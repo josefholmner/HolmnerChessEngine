@@ -10,6 +10,9 @@ link_directories(${HolmnerChessEngine_SOURCE_DIR}/Engine/src)
 target_link_libraries(HolmnerChessGui Engine)
 
 # SFML
-set(SFML_STATIC_LIBRARIES TRUE)
+IF (WIN32)
+    set(SFML_STATIC_LIBRARIES TRUE)
+ENDIF()
+
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 target_link_libraries(HolmnerChessGui sfml-graphics)
