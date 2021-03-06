@@ -1,0 +1,2 @@
+project(HolmnerChessEngine)
+add_subdirectory(src)
