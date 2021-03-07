@@ -1,6 +1,6 @@
 #pragma once
 
-class Engine
+class EngineAPI
 {
 public:
     static void printDummy();
