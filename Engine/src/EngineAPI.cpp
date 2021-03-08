@@ -1,8 +1,15 @@
 #include "EngineAPI.h"
 
-#include <iostream>
+#include "private_include/BoardState.h"
 
-void EngineAPI::printDummy()
+std::optional<int32_t> EngineAPI::getNumLegalMoves(const std::string& FEN, int32_t depth) const
 {
-    std::cout << "Dummy print from Engine." << std::endl;
+    BoardState board;
+    if (!board.initFromFEN(FEN))
+    {
+        return {};
+    }
+
+    // TODO: implement.
+    return 0;
 }
