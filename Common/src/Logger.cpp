@@ -1,8 +1,8 @@
-#include "Logger.h"
+#include "Common/Logger.h"
 
 #include <iostream>
 
-void Logger::Log(Type type, const std::string& sender, const std::string& msg)
+void hceCommon:: Logger::Log(Type type, const std::string& sender, const std::string& msg)
 {
 	switch (type)
 	{

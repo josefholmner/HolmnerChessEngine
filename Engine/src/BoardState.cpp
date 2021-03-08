@@ -1,4 +1,4 @@
-#include "private_include/BoardState.h"
+#include "PrivateInclude/BoardState.h"
 
 #include <vector>
 #include <sstream>

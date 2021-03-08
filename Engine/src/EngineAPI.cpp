@@ -1,8 +1,8 @@
-#include "EngineAPI.h"
+#include "Engine/EngineAPI.h"
 
-#include "private_include/BoardState.h"
+#include "PrivateInclude/BoardState.h"
 
-std::optional<int32_t> EngineAPI::getNumLegalMoves(const std::string& FEN, int32_t depth) const
+std::optional<int32_t> hceEngine::EngineAPI::getNumLegalMoves(const std::string& FEN, int32_t depth) const
 {
     BoardState board;
     if (!board.initFromFEN(FEN))

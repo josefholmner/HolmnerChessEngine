@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Logger.h"
+#include <string>
 
 class Utilities
 {
 public:
-	static void Log(Logger::Type type, const std::string& msg);
+	static void Log(const std::string& msg);
+	static void LogW(const std::string& msg);
+	static void LogE(const std::string& msg);
 };
