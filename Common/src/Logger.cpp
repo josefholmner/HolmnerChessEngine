@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void hceCommon:: Logger::Log(Type type, const std::string& sender, const std::string& msg)
+void hceCommon:: Logger::log(Type type, const std::string& sender, const std::string& msg)
 {
 	switch (type)
 	{

@@ -15,6 +15,6 @@ namespace hceCommon
 			Error
 		};
 
-		static void Log(Type type, const std::string& sender, const std::string& msg);
+		static void log(Type type, const std::string& sender, const std::string& msg);
 	};
 }

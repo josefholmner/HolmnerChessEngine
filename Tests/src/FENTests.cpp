@@ -1,6 +1,6 @@
 #include "FENTests.h"
 
-#include "Utilities.h"
+#include "TestsUtilities.h"
 
 #include "Engine/EngineAPI.h"
 
@@ -10,14 +10,14 @@ void FENTests::Run()
 {
 	hceEngine::EngineAPI engine;
 	const auto numMoves = engine.getNumLegalMoves(
-		"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 1);
+		"r1bqkbnr/ppp1ppNp/3p4/8/4K3/3P4/PPPnPPPP/RNBQ1B1R w kq - 0 1", 1);
 
 	if (!numMoves)
 	{
-		Utilities::LogE("FEN Tests failed.");
+		TestsUtilities::logE("FEN Tests failed.");
 	}
 	else
 	{
-		Utilities::Log("FEN Tests succeeded.");
+		TestsUtilities::log("FEN Tests succeeded.");
 	}
 }
