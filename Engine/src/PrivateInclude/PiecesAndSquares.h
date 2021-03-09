@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 typedef int32_t Piece;
 namespace pieces
@@ -19,6 +20,8 @@ namespace pieces
 	constexpr Piece bB = 10;
 	constexpr Piece bN = 11;
 	constexpr Piece bP = 12;
+
+	std::string pieceToStr(Piece piece);
 }
 
 typedef int32_t Square;

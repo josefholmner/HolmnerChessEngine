@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineUtilities.h"
+#include "PiecesAndSquares.h"
 
 #include <string>
 #include <vector>

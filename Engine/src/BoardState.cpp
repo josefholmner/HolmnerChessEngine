@@ -48,7 +48,7 @@ void BoardState::printBoard() const
 		for (int32_t file = 0; file < 8; file++)
 		{
 			const int32_t index = file + rank * 8;
-			std::cout << "[" << EngineUtilities::pieceToStr(squares[index]) << "] ";
+			std::cout << "[" << pieces::pieceToStr(squares[index]) << "] ";
 		}
 
 		std::cout << std::endl;
