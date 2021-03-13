@@ -39,3 +39,12 @@ std::string pieces::pieceToStr(Piece piece)
 	}
 }
 
+Rank ranks::toRank(Square sq)
+{
+	return sq / 8;
+}
+
+File files::toFile(Square sq)
+{
+	return sq % 8;
+}
