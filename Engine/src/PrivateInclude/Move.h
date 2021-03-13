@@ -3,7 +3,7 @@
 #include "PiecesAndSquares.h"
 #include "EngineUtilities.h"
 
-#include <assert.h>
+#include <cassert>
 
 class Move
 {

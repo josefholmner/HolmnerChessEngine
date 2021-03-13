@@ -7,7 +7,7 @@
 #include <array>
 #include <unordered_map>
 #include <optional>
-#include <assert.h>
+#include <cassert>
 #include "Move.h"
 
 class BoardState

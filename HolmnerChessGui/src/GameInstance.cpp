@@ -2,7 +2,7 @@
 
 #include "ThirdPartyWrappersFactory.h"
 
-#include <assert.h>
+#include <cassert>
 
 void GameInstance::startNew()
 {

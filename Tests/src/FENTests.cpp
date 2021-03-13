@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <assert.h>
+#include <cassert>
 
 namespace testHelpers
 {
