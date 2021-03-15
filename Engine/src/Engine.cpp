@@ -201,8 +201,195 @@ namespace
 		return isSquareInCheck(board, side, kSq);
 	}
 
-	void appendIfNotInCheck(BoardState& board, Color side, const Move& move, std::vector<Move>& moves)
+	void signalMayProhibitCastelingKingOrRookMove(const BoardState& board, Color side,
+		bool mayProhibitKingSide, bool mayProhibitQueenSide, Move& move)
 	{
+		auto& castlingAvailability = board.getCastleAvailability();
+		if (side == Color::WHITE)
+		{
+			assert(board.getPiece(move.fromSquare) == wK || board.getPiece(move.fromSquare) == wR);
+			if (mayProhibitKingSide && castlingAvailability.find('K')->second)
+			{
+				move.prohibitsWKcastling = true;
+			}
+			if (mayProhibitQueenSide && castlingAvailability.find('Q')->second)
+			{
+				move.prohibitsWQcastling = true;
+			}
+		}
+		else
+		{
+			assert(board.getPiece(move.fromSquare) == bK || board.getPiece(move.fromSquare) == bR);
+			if (mayProhibitKingSide && castlingAvailability.find('k')->second)
+			{
+				move.prohibitsBKcastling = true;
+			}
+			if (mayProhibitQueenSide && castlingAvailability.find('q')->second)
+			{
+				move.prohibitsBQcastling = true;
+			}
+		}
+	}
+
+	void signalMayProhibitCastelingRookCaptured(const BoardState& board, Color side,
+		bool mayProhibitKingSide, bool mayProhibitQueenSide, Move& move)
+	{
+		auto& castlingAvailability = board.getCastleAvailability();
+		if (side == Color::WHITE)
+		{
+			assert(move.capturedPiece == bR);
+			if (mayProhibitKingSide && castlingAvailability.find('k')->second)
+			{
+				move.prohibitsBKcastling = true;
+			}
+			if (mayProhibitQueenSide && castlingAvailability.find('q')->second)
+			{
+				move.prohibitsBQcastling = true;
+			}
+		}
+		else
+		{
+			assert(move.capturedPiece == wR);
+			if (mayProhibitKingSide && castlingAvailability.find('K')->second)
+			{
+				move.prohibitsWKcastling = true;
+			}
+			if (mayProhibitQueenSide && castlingAvailability.find('Q')->second)
+			{
+				move.prohibitsWQcastling = true;
+			}
+		}
+	}
+
+	// In case a rook is captured, it may prohibit casteling rights. This must be checked explicitly
+	// since in theory the non-captured rook could take its place, and then casteling is not legal.
+	void handleRookCaptureCastleAvailability(const BoardState& board, Color side, Move& move)
+	{
+		if (side == Color::WHITE)
+		{
+			if (move.capturedPiece != bR)
+			{
+				return;
+			}
+
+			if (move.capturedSquare == squares::a8)
+			{
+				signalMayProhibitCastelingRookCaptured(board, side, false, true, move);
+			}
+			else if (move.capturedSquare == squares::h8)
+			{
+				signalMayProhibitCastelingRookCaptured(board, side, true, false, move);
+			}
+		}
+		else
+		{
+			if (move.capturedPiece != wR)
+			{
+				return;
+			}
+
+			if (move.capturedSquare == squares::a1)
+			{
+				signalMayProhibitCastelingRookCaptured(board, side, false, true, move);
+			}
+			else if (move.capturedSquare == squares::h1)
+			{
+				signalMayProhibitCastelingRookCaptured(board, side, true, false, move);
+			}
+		}
+	}
+
+	bool isCastelingMove(const Move& move)
+	{
+		if (move.movingPiece == wK && move.fromSquare == squares::e1 &&
+			(move.toSquare == squares::g1 || move.toSquare == squares::c1))
+		{
+			return true;
+		}
+
+		if (move.movingPiece == bK && move.fromSquare == squares::e8 &&
+			(move.toSquare == squares::g8 || move.toSquare == squares::c8))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	void doRookMoveForTemporaryCastling(BoardState& board, const Move& move)
+	{
+		assert(move.movingPiece == wK || move.movingPiece == bK);
+		assert(move.fromSquare == squares::e1 || move.fromSquare == squares::e8);
+		assert(isCastelingMove(move));
+
+		if (move.movingPiece == wK)
+		{
+			if (move.toSquare == squares::g1)
+			{
+				board.getPieces()[squares::h1] = none;
+				board.getPieces()[squares::f1] = wR;
+			}
+			else if (move.toSquare == squares::c1)
+			{
+				board.getPieces()[squares::a1] = none;
+				board.getPieces()[squares::d1] = wR;
+			}
+		}
+		else
+		{
+			if (move.toSquare == squares::g8)
+			{
+				board.getPieces()[squares::h8] = none;
+				board.getPieces()[squares::f8] = bR;
+			}
+			else if (move.toSquare == squares::c8)
+			{
+				board.getPieces()[squares::a8] = none;
+				board.getPieces()[squares::d8] = bR;
+			}
+		}
+	}
+
+	void undoRookMoveForTemporaryCastling(BoardState& board, const Move& move)
+	{
+		assert(move.movingPiece == wK || move.movingPiece == bK);
+		assert(move.fromSquare == squares::e1 || move.fromSquare == squares::e8);
+		assert(isCastelingMove(move));
+
+		if (move.movingPiece == wK)
+		{
+			if (move.toSquare == squares::g1)
+			{
+				board.getPieces()[squares::h1] = wR;
+				board.getPieces()[squares::f1] = none;
+			}
+			else if (move.toSquare == squares::c1)
+			{
+				board.getPieces()[squares::a1] = wR;
+				board.getPieces()[squares::d1] = none;
+			}
+		}
+		else
+		{
+			if (move.toSquare == squares::g8)
+			{
+				board.getPieces()[squares::h8] = bR;
+				board.getPieces()[squares::f8] = none;
+			}
+			else if (move.toSquare == squares::c8)
+			{
+				board.getPieces()[squares::a8] = bR;
+				board.getPieces()[squares::d8] = none;
+			}
+		}
+	}
+
+	void appendIfNotInCheck(BoardState& board, Color side, Move& move, std::vector<Move>& moves)
+	{
+#ifndef NDEBUG
+		const BoardState boardPreMove = board;
+#endif
+
 		// Temporarily make the move, before looking if in check.
 		auto& pieces = board.getPieces();
 		
@@ -214,8 +401,54 @@ namespace
 
 		pieces[move.toSquare] = move.movingPiece;
 
+		// In case this is a castling move, we have to take care of the rook.
+		const bool isCasteling = isCastelingMove(move);
+		if (isCasteling)
+		{
+			doRookMoveForTemporaryCastling(board, move);
+		}
+
 		if (!isInCheck(board, side))
 		{
+			handleRookCaptureCastleAvailability(board, side, move);
+
+			if (isCasteling && side == Color::WHITE)
+			{
+				if (move.toSquare == squares::g1)
+				{
+					assert(board.getPiece(squares::h1) == none && board.getPiece(squares::g1) == wK &&
+						board.getPiece(squares::f1) == wR && board.getPiece(squares::e1) == none && board.getCastleAvailability()['K']);
+				}				
+				else if (move.toSquare == squares::c1)
+				{
+					assert(board.getPiece(squares::a1) == none && board.getPiece(squares::c1) == wK &&
+						board.getPiece(squares::d1) == wR && board.getPiece(squares::e1) == none && board.getPiece(squares::b1) == none
+						&& board.getCastleAvailability()['Q']);
+				}						
+				else
+				{
+					assert(false);
+				}
+			}
+			if (isCasteling && side == Color::BLACK)
+			{
+				if (move.toSquare == squares::g8)
+				{
+					assert(board.getPiece(squares::h8) == none && board.getPiece(squares::g8) == bK &&
+						board.getPiece(squares::f8) == bR && board.getPiece(squares::e8) == none && board.getCastleAvailability()['k']);
+				}
+				else if (move.toSquare == squares::c8)
+				{
+					assert(board.getPiece(squares::a8) == none && board.getPiece(squares::c8) == bK &&
+						board.getPiece(squares::d8) == bR && board.getPiece(squares::e8) == none && board.getPiece(squares::b8) == none
+						&& board.getCastleAvailability()['q']);
+				}
+				else
+				{
+					assert(false);
+				}
+			}
+
 			moves.push_back(move);
 		}
 
@@ -227,6 +460,19 @@ namespace
 		}
 		
 		pieces[move.fromSquare] = move.movingPiece;
+
+		// Take care of the rook if this was a casteling move.
+		if (isCasteling)
+		{
+			undoRookMoveForTemporaryCastling(board, move);
+		}
+
+#ifndef NDEBUG
+		assert(boardPreMove.getPieces() == board.getPieces());
+		assert(boardPreMove.getCastleAvailability() == board.getCastleAvailability());
+		assert(boardPreMove.getEnPassantSquare() == board.getEnPassantSquare());
+		assert(boardPreMove.getTurn() == board.getTurn());
+#endif
 	}
 
 	void appendPawnAdvance(BoardState& board, Square sq, Color side, std::vector<Move>& moves)
@@ -234,8 +480,8 @@ namespace
 		const Square advance = side == Color::WHITE ? 8 : -8;
 		if (board.getPiece(sq + advance) == none)
 		{
-			const Piece pawn = side == Color::WHITE ? wP : bP;
-			appendIfNotInCheck(board, side, Move(pawn, sq, sq + advance), moves);
+			appendIfNotInCheck(board, side,
+				Move(board.getPiece(sq), sq, sq + advance, board.getEnPassantSquare()), moves);
 		}
 	}
 
@@ -250,8 +496,7 @@ namespace
 		if (board.getPiece(sq + advance/2) == none &&
 			board.getPiece(sq + advance) == none)
 		{
-			const Piece pawn = side == Color::WHITE ? wP : bP;
-			Move move(pawn, sq, sq + advance);
+			Move move(board.getPiece(sq), sq, sq + advance, board.getEnPassantSquare());
 			move.enPassantCreatedSquare = sq + advance / 2;
 			appendIfNotInCheck(board, side, move, moves);
 		}
@@ -266,16 +511,15 @@ namespace
 		const Square advance = side == Color::WHITE ? 8 : -8;
 		if (board.getPiece(sq + advance) == none)
 		{
-			const Piece pawn = side == Color::WHITE ? wP : bP;
 			const Piece Q = side == Color::WHITE ? wQ : bQ;
 			const Piece R = side == Color::WHITE ? wR : bR;
 			const Piece B = side == Color::WHITE ? wB : bB;
 			const Piece N = side == Color::WHITE ? wN : bN;
 			for (Piece promotion : {Q, R, B, N})
 			{
-				Move move(wP, sq, sq + advance);
+				Move move(board.getPiece(sq), sq, sq + advance, board.getEnPassantSquare());
 				move.pawnPromotionPiece = promotion;
-				appendIfNotInCheck(board, Color::WHITE, move, moves);
+				appendIfNotInCheck(board, side, move, moves);
 			}
 		}
 	}
@@ -299,9 +543,8 @@ namespace
 			const Piece diagPiece = board.getPiece(sq + offs);
 			if (isOpponent(diagPiece))
 			{
-				const Piece pawn = side == Color::WHITE ? wP : bP;
-				appendIfNotInCheck(board, side,
-					Move(pawn, sq, sq + offs, diagPiece, sq + offs), moves);
+				appendIfNotInCheck(board, side, Move(board.getPiece(sq), sq, sq + offs, board.getEnPassantSquare(),
+					diagPiece, sq + offs),moves);
 			}
 		}
 	}
@@ -326,9 +569,9 @@ namespace
 			const Square enPassSq = board.getEnPassantSquare();
 			if (enPassSq != squares::none && enPassSq == sq + offs)
 			{
-				const Piece pawn = side == Color::WHITE ? wP : -bP;
-				Move move(pawn, sq, sq + offs, board.getPiece(sq + offs - 8),
-					sq + offs - 8);
+				const Square enPassEnemyOffs = side == Color::WHITE ? -8 : 8;
+				Move move(board.getPiece(sq), sq, sq + offs, enPassSq,
+					board.getPiece(enPassSq + enPassEnemyOffs), enPassSq + enPassEnemyOffs);
 				appendIfNotInCheck(board, side, move, moves);
 			}
 		}
@@ -363,8 +606,7 @@ namespace
 				const Piece N = side == Color::WHITE ? wN : bN;
 				for (Piece promotion : {Q, R, B, N})
 				{
-					const Piece pawn = side == Color::WHITE ? wP : bP;
-					Move move(pawn, sq, sq + offs, diagPiece, sq + offs);
+					Move move(board.getPiece(sq), sq, sq + offs, board.getEnPassantSquare(), diagPiece, sq + offs);
 					move.pawnPromotionPiece = promotion;
 					appendIfNotInCheck(board, side, move, moves);
 				}
@@ -443,11 +685,12 @@ namespace
 			const Piece other = board.getPiece(nSq);
 			if (other == none)
 			{
-				appendIfNotInCheck(board, side, Move(knight, sq, nSq), moves);
+				appendIfNotInCheck(board, side, Move(knight, sq, nSq, board.getEnPassantSquare()), moves);
 			}
 			else if (isOpponent(other))
 			{
-				appendIfNotInCheck(board, side, Move(knight, sq, nSq, other, nSq), moves);
+				appendIfNotInCheck(board, side,
+					Move(knight, sq, nSq, board.getEnPassantSquare(), other, nSq), moves);
 			}
 		}
 	}
@@ -474,11 +717,12 @@ namespace
 					const Piece diagPiece = board.getPiece(diagSq);
 					if (diagPiece == none)
 					{
-						moves.push_back(Move(board.getPiece(sq), sq, diagSq));
+						moves.push_back(Move(board.getPiece(sq), sq, diagSq, board.getEnPassantSquare()));
 					}
 					else if (isOpponent(diagPiece))
 					{
-						moves.push_back(Move(board.getPiece(sq), sq, diagSq, diagPiece, diagSq));
+						moves.push_back(Move(
+							board.getPiece(sq), sq, diagSq, board.getEnPassantSquare(), diagPiece, diagSq));
 					}
 					else
 					{
@@ -494,7 +738,7 @@ namespace
 
 	void appendBishopMoves(BoardState& board, Color side, Square sq, std::vector<Move>& moves)
 	{
-		for (const auto& move : getDiagonalMoves(board, side, sq))
+		for (auto& move : getDiagonalMoves(board, side, sq))
 		{
 			appendIfNotInCheck(board, side, move, moves);
 		}
@@ -522,11 +766,12 @@ namespace
 					const Piece diagPiece = board.getPiece(diagSq);
 					if (diagPiece == none)
 					{
-						moves.push_back(Move(board.getPiece(sq), sq, diagSq));
+						moves.push_back(Move(board.getPiece(sq), sq, diagSq, board.getEnPassantSquare()));
 					}
 					else if (isOpponent(diagPiece))
 					{
-						moves.push_back(Move(board.getPiece(sq), sq, diagSq, diagPiece, diagSq));
+						moves.push_back(Move(
+							board.getPiece(sq), sq, diagSq, board.getEnPassantSquare(), diagPiece, diagSq));
 					}
 					else
 					{
@@ -540,34 +785,6 @@ namespace
 		return moves;
 	}
 
-	void signalMayProhibitCasteling(BoardState& board, Color side,
-		bool mayProhibitKingSide, bool mayProhibitQueenSide, Move& move)
-	{
-		auto& castlingAvailability = board.getCastleAvailability();
-		if (side == Color::WHITE)
-		{
-			if (mayProhibitKingSide && castlingAvailability['K'])
-			{
-				move.prohibitsWKcastling = true;
-			}
-			if (mayProhibitQueenSide && castlingAvailability['Q'])
-			{
-				move.prohibitsWQcastling = true;
-			}
-		}
-		else
-		{
-			if (mayProhibitKingSide && castlingAvailability['k'])
-			{
-				move.prohibitsBKcastling = true;
-			}
-			if (mayProhibitQueenSide && castlingAvailability['q'])
-			{
-				move.prohibitsBQcastling = true;
-			}
-		}
-	}
-
 	void appendRookMoves(BoardState& board, Color side, Square sq, std::vector<Move>& moves)
 	{
 		const File file = files::toFile(sq);
@@ -576,10 +793,10 @@ namespace
 			switch (file)
 			{
 				case 0:
-					signalMayProhibitCasteling(board, side, false, true, move);
+					signalMayProhibitCastelingKingOrRookMove(board, side, false, true, move);
 					break;
 				case 7:
-					signalMayProhibitCasteling(board, side, true, false, move);
+					signalMayProhibitCastelingKingOrRookMove(board, side, true, false, move);
 					break;
 			}
 
@@ -589,12 +806,12 @@ namespace
 
 	void appendQueenMoves(BoardState& board, Color side, Square sq, std::vector<Move>& moves)
 	{
-		for (const auto& move : getDiagonalMoves(board, side, sq))
+		for (auto& move : getDiagonalMoves(board, side, sq))
 		{
 			appendIfNotInCheck(board, side, move, moves);
 		}
 
-		for (const auto& move : getStraightMoves(board, side, sq))
+		for (auto& move : getStraightMoves(board, side, sq))
 		{
 			appendIfNotInCheck(board, side, move, moves);
 		}
@@ -610,14 +827,14 @@ namespace
 
 		if (other == none)
 		{
-			Move move(board.getPiece(sq), sq, sq + offs);
-			signalMayProhibitCasteling(board, side, true, true, move);
+			Move move(board.getPiece(sq), sq, sq + offs, board.getEnPassantSquare());
+			signalMayProhibitCastelingKingOrRookMove(board, side, true, true, move);
 			appendIfNotInCheck(board, side, move, moves);
 		}
 		else if (isOpponent(other))
 		{
-			Move move(board.getPiece(sq), sq, sq + offs, other, sq + offs);
-			signalMayProhibitCasteling(board, side, true, true, move);
+			Move move(board.getPiece(sq), sq, sq + offs, board.getEnPassantSquare(), other, sq + offs);
+			signalMayProhibitCastelingKingOrRookMove(board, side, true, true, move);
 			appendIfNotInCheck(board, side, move, moves);
 		}
 	}
@@ -630,34 +847,34 @@ namespace
 		if (side == Color::WHITE)
 		{
 			if (castlingAvailability['K'] && pieces[squares::f1] == none && pieces[squares::g1] == none &&
-				!isSquareInCheck(board, side, squares::f1))
+				pieces[squares::h1] == wR && !isSquareInCheck(board, side, squares::f1))
 			{
-				Move move(pieces[sq], squares::e1, squares::g1);
-				signalMayProhibitCasteling(board, side, true, true, move);
+				Move move(pieces[sq], squares::e1, squares::g1, board.getEnPassantSquare());
+				signalMayProhibitCastelingKingOrRookMove(board, side, true, true, move);
 				appendIfNotInCheck(board, side, move, moves);
 			}
 			if (castlingAvailability['Q'] && pieces[squares::b1] == none && pieces[squares::c1] == none &&
-				pieces[squares::d1] == none && !isSquareInCheck(board, side, squares::d1))
+				pieces[squares::d1] == none && pieces[squares::a1] == wR && !isSquareInCheck(board, side, squares::d1))
 			{
-				Move move(pieces[sq], squares::e1, squares::c1);
-				signalMayProhibitCasteling(board, side, true, true, move);
+				Move move(pieces[sq], squares::e1, squares::c1, board.getEnPassantSquare());
+				signalMayProhibitCastelingKingOrRookMove(board, side, true, true, move);
 				appendIfNotInCheck(board, side, move, moves);
 			}
 		}
 		else
 		{
 			if (castlingAvailability['k'] && pieces[squares::f8] == none && pieces[squares::g8] == none &&
-				!isSquareInCheck(board, side, squares::f8))
+				pieces[squares::h8] == bR && !isSquareInCheck(board, side, squares::f8))
 			{
-				Move move(pieces[sq], squares::e8, squares::g8);
-				signalMayProhibitCasteling(board, side, true, true, move);
+				Move move(pieces[sq], squares::e8, squares::g8, board.getEnPassantSquare());
+				signalMayProhibitCastelingKingOrRookMove(board, side, true, true, move);
 				appendIfNotInCheck(board, side, move, moves);
 			}
 			if (castlingAvailability['q'] && pieces[squares::b8] == none && pieces[squares::c8] == none &&
-				pieces[squares::d8] == none && !isSquareInCheck(board, side, squares::d8))
+				pieces[squares::d8] == none && pieces[squares::a8] == bR && !isSquareInCheck(board, side, squares::d8))
 			{
-				Move move(pieces[sq], squares::e8, squares::c8);
-				signalMayProhibitCasteling(board, side, true, true, move);
+				Move move(pieces[sq], squares::e8, squares::c8, board.getEnPassantSquare());
+				signalMayProhibitCastelingKingOrRookMove(board, side, true, true, move);
 				appendIfNotInCheck(board, side, move, moves);
 			}
 		}
@@ -710,7 +927,7 @@ namespace
 
 	std::vector<Move> getLegalWhiteMoves(BoardState& board)
 	{
-		static constexpr size_t probableMax = 100;
+		static constexpr size_t probableMax = 50;
 		std::vector<Move> moves;
 		moves.reserve(probableMax);
 
@@ -744,7 +961,7 @@ namespace
 
 	std::vector<Move> getLegalBlackMoves(BoardState& board)
 	{
-		static constexpr size_t probableMax = 100;
+		static constexpr size_t probableMax = 50;
 		std::vector<Move> moves;
 		moves.reserve(probableMax);
 
@@ -752,24 +969,24 @@ namespace
 		{
 			switch (board.getPiece(sq))
 			{
-			case bP:
-				appendBlackPawnMoves(board, sq, moves);
-				break;
-			case bN:
-				appendKnightMoves(board, Color::BLACK, sq, moves);
-				break;
-			case bB:
-				appendBishopMoves(board, Color::BLACK, sq, moves);
-				break;
-			case bR:
-				appendRookMoves(board, Color::BLACK, sq, moves);
-				break;
-			case bQ:
-				appendQueenMoves(board, Color::BLACK, sq, moves);
-				break;
-			case bK:
-				appendKingMoves(board, Color::BLACK, sq, moves);
-				break;
+				case bP:
+					appendBlackPawnMoves(board, sq, moves);
+					break;
+				case bN:
+					appendKnightMoves(board, Color::BLACK, sq, moves);
+					break;
+				case bB:
+					appendBishopMoves(board, Color::BLACK, sq, moves);
+					break;
+				case bR:
+					appendRookMoves(board, Color::BLACK, sq, moves);
+					break;
+				case bQ:
+					appendQueenMoves(board, Color::BLACK, sq, moves);
+					break;
+				case bK:
+					appendKingMoves(board, Color::BLACK, sq, moves);
+					break;
 			}
 		}
 

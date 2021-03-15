@@ -20,6 +20,8 @@ public:
 	void makeMove(const Move& move);
 	void unmakeMove(const Move& move);
 
+	bool isValid() const;
+
 	pieces::Color getTurn() const
 	{
 		return turn;
@@ -37,7 +39,6 @@ public:
 
 	Piece getPiece(Square sq) const
 	{
-		assert(sq >= squares::a1 && sq <= squares::h8);
 		return pieces[sq];
 	}
 
@@ -46,7 +47,7 @@ public:
 		return casleAvailability;
 	}
 
-	std::unordered_map<char, bool> getCastleAvailability()
+	std::unordered_map<char, bool>& getCastleAvailability()
 	{
 		return casleAvailability;
 	}
@@ -60,11 +61,12 @@ private:
 	void makePawnMove(const Move& move);
 	void unmakePawnMove(const Move& move);
 
-	void makeRookMove(const Move& move);
-	void unmakeRookMove(const Move& move);
-
 	void makeKingMove(const Move& move);
 	void unmakeKingMove(const Move& move);
+
+	// For any piece that is not a pawn, king or rook.
+	void makeNonSpecializedMove(const Move& move);
+	void unmakeNonSpecializedMove(const Move& move);
 
 	std::array<Piece, squares::num> pieces;
 	std::unordered_map<char, bool> casleAvailability;

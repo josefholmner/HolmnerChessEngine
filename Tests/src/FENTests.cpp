@@ -159,14 +159,24 @@ namespace testHelpers
 	};
 }
 
+void printReleaseOrDebug()
+{
+#ifdef NDEBUG
+	TestsUtilities::log("FEN tests are running in a 'Release' build.");
+#else
+	TestsUtilities::log("FEN tests are running in a 'Debug' build.");
+#endif
+
+}
+
 void FENTests::Run()
 {
+	printReleaseOrDebug();
 	hceEngine::EngineAPI engine;
 
-	//for (const auto& test : testHelpers::FENTestsStrVector)
-	for (size_t i = 0; i < testHelpers::FENTestsStrVector.size(); i++)
+	for (size_t depth = 1; depth <= 5; depth++)
 	{
-		for (size_t depth = 1; depth <= 1; depth++)
+		for (size_t i = 0; i < testHelpers::FENTestsStrVector.size(); i++)
 		{
 			const std::string test = testHelpers::FENTestsStrVector[i];
 			testHelpers::FENTestParams params(test);
@@ -184,9 +194,14 @@ void FENTests::Run()
 					" depth: " + std::to_string(depth) + ".\nFEN: "
 					+ test + "\nExpected num moves: " + std::to_string(params.numMoves[depth])
 					+ " but got: " + std::to_string(*numMoves));
-				goto endTest;
+				//goto endTest;
 			}
+
+			TestsUtilities::log("FEN test: " + std::to_string(i) + " succeeded. Depth: "
+				+ std::to_string(depth));
 		}
+
+		TestsUtilities::log("FEN test depth: " + std::to_string(depth) + " succeeded.");
 	}
 
 endTest : ;

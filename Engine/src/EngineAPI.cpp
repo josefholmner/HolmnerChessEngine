@@ -4,6 +4,8 @@
 #include "PrivateInclude/BoardState.h"
 #include "PrivateInclude/Move.h"
 
+#include <cassert>
+
 hceEngine::EngineAPI::EngineAPI()
 {
     engine = std::make_unique<Engine>();
@@ -28,9 +30,22 @@ namespace
         size_t num = 0;
         for (const auto& move : moves)
         {
+#ifndef NDEBUG
+            const BoardState boardPreMove = board;
+#endif
+
+            assert(board.isValid());
             board.makeMove(move);
+            assert(board.isValid());
             num += countMovesRecursive(engine, board, depth - 1);
+            assert(board.isValid());
             board.unmakeMove(move);
+            assert(board.isValid());
+
+            assert(boardPreMove.getPieces() == board.getPieces());
+            assert(boardPreMove.getCastleAvailability() == board.getCastleAvailability());
+            assert(boardPreMove.getEnPassantSquare() == board.getEnPassantSquare());
+            assert(boardPreMove.getTurn() == board.getTurn());
         }
         return num;
     }

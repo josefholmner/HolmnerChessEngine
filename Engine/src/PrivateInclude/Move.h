@@ -8,21 +8,24 @@
 class Move
 {
 public:
-	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure) noexcept :
+	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Square inPreviousEnPassantSq) noexcept :
 		movingPiece{ inMovingPiece },
 		fromSquare{ inFromSquare },
-		toSquare{ inToSqaure }
+		toSquare{ inToSqaure },
+		previousEnPassantSquare{ inPreviousEnPassantSq }
 	{
 		assert(EngineUtilities::isNonNonePiece(inMovingPiece));
 		assert(EngineUtilities::isNonNoneSquare(inFromSquare));
 		assert(EngineUtilities::isNonNoneSquare(inToSqaure));
+		assert(EngineUtilities::isValidSquare(inPreviousEnPassantSq));
 	}
 	
-	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Piece inCapturedPiece,
-		Square inCapturedSquare) noexcept :
+	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Square inPreviousEnPassantSq,
+		Piece inCapturedPiece, Square inCapturedSquare) noexcept :
 		movingPiece{inMovingPiece},
 		fromSquare{inFromSquare},
 		toSquare{inToSqaure},
+		previousEnPassantSquare{ inPreviousEnPassantSq },
 		capturedPiece{ inCapturedPiece },
 		capturedSquare { inCapturedSquare }
 	{
@@ -41,6 +44,7 @@ public:
 
 	// These are needed for pawn promotion or en passant caaptures/creation.
 	Piece pawnPromotionPiece = pieces::none;
+	Square previousEnPassantSquare = squares::none;
 	Square enPassantCreatedSquare = squares::none;
 
 	bool prohibitsWKcastling = false; // White king-side.
