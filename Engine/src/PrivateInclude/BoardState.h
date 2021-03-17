@@ -71,5 +71,5 @@ private:
 	std::array<Piece, squares::num> pieces;
 	std::unordered_map<char, bool> casleAvailability;
 	pieces::Color turn;
-	Square enPassantSquare;
+	Square enPassantSquare = squares::none;
 };

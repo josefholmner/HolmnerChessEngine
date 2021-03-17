@@ -443,6 +443,11 @@ void BoardState::makeMove(const Move& move)
 {
 	using namespace pieces;
 
+	handleCastelingFlagsMakeMove(move, *this);
+
+	// Must be set for all moves since any move will remove previous en passant square.
+	enPassantSquare = move.enPassantCreatedSquare;
+
 	switch (move.movingPiece)
 	{
 		case wP:
@@ -465,6 +470,9 @@ void BoardState::makeMove(const Move& move)
 void BoardState::unmakeMove(const Move& move)
 {
 	using namespace pieces;
+
+	handleCastelingFlagsUnmakeMove(move, *this);
+	enPassantSquare = move.previousEnPassantSquare;
 
 	switch (move.movingPiece)
 	{
@@ -501,8 +509,6 @@ void BoardState::makePawnMove(const Move& move)
 		}
 
 		pieces[move.toSquare] = move.pawnPromotionPiece;
-		handleCastelingFlagsMakeMove(move, *this);
-		enPassantSquare = move.enPassantCreatedSquare;
 	}
 	else
 	{
@@ -519,7 +525,7 @@ void BoardState::makeKingMove(const Move& move)
 {
 	if (turn == pieces::Color::WHITE)
 	{
-		// Perform casteling.
+		// Perform casteling (rook only).
 		if (move.fromSquare == squares::e1)
 		{
 			if (move.toSquare == squares::g1)
@@ -538,7 +544,7 @@ void BoardState::makeKingMove(const Move& move)
 	}
 	else
 	{
-		// Perform casteling.
+		// Perform casteling (rook only).
 		if (move.fromSquare == squares::e8)
 		{
 			if (move.toSquare == squares::g8)
@@ -564,7 +570,7 @@ void BoardState::unmakeKingMove(const Move& move)
 	// At this point turn has switched sides, therefore the color check may seem wrong but is correct.
 	if (turn == pieces::Color::BLACK)
 	{
-		// Unmake casteling.
+		// Unmake casteling (rook only).
 		if (move.fromSquare == squares::e1)
 		{
 			if (move.toSquare == squares::g1)
@@ -583,7 +589,7 @@ void BoardState::unmakeKingMove(const Move& move)
 	}
 	else
 	{
-		// Unmake casteling.
+		// Unmake casteling (rook only).
 		if (move.fromSquare == squares::e8)
 		{
 			if (move.toSquare == squares::g8)
@@ -613,8 +619,6 @@ void BoardState::makeNonSpecializedMove(const Move& move)
 	}
 
 	pieces[move.toSquare] = move.movingPiece;
-	enPassantSquare = move.enPassantCreatedSquare;
-	handleCastelingFlagsMakeMove(move, *this);
 }
 
 void BoardState::unmakeNonSpecializedMove(const Move& move)
@@ -624,9 +628,6 @@ void BoardState::unmakeNonSpecializedMove(const Move& move)
 	{
 		pieces[move.capturedSquare] = move.capturedPiece;
 	}
-
 	pieces[move.fromSquare] = move.movingPiece;
-	enPassantSquare = move.previousEnPassantSquare;
-	handleCastelingFlagsUnmakeMove(move, *this);
 }
 
