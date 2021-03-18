@@ -2,6 +2,7 @@
 
 #include "TestsUtilities.h"
 #include "Common/CommonUtilities.h"
+#include "Common/StopWatch.h"
 #include "Engine/EngineAPI.h"
 
 #include <vector>
@@ -173,8 +174,11 @@ void FENTests::Run()
 {
 	printReleaseOrDebug();
 	hceEngine::EngineAPI engine;
+	hceCommon::Stopwatch stopWatch;
+	stopWatch.start();
 
-	for (size_t depth = 1; depth <= 5; depth++)
+	static constexpr int32_t maxDepth = 5;
+	for (size_t depth = 1; depth <= maxDepth; depth++)
 	{
 		for (size_t i = 0; i < testHelpers::FENTestsStrVector.size(); i++)
 		{
@@ -185,7 +189,7 @@ void FENTests::Run()
 			if (!numMoves)
 			{
 				TestsUtilities::logE("FEN test could not be run with test: " + test);
-				goto endTest;
+				return;
 			}
 
 			if (*numMoves != params.numMoves[depth])
@@ -194,16 +198,13 @@ void FENTests::Run()
 					" depth: " + std::to_string(depth) + ".\nFEN: "
 					+ test + "\nExpected num moves: " + std::to_string(params.numMoves[depth])
 					+ " but got: " + std::to_string(*numMoves));
-				//goto endTest;
+				return;
 			}
-
-			TestsUtilities::log("FEN test: " + std::to_string(i) + " succeeded. Depth: "
-				+ std::to_string(depth));
 		}
 
-		TestsUtilities::log("FEN test depth: " + std::to_string(depth) + " succeeded.");
+		TestsUtilities::log("FEN tests depth: " + std::to_string(depth) + " succeeded.");
 	}
 
-endTest : ;
-	TestsUtilities::log("FEN Tests end.");
+	TestsUtilities::log("FEN Tests finished successfully. Time: " +
+		std::to_string(stopWatch.getMilliseconds()));
 }

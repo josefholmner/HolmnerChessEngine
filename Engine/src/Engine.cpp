@@ -673,7 +673,8 @@ namespace
 		// Castling moves.
 		if (sq == squares::e1 && board.getPiece(squares::f1) == pieces::none &&
 			board.getPiece(squares::g1) == pieces::none && castleKAvailable &&
-			!isSquareReachableByBlack(board, squares::f1, fastSqLookup))
+			!isSquareReachableByBlack(board, squares::f1, fastSqLookup) &&
+			!isSquareReachableByBlack(board, squares::e1, fastSqLookup))
 		{
 			assert(board.getPiece(squares::h1) == pieces::wR);
 			Move move = createRegularSilentMove(board, sq, squares::g1);
@@ -684,7 +685,8 @@ namespace
 
 		if (sq == squares::e1 && board.getPiece(squares::b1) == pieces::none &&
 			board.getPiece(squares::c1) == pieces::none && board.getPiece(squares::d1) == pieces::none
-			&& castleQAvailable && !isSquareReachableByBlack(board, squares::d1, fastSqLookup))
+			&& castleQAvailable && !isSquareReachableByBlack(board, squares::d1, fastSqLookup)
+			&& !isSquareReachableByBlack(board, squares::e1, fastSqLookup))
 		{
 			assert(board.getPiece(squares::a1) == pieces::wR);
 			Move move = createRegularSilentMove(board, sq, squares::c1);
@@ -726,7 +728,8 @@ namespace
 		// Castling moves.
 		if (sq == squares::e8 && board.getPiece(squares::f8) == pieces::none &&
 			board.getPiece(squares::g8) == pieces::none && castleKAvailable &&
-			!isSquareReachableByWhite(board, squares::f8, fastSqLookup))
+			!isSquareReachableByWhite(board, squares::f8, fastSqLookup) &&
+			!isSquareReachableByWhite(board, squares::e8, fastSqLookup))
 		{
 			assert(board.getPiece(squares::h8) == pieces::bR);
 			Move move = createRegularSilentMove(board, sq, squares::g8);
@@ -737,7 +740,8 @@ namespace
 
 		if (sq == squares::e8 && board.getPiece(squares::b8) == pieces::none &&
 			board.getPiece(squares::c8) == pieces::none && board.getPiece(squares::d8) == pieces::none
-			&& castleQAvailable && !isSquareReachableByWhite(board, squares::d8, fastSqLookup))
+			&& castleQAvailable && !isSquareReachableByWhite(board, squares::d8, fastSqLookup) &&
+			!isSquareReachableByWhite(board, squares::e8, fastSqLookup))
 		{
 			assert(board.getPiece(squares::a8) == pieces::bR);
 			Move move = createRegularSilentMove(board, sq, squares::c8);
