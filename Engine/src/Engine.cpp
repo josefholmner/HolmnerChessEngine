@@ -9,7 +9,7 @@
 
 namespace
 {
-	Piece fast_getPieceAtEndOfSweep(const BoardState& board, const std::vector<Square>& sweep)
+	Piece getPieceAtEndOfSweep(const BoardState& board, const std::vector<Square>& sweep)
 	{
 		for (const Square sq : sweep)
 		{
@@ -24,33 +24,33 @@ namespace
 		return pieces::none;
 	}
 
-	bool fast_isSquareReachableByBlack(const BoardState& board, Square sq,
+	bool isSquareReachableByBlack(const BoardState& board, Square sq,
 		const FastSqLookup& fastSqLookup)
 	{
 		// Check diagonals (not pawns or king though, they are checked futher below).
-		const Piece dA8 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA8()[sq]);
+		const Piece dA8 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA8()[sq]);
 		if (EngineUtilities::isBlack(dA8) && (dA8 == pieces::bQ || dA8 == pieces::bB)) { return true; }
 
-		const Piece dH8 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH8()[sq]);
+		const Piece dH8 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH8()[sq]);
 		if (EngineUtilities::isBlack(dH8) && (dH8 == pieces::bQ || dH8 == pieces::bB)) { return true; }
 
-		const Piece dH1 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH1()[sq]);
+		const Piece dH1 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH1()[sq]);
 		if (EngineUtilities::isBlack(dH1) && (dH1 == pieces::bQ || dH1 == pieces::bB)) { return true; }
 
-		const Piece dA1 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA1()[sq]);
+		const Piece dA1 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA1()[sq]);
 		if (EngineUtilities::isBlack(dA1) && (dA1 == pieces::bQ || dA1 == pieces::bB)) { return true; }
 
 		// Check straights.
-		const Piece sRMin = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMin()[sq]);
+		const Piece sRMin = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMin()[sq]);
 		if (EngineUtilities::isBlack(sRMin) && (sRMin == pieces::bQ || sRMin == pieces::bR)) { return true; }
 
-		const Piece sRMax = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMax()[sq]);
+		const Piece sRMax = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMax()[sq]);
 		if (EngineUtilities::isBlack(sRMax) && (sRMax == pieces::bQ || sRMax == pieces::bR)) { return true; }
 
-		const Piece sFmin = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMin()[sq]);
+		const Piece sFmin = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMin()[sq]);
 		if (EngineUtilities::isBlack(sFmin) && (sFmin == pieces::bQ || sFmin == pieces::bR)) { return true; }
 
-		const Piece sFMax = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMax()[sq]);
+		const Piece sFMax = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMax()[sq]);
 		if (EngineUtilities::isBlack(sFMax) && (sFMax == pieces::bQ || sFMax == pieces::bR)) { return true; }
 
 		// Check pawns (it is not an error that we use the same color pawn captures here).
@@ -74,33 +74,33 @@ namespace
 		return false;
 	}
 
-	bool fast_isSquareReachableByWhite(const BoardState& board, Square sq,
+	bool isSquareReachableByWhite(const BoardState& board, Square sq,
 		const FastSqLookup& fastSqLookup)
 	{
 		// Check diagonals (not pawns or king though, they are checked futher below).
-		const Piece dA8 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA8()[sq]);
+		const Piece dA8 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA8()[sq]);
 		if (EngineUtilities::isWhite(dA8) && (dA8 == pieces::wQ || dA8 == pieces::wB)) { return true; }
 
-		const Piece dH8 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH8()[sq]);
+		const Piece dH8 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH8()[sq]);
 		if (EngineUtilities::isWhite(dH8) && (dH8 == pieces::wQ || dH8 == pieces::wB)) { return true; }
 
-		const Piece dH1 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH1()[sq]);
+		const Piece dH1 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsH1()[sq]);
 		if (EngineUtilities::isWhite(dH1) && (dH1 == pieces::wQ || dH1 == pieces::wB)) { return true; }
 
-		const Piece dA1 = fast_getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA1()[sq]);
+		const Piece dA1 = getPieceAtEndOfSweep(board, fastSqLookup.getDiagTowardsA1()[sq]);
 		if (EngineUtilities::isWhite(dA1) && (dA1 == pieces::wQ || dA1 == pieces::wB)) { return true; }
 
 		// Check straights.
-		const Piece sRMin = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMin()[sq]);
+		const Piece sRMin = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMin()[sq]);
 		if (EngineUtilities::isWhite(sRMin) && (sRMin == pieces::wQ || sRMin == pieces::wR)) { return true; }
 
-		const Piece sRMax = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMax()[sq]);
+		const Piece sRMax = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsRankMax()[sq]);
 		if (EngineUtilities::isWhite(sRMax) && (sRMax == pieces::wQ || sRMax == pieces::wR)) { return true; }
 
-		const Piece sFmin = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMin()[sq]);
+		const Piece sFmin = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMin()[sq]);
 		if (EngineUtilities::isWhite(sFmin) && (sFmin == pieces::wQ || sFmin == pieces::wR)) { return true; }
 
-		const Piece sFMax = fast_getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMax()[sq]);
+		const Piece sFMax = getPieceAtEndOfSweep(board, fastSqLookup.getstraightTowardsFileMax()[sq]);
 		if (EngineUtilities::isWhite(sFMax) && (sFMax == pieces::wQ || sFMax == pieces::wR)) { return true; }
 
 		// Check pawns (it is not an error that we use the same color pawn captures here).
@@ -124,7 +124,7 @@ namespace
 		return false;
 	}
 
-	bool fast_isWhiteInCheck(const BoardState& board, const FastSqLookup& fastSqLookup)
+	bool isWhiteInCheck(const BoardState& board, const FastSqLookup& fastSqLookup)
 	{
 		const auto& pieces = board.getPieces();
 		const auto itr = std::find(pieces.begin(), pieces.end(), pieces::wK);
@@ -132,10 +132,10 @@ namespace
 		const Square kSq = std::distance(pieces.begin(), itr);
 		assert(board.getPiece(kSq) == pieces::wK);
 
-		return fast_isSquareReachableByBlack(board, kSq, fastSqLookup);
+		return isSquareReachableByBlack(board, kSq, fastSqLookup);
 	}
 
-	bool fast_isBlackInCheck(const BoardState& board, const FastSqLookup& fastSqLookup)
+	bool isBlackInCheck(const BoardState& board, const FastSqLookup& fastSqLookup)
 	{
 		const auto& pieces = board.getPieces();
 		const auto itr = std::find(pieces.begin(), pieces.end(), pieces::bK);
@@ -143,11 +143,11 @@ namespace
 		const Square kSq = std::distance(pieces.begin(), itr);
 		assert(board.getPiece(kSq) == pieces::bK);
 
-		return fast_isSquareReachableByWhite(board, kSq, fastSqLookup);
+		return isSquareReachableByWhite(board, kSq, fastSqLookup);
 	}
 
-	void fast_appendIfNotInCheck(BoardState& board, pieces::Color side, const Move& move, std::vector<Move>& moves,
-		const FastSqLookup& fastSqLookup)
+	void appendIfNotInCheck(BoardState& board, pieces::Color side, const Move& move,
+		std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 #ifndef NDEBUG
 		const BoardState boardPreMove = board;
@@ -199,14 +199,14 @@ namespace
 
 		if (side == pieces::Color::WHITE)
 		{
-			if (!fast_isWhiteInCheck(board, fastSqLookup))
+			if (!isWhiteInCheck(board, fastSqLookup))
 			{
 				moves.push_back(move);
 			}
 		}
 		else
 		{
-			if (!fast_isBlackInCheck(board, fastSqLookup))
+			if (!isBlackInCheck(board, fastSqLookup))
 			{
 				moves.push_back(move);
 			}
@@ -263,7 +263,7 @@ namespace
 #endif
 	}
 
-	bool fast_rookCaptureProhibitsWQcastling(const BoardState& board, Square captureSquare)
+	bool rookCaptureProhibitsWQcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -275,7 +275,7 @@ namespace
 		return false;
 	}
 
-	bool fast_rookCaptureProhibitsWKcastling(const BoardState& board, Square captureSquare)
+	bool rookCaptureProhibitsWKcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -287,7 +287,7 @@ namespace
 		return false;
 	}
 
-	bool fast_rookCaptureProhibitsBQcastling(const BoardState& board, Square captureSquare)
+	bool rookCaptureProhibitsBQcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -299,7 +299,7 @@ namespace
 		return false;
 	}
 
-	bool fast_rookCaptureProhibitsBKcastling(const BoardState& board, Square captureSquare)
+	bool rookCaptureProhibitsBKcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -312,15 +312,16 @@ namespace
 	}
 
 
-	// Note: Does not handle en passant square creation, pawn promotion, casteling or castling avaialibity.
-	Move fast_createRegularSilentMove(const BoardState& board, Square fromSquare, Square toSquare)
+	// Note: Does not handle en passant square creation, pawn promotion, casteling or
+	// castling avaialibity.
+	Move createRegularSilentMove(const BoardState& board, Square fromSquare, Square toSquare)
 	{
 		return Move(board.getPiece(fromSquare), fromSquare, toSquare, board.getEnPassantSquare());
 	}
 
 	// Note: Does not handle pawn promotion, en passant captures or castling avaialibity
 	// due to rook or king moved. Does handle castling availability due to captured rook though.
-	Move fast_createWhiteRegularCapturingMove(const BoardState& board, Square fromSquare, Square toSquare)
+	Move createWhiteRegularCapturingMove(const BoardState& board, Square fromSquare, Square toSquare)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
 
@@ -331,11 +332,11 @@ namespace
 		// Handle castling availability if a rook was captured.
 		if (capturedPiece == pieces::bR)
 		{
-			if (fast_rookCaptureProhibitsBKcastling(board, toSquare))
+			if (rookCaptureProhibitsBKcastling(board, toSquare))
 			{
 				move.prohibitsBKcastling = true;
 			}
-			else if (fast_rookCaptureProhibitsBQcastling(board, toSquare))
+			else if (rookCaptureProhibitsBQcastling(board, toSquare))
 			{
 				move.prohibitsBQcastling = true;
 			}
@@ -346,7 +347,7 @@ namespace
 
 	// Note: Does not handle pawn promotion, en passant captures or castling avaialibity
 	// due to rook or king moved. Does handle castling availability due to captured rook though.
-	Move fast_createBlackRegularCapturingMove(const BoardState& board, Square fromSquare, Square toSquare)
+	Move createBlackRegularCapturingMove(const BoardState& board, Square fromSquare, Square toSquare)
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
 		const Piece capturedPiece = board.getPiece(toSquare);
@@ -356,11 +357,11 @@ namespace
 		// Handle castling availability if a rook was captured.
 		if (capturedPiece == pieces::wR)
 		{
-			if (fast_rookCaptureProhibitsWKcastling(board, toSquare))
+			if (rookCaptureProhibitsWKcastling(board, toSquare))
 			{
 				move.prohibitsWKcastling = true;
 			}
-			else if (fast_rookCaptureProhibitsWQcastling(board, toSquare))
+			else if (rookCaptureProhibitsWQcastling(board, toSquare))
 			{
 				move.prohibitsWQcastling = true;
 			}
@@ -369,7 +370,7 @@ namespace
 		return move;
 	}
 
-	void fast_appendWhiteRegularSweepMoves(BoardState& board, Square sq,
+	void appendWhiteRegularSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -380,13 +381,13 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE,
-					fast_createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE,
+					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE,
-					fast_createWhiteRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE,
+					createWhiteRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
 				return;
 			}
 			else
@@ -396,7 +397,7 @@ namespace
 		}
 	}
 
-	void fast_appendBlackRegularSweepMoves(BoardState& board, Square sq,
+	void appendBlackRegularSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -407,13 +408,13 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK,
-					fast_createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK,
+					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK,
-					fast_createBlackRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK,
+					createBlackRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
 				return;
 			}
 			else
@@ -423,7 +424,7 @@ namespace
 		}
 	}
 
-	void fast_appendWhiteRegularNonSweepMoves(BoardState& board, Square sq,
+	void appendWhiteRegularNonSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -434,18 +435,18 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE,
-					fast_createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE,
+					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE,
-					fast_createWhiteRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE,
+					createWhiteRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 		}
 	}
 
-	void fast_appendBlackRegularNonSweepMoves(BoardState& board, Square sq,
+	void appendBlackRegularNonSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -456,18 +457,18 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK,
-					fast_createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK,
+					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK,
-					fast_createBlackRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK,
+					createBlackRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 		}
 	}
 
-	bool fast_rookMoveProhibitsWKCastling(const BoardState& board, Square fromSquare)
+	bool rookMoveProhibitsWKCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -479,7 +480,7 @@ namespace
 		return false;
 	}
 
-	bool fast_rookMoveProhibitsWQCastling(const BoardState& board, Square fromSquare)
+	bool rookMoveProhibitsWQCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -491,7 +492,7 @@ namespace
 		return false;
 	}
 
-	bool fast_rookMoveProhibitsBKCastling(const BoardState& board, Square fromSquare)
+	bool rookMoveProhibitsBKCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -503,7 +504,7 @@ namespace
 		return false;
 	}
 
-	bool fast_rookMoveProhibitsBQCastling(const BoardState& board, Square fromSquare)
+	bool rookMoveProhibitsBQCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -515,30 +516,30 @@ namespace
 		return false;
 	}
 
-	void fast_appendWhiteRookSweepMoves(BoardState& board, Square sq,
+	void appendWhiteRookSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
 		assert(board.getPiece(sq) == pieces::wR);
-		const bool prohibitsWKcastle = fast_rookMoveProhibitsWKCastling(board, sq);
-		const bool prohibitsWQcastle = fast_rookMoveProhibitsWQCastling(board, sq);
+		const bool prohibitsWKcastle = rookMoveProhibitsWKCastling(board, sq);
+		const bool prohibitsWQcastle = rookMoveProhibitsWQCastling(board, sq);
 		for (const Square nextSq : trySqs[sq])
 		{
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				Move move = fast_createRegularSilentMove(board, sq, nextSq);
+				Move move = createRegularSilentMove(board, sq, nextSq);
 				move.prohibitsWKcastling = prohibitsWKcastle;
 				move.prohibitsWQcastling = prohibitsWQcastle;
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
-				Move move = fast_createWhiteRegularCapturingMove(board, sq, nextSq);
+				Move move = createWhiteRegularCapturingMove(board, sq, nextSq);
 				move.prohibitsWKcastling = prohibitsWKcastle;
 				move.prohibitsWQcastling = prohibitsWQcastle;
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 				return;
 			}
 			else
@@ -548,30 +549,30 @@ namespace
 		}
 	}
 
-	void fast_appendBlackRookSweepMoves(BoardState& board, Square sq,
+	void appendBlackRookSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
 		assert(board.getPiece(sq) == pieces::bR);
-		const bool prohibitsBKcastle = fast_rookMoveProhibitsBKCastling(board, sq);
-		const bool prohibitsBQcastle = fast_rookMoveProhibitsBQCastling(board, sq);
+		const bool prohibitsBKcastle = rookMoveProhibitsBKCastling(board, sq);
+		const bool prohibitsBQcastle = rookMoveProhibitsBQCastling(board, sq);
 		for (const Square nextSq : trySqs[sq])
 		{
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				Move move = fast_createRegularSilentMove(board, sq, nextSq);
+				Move move = createRegularSilentMove(board, sq, nextSq);
 				move.prohibitsBKcastling = prohibitsBKcastle;
 				move.prohibitsBQcastling = prohibitsBQcastle;
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				Move move = fast_createBlackRegularCapturingMove(board, sq, nextSq);
+				Move move = createBlackRegularCapturingMove(board, sq, nextSq);
 				move.prohibitsBKcastling = prohibitsBKcastle;
 				move.prohibitsBQcastling = prohibitsBQcastle;
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 				return;
 			}
 			else
@@ -581,7 +582,7 @@ namespace
 		}
 	}
 
-	void fast_appendWhitePawnAdvanceWithPromotions(BoardState& board,
+	void appendWhitePawnAdvanceWithPromotions(BoardState& board,
 		Square fromSquare, Square toSquare, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -590,28 +591,28 @@ namespace
 
 		for (const auto promotion : {pieces::wQ, pieces::wR, pieces::wB, pieces::wN })
 		{
-			Move move = fast_createRegularSilentMove(board, fromSquare, toSquare);
+			Move move = createRegularSilentMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 		}
 	}
 
-	void fast_appendBlackPawnAdvanceWithPromotions(BoardState& board,
-		Square fromSquare, Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
+	void appendBlackPawnAdvanceWithPromotions(BoardState& board, Square fromSquare,
+		Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 		assert(ranks::toRank(fromSquare) == 1);
 		assert(ranks::toRank(toSquare) == 0);
 
 		for (const auto promotion : { pieces::bQ, pieces::bR, pieces::bB, pieces::bN })
 		{
-			Move move = fast_createRegularSilentMove(board, fromSquare, toSquare);
+			Move move = createRegularSilentMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 		}
 	}
 
-	void fast_appendWhitePawnCaptureWithPromotions(BoardState& board,
-		Square fromSquare, Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
+	void appendWhitePawnCaptureWithPromotions(BoardState& board, Square fromSquare,
+		Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 		assert(ranks::toRank(fromSquare) == 6);
 		assert(ranks::toRank(toSquare) == 7);
@@ -619,14 +620,14 @@ namespace
 
 		for (const auto promotion : { pieces::wQ, pieces::wR, pieces::wB, pieces::wN })
 		{
-			Move move = fast_createWhiteRegularCapturingMove(board, fromSquare, toSquare);
+			Move move = createWhiteRegularCapturingMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 		}
 	}
 
-	void fast_appendBlackPawnCaptureWithPromotions(BoardState& board,
-		Square fromSquare, Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
+	void appendBlackPawnCaptureWithPromotions(BoardState& board, Square fromSquare,
+		Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 		assert(ranks::toRank(fromSquare) == 1);
 		assert(ranks::toRank(toSquare) == 0);
@@ -634,13 +635,13 @@ namespace
 
 		for (const auto promotion : { pieces::bQ, pieces::bR, pieces::bB, pieces::bN })
 		{
-			Move move = fast_createBlackRegularCapturingMove(board, fromSquare, toSquare);
+			Move move = createBlackRegularCapturingMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 		}
 	}
 
-	void fast_appendWhiteKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendWhiteKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -655,45 +656,45 @@ namespace
 			const Piece other = board.getPiece(toSq);
 			if (other == pieces::none)
 			{
-				Move move = fast_createRegularSilentMove(board, sq, toSq);
+				Move move = createRegularSilentMove(board, sq, toSq);
 				move.prohibitsWKcastling = castleKAvailable;
 				move.prohibitsWQcastling = castleQAvailable;
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
-				Move move = fast_createWhiteRegularCapturingMove(board, sq, toSq);
+				Move move = createWhiteRegularCapturingMove(board, sq, toSq);
 				move.prohibitsWKcastling = castleKAvailable;
 				move.prohibitsWQcastling = castleQAvailable;
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 			}
 		}
 
 		// Castling moves.
 		if (sq == squares::e1 && board.getPiece(squares::f1) == pieces::none &&
 			board.getPiece(squares::g1) == pieces::none && castleKAvailable &&
-			!fast_isSquareReachableByBlack(board, squares::f1, fastSqLookup))
+			!isSquareReachableByBlack(board, squares::f1, fastSqLookup))
 		{
 			assert(board.getPiece(squares::h1) == pieces::wR);
-			Move move = fast_createRegularSilentMove(board, sq, squares::g1);
+			Move move = createRegularSilentMove(board, sq, squares::g1);
 			move.prohibitsWKcastling = castleKAvailable;
 			move.prohibitsWQcastling = castleQAvailable;
-			fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 		}
 
 		if (sq == squares::e1 && board.getPiece(squares::b1) == pieces::none &&
 			board.getPiece(squares::c1) == pieces::none && board.getPiece(squares::d1) == pieces::none
-			&& castleQAvailable && !fast_isSquareReachableByBlack(board, squares::d1, fastSqLookup))
+			&& castleQAvailable && !isSquareReachableByBlack(board, squares::d1, fastSqLookup))
 		{
 			assert(board.getPiece(squares::a1) == pieces::wR);
-			Move move = fast_createRegularSilentMove(board, sq, squares::c1);
+			Move move = createRegularSilentMove(board, sq, squares::c1);
 			move.prohibitsWKcastling = castleKAvailable;
 			move.prohibitsWQcastling = castleQAvailable;
-			fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 		}
 	}
 
-	void fast_appendBlackKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendBlackKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -708,45 +709,45 @@ namespace
 			const Piece other = board.getPiece(toSq);
 			if (other == pieces::none)
 			{
-				Move move = fast_createRegularSilentMove(board, sq, toSq);
+				Move move = createRegularSilentMove(board, sq, toSq);
 				move.prohibitsBKcastling = castleKAvailable;
 				move.prohibitsBQcastling = castleQAvailable;
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				Move move = fast_createBlackRegularCapturingMove(board, sq, toSq);
+				Move move = createBlackRegularCapturingMove(board, sq, toSq);
 				move.prohibitsBKcastling = castleKAvailable;
 				move.prohibitsBQcastling = castleQAvailable;
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 			}
 		}
 
 		// Castling moves.
 		if (sq == squares::e8 && board.getPiece(squares::f8) == pieces::none &&
 			board.getPiece(squares::g8) == pieces::none && castleKAvailable &&
-			!fast_isSquareReachableByWhite(board, squares::f8, fastSqLookup))
+			!isSquareReachableByWhite(board, squares::f8, fastSqLookup))
 		{
 			assert(board.getPiece(squares::h8) == pieces::bR);
-			Move move = fast_createRegularSilentMove(board, sq, squares::g8);
+			Move move = createRegularSilentMove(board, sq, squares::g8);
 			move.prohibitsBKcastling = castleKAvailable;
 			move.prohibitsBQcastling = castleQAvailable;
-			fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 		}
 
 		if (sq == squares::e8 && board.getPiece(squares::b8) == pieces::none &&
 			board.getPiece(squares::c8) == pieces::none && board.getPiece(squares::d8) == pieces::none
-			&& castleQAvailable && !fast_isSquareReachableByWhite(board, squares::d8, fastSqLookup))
+			&& castleQAvailable && !isSquareReachableByWhite(board, squares::d8, fastSqLookup))
 		{
 			assert(board.getPiece(squares::a8) == pieces::bR);
-			Move move = fast_createRegularSilentMove(board, sq, squares::c8);
+			Move move = createRegularSilentMove(board, sq, squares::c8);
 			move.prohibitsBKcastling = castleKAvailable;
 			move.prohibitsBQcastling = castleQAvailable;
-			fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 		}
 	}
 
-	void fast_appendWhitePawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendWhitePawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -761,11 +762,11 @@ namespace
 		{
 			if (rank == 6) // Pawn promotion.
 			{
-				fast_appendWhitePawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
+				appendWhitePawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
 			}
 			else
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, fast_createRegularSilentMove(
+				appendIfNotInCheck(board, pieces::Color::WHITE, createRegularSilentMove(
 					board, sq, singleAdvanceSq), moves, fastSqLookup);
 			}
 				
@@ -774,9 +775,9 @@ namespace
 			const Square doubleAdvanceSq = sq + 16;
 			if (rank == 1 && board.getPiece(doubleAdvanceSq) == pieces::none)
 			{
-				Move move = fast_createRegularSilentMove(board, sq, doubleAdvanceSq);
+				Move move = createRegularSilentMove(board, sq, doubleAdvanceSq);
 				move.enPassantCreatedSquare = singleAdvanceSq; // One square behind the pawn.
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
 			}
 		}
 
@@ -788,24 +789,24 @@ namespace
 			{
 				if (rank == 6)
 				{
-					fast_appendWhitePawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
+					appendWhitePawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
 				}
 				else
 				{
-					fast_appendIfNotInCheck(board, pieces::Color::WHITE,
-						fast_createWhiteRegularCapturingMove(board, sq, captureSq), moves, fastSqLookup);
+					appendIfNotInCheck(board, pieces::Color::WHITE,
+						createWhiteRegularCapturingMove(board, sq, captureSq), moves, fastSqLookup);
 				}
 			}
 			else if (captureSq == board.getEnPassantSquare())
 			{
 				assert(board.getPiece(captureSq - 8) == pieces::bP);
-				fast_appendIfNotInCheck(board, pieces::Color::WHITE, Move(pieces::wP, sq,
+				appendIfNotInCheck(board, pieces::Color::WHITE, Move(pieces::wP, sq,
 					captureSq, captureSq, pieces::bP, captureSq - 8), moves, fastSqLookup);
 			}
 		}
 	}
 
-	void fast_appendBlackPawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendBlackPawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -820,11 +821,11 @@ namespace
 		{
 			if (rank == 1) // Pawn promotion.
 			{
-				fast_appendBlackPawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
+				appendBlackPawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
 			}
 			else
 			{
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, fast_createRegularSilentMove(
+				appendIfNotInCheck(board, pieces::Color::BLACK, createRegularSilentMove(
 					board, sq, singleAdvanceSq), moves, fastSqLookup);
 			}
 
@@ -833,9 +834,9 @@ namespace
 			const Square doubleAdvanceSq = sq - 16;
 			if (rank == 6 && board.getPiece(doubleAdvanceSq) == pieces::none)
 			{
-				Move move = fast_createRegularSilentMove(board, sq, doubleAdvanceSq);
+				Move move = createRegularSilentMove(board, sq, doubleAdvanceSq);
 				move.enPassantCreatedSquare = singleAdvanceSq; // One square behind the pawn.
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
 			}
 		}
 
@@ -847,95 +848,105 @@ namespace
 			{
 				if (rank == 1)
 				{
-					fast_appendBlackPawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
+					appendBlackPawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
 				}
 				else
 				{
-					fast_appendIfNotInCheck(board, pieces::Color::BLACK,
-						fast_createBlackRegularCapturingMove(board, sq, captureSq), moves, fastSqLookup);
+					appendIfNotInCheck(board, pieces::Color::BLACK,
+						createBlackRegularCapturingMove(board, sq, captureSq), moves, fastSqLookup);
 				}
 			}
 			else if (captureSq == board.getEnPassantSquare())
 			{
 				assert(board.getPiece(captureSq + 8) == pieces::wP);
-				fast_appendIfNotInCheck(board, pieces::Color::BLACK, Move(pieces::bP, sq, captureSq,
+				appendIfNotInCheck(board, pieces::Color::BLACK, Move(pieces::bP, sq, captureSq,
 					captureSq, pieces::wP, captureSq + 8), moves, fastSqLookup);
 			}
 		}
 	}
 
-	void fast_appendWhiteBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendWhiteBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
 	}
 
-	void fast_appendBlackBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendBlackBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
 	}
 
-	void fast_appendWhiteKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendWhiteKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendWhiteRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(), moves, fastSqLookup);
+		appendWhiteRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(),
+			moves, fastSqLookup);
 	}
 
-	void fast_appendBlackKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendBlackKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendBlackRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(), moves, fastSqLookup);
+		appendBlackRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(),
+			moves, fastSqLookup);
 	}
 
-	void fast_appendWhiteRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendWhiteRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
-		fast_appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
-		fast_appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
-		fast_appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
+		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
+		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
+		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
+		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
 	}
 
-	void fast_appendBlackRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendBlackRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
-		fast_appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
-		fast_appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
-		fast_appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
+		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
+		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
+		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
+		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
 	}
 
-	void fast_appendWhiteQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendWhiteQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
-		fast_appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves,
+			fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves,
+			fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves,
+			fastSqLookup);
+		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves,
+			fastSqLookup);
 	}
 
-	void fast_appendBlackQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void appendBlackQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
-		fast_appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves,
+			fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves,
+			fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves,
+			fastSqLookup);
+		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves,
+			fastSqLookup);
 	}
 
 	std::vector<Move> getLegalWhiteMoves(BoardState& board, const FastSqLookup& fastSqLookup)
@@ -952,22 +963,22 @@ namespace
 			switch (board.getPiece(sq))
 			{ 
 				case pieces::wP:
-					fast_appendWhitePawnMoves(board, sq, fastSqLookup, moves);
+					appendWhitePawnMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wN:
-					fast_appendWhiteKnightMoves(board, sq, fastSqLookup, moves);
+					appendWhiteKnightMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wB:
-					fast_appendWhiteBishopMoves(board, sq, fastSqLookup, moves);
+					appendWhiteBishopMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wR:
-					fast_appendWhiteRookMoves(board, sq, fastSqLookup, moves);
+					appendWhiteRookMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wQ:
-					fast_appendWhiteQueenMoves(board, sq, fastSqLookup, moves);
+					appendWhiteQueenMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wK:
-					fast_appendWhiteKingMoves(board, sq, fastSqLookup, moves);
+					appendWhiteKingMoves(board, sq, fastSqLookup, moves);
 					break;
 			}
 		}
@@ -989,22 +1000,22 @@ namespace
 			switch (board.getPiece(sq))
 			{
 				case pieces::bP:
-					fast_appendBlackPawnMoves(board, sq, fastSqLookup, moves);
+					appendBlackPawnMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bN:
-					fast_appendBlackKnightMoves(board, sq, fastSqLookup, moves);
+					appendBlackKnightMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bB:
-					fast_appendBlackBishopMoves(board, sq, fastSqLookup, moves);
+					appendBlackBishopMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bR:
-					fast_appendBlackRookMoves(board, sq, fastSqLookup, moves);
+					appendBlackRookMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bQ:
-					fast_appendBlackQueenMoves(board, sq, fastSqLookup, moves);
+					appendBlackQueenMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bK:
-					fast_appendBlackKingMoves(board, sq, fastSqLookup, moves);
+					appendBlackKingMoves(board, sq, fastSqLookup, moves);
 					break;
 			}
 		}
