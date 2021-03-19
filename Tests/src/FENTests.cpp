@@ -146,17 +146,18 @@ namespace testHelpers
 			assert(splitStr.size() == 7);
 			FEN = splitStr[0];
 			FEN.erase(FEN.find_last_not_of(' ') + 1);
-			static constexpr int32_t maxDepth = 5;
 
-			for (size_t i = 1; i <= maxDepth; i++)
+			for (size_t i = 1; i < splitStr.size(); i++)
 			{
 				const auto splitDepth = CommonUtilities::splitString(splitStr[i], ' ');
-				numMoves[i] = std::stoi(splitDepth[1]);
+				(void)sscanf(splitDepth[1].c_str(), "%zu", &numMoves[i]);
 			}
 		}
 
 		std::string FEN;
-		std::unordered_map<size_t, int32_t> numMoves;
+
+		// Key is depth, value is number of moves.
+		std::unordered_map<size_t, size_t> numMoves;
 	};
 }
 
@@ -173,6 +174,7 @@ void printReleaseOrDebug()
 void FENTests::Run()
 {
 	printReleaseOrDebug();
+	size_t numMovesSum = 0;
 	hceEngine::EngineAPI engine;
 	hceCommon::Stopwatch stopWatch;
 	stopWatch.start();
@@ -200,11 +202,15 @@ void FENTests::Run()
 					+ " but got: " + std::to_string(*numMoves));
 				return;
 			}
+
+			numMovesSum += *numMoves;
 		}
 
 		TestsUtilities::log("FEN tests depth: " + std::to_string(depth) + " succeeded.");
 	}
 
-	TestsUtilities::log("FEN Tests finished successfully. Time: " +
-		std::to_string(stopWatch.getMilliseconds()));
+	int32_t mills = stopWatch.getMilliseconds();
+	TestsUtilities::log("FEN Tests finished successfully. Generated: " + std::to_string(numMovesSum)
+		+ " moves in: " + std::to_string(mills) + " ms, or: " +
+		std::to_string((numMovesSum / mills) * 1000) + " moves per second.");
 }
