@@ -396,7 +396,7 @@ namespace moveGenerationHelpers
 		return move;
 	}
 
-	void appendWhiteRegularSweepMoves(BoardState& board, Square sq,
+	void addWhiteRegularSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -422,7 +422,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackRegularSweepMoves(BoardState& board, Square sq,
+	void addBlackRegularSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -448,7 +448,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendWhiteRegularNonSweepMoves(BoardState& board, Square sq,
+	void addWhiteRegularNonSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -469,7 +469,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackRegularNonSweepMoves(BoardState& board, Square sq,
+	void addBlackRegularNonSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -539,7 +539,7 @@ namespace moveGenerationHelpers
 		return false;
 	}
 
-	void appendWhiteRookSweepMoves(BoardState& board, Square sq,
+	void addWhiteRookSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -572,7 +572,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackRookSweepMoves(BoardState& board, Square sq,
+	void addBlackRookSweepMoves(BoardState& board, Square sq,
 		const std::array<std::vector<Square>, squares::num>& trySqs, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -605,7 +605,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendWhitePawnAdvanceWithPromotions(BoardState& board,
+	void addWhitePawnAdvanceWithPromotions(BoardState& board,
 		Square fromSquare, Square toSquare, std::vector<Move>& moves,
 		const FastSqLookup& fastSqLookup)
 	{
@@ -620,7 +620,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackPawnAdvanceWithPromotions(BoardState& board, Square fromSquare,
+	void addBlackPawnAdvanceWithPromotions(BoardState& board, Square fromSquare,
 		Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 		assert(ranks::toRank(fromSquare) == 1);
@@ -634,7 +634,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendWhitePawnCaptureWithPromotions(BoardState& board, Square fromSquare,
+	void addWhitePawnCaptureWithPromotions(BoardState& board, Square fromSquare,
 		Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 		assert(ranks::toRank(fromSquare) == 6);
@@ -649,7 +649,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackPawnCaptureWithPromotions(BoardState& board, Square fromSquare,
+	void addBlackPawnCaptureWithPromotions(BoardState& board, Square fromSquare,
 		Square toSquare, std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
 		assert(ranks::toRank(fromSquare) == 1);
@@ -664,7 +664,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendWhiteKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addWhiteKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -719,7 +719,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addBlackKingMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -774,7 +774,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendWhitePawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addWhitePawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
@@ -789,7 +789,7 @@ namespace moveGenerationHelpers
 		{
 			if (rank == 6) // Pawn promotion.
 			{
-				appendWhitePawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
+				addWhitePawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
 			}
 			else
 			{
@@ -816,7 +816,7 @@ namespace moveGenerationHelpers
 			{
 				if (rank == 6)
 				{
-					appendWhitePawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
+					addWhitePawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
 				}
 				else
 				{
@@ -833,7 +833,7 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendBlackPawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addBlackPawnMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
@@ -848,7 +848,7 @@ namespace moveGenerationHelpers
 		{
 			if (rank == 1) // Pawn promotion.
 			{
-				appendBlackPawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
+				addBlackPawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, fastSqLookup);
 			}
 			else
 			{
@@ -875,7 +875,7 @@ namespace moveGenerationHelpers
 			{
 				if (rank == 1)
 				{
-					appendBlackPawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
+					addBlackPawnCaptureWithPromotions(board, sq, captureSq, moves, fastSqLookup);
 				}
 				else
 				{
@@ -892,87 +892,87 @@ namespace moveGenerationHelpers
 		}
 	}
 
-	void appendWhiteBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addWhiteBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
 	}
 
-	void appendBlackBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addBlackBishopMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
 	}
 
-	void appendWhiteKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addWhiteKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendWhiteRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(),
+		addWhiteRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(),
 			moves, fastSqLookup);
 	}
 
-	void appendBlackKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addBlackKnightMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendBlackRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(),
+		addBlackRegularNonSweepMoves(board, sq, fastSqLookup.getknightReachableSquares(),
 			moves, fastSqLookup);
 	}
 
-	void appendWhiteRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addWhiteRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
-		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
-		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
-		appendWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
+		addWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
+		addWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
+		addWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
+		addWhiteRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
 	}
 
-	void appendBlackRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addBlackRookMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
-		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
-		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
-		appendBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
+		addBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves, fastSqLookup);
+		addBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves, fastSqLookup);
+		addBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves, fastSqLookup);
+		addBlackRookSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves, fastSqLookup);
 	}
 
-	void appendWhiteQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addWhiteQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves,
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves,
 			fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves,
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves,
 			fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves,
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves,
 			fastSqLookup);
-		appendWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves,
+		addWhiteRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves,
 			fastSqLookup);
 	}
 
-	void appendBlackQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
+	void addBlackQueenMoves(BoardState& board, Square sq, const FastSqLookup& fastSqLookup,
 		std::vector<Move>& moves)
 	{
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves,
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH8(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA8(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsH1(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getDiagTowardsA1(), moves, fastSqLookup);
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMin(), moves,
 			fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves,
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsRankMax(), moves,
 			fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves,
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMin(), moves,
 			fastSqLookup);
-		appendBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves,
+		addBlackRegularSweepMoves(board, sq, fastSqLookup.getstraightTowardsFileMax(), moves,
 			fastSqLookup);
 	}
 
@@ -990,22 +990,22 @@ namespace moveGenerationHelpers
 			switch (board.getPiece(sq))
 			{ 
 				case pieces::wP:
-					appendWhitePawnMoves(board, sq, fastSqLookup, moves);
+					addWhitePawnMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wN:
-					appendWhiteKnightMoves(board, sq, fastSqLookup, moves);
+					addWhiteKnightMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wB:
-					appendWhiteBishopMoves(board, sq, fastSqLookup, moves);
+					addWhiteBishopMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wR:
-					appendWhiteRookMoves(board, sq, fastSqLookup, moves);
+					addWhiteRookMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wQ:
-					appendWhiteQueenMoves(board, sq, fastSqLookup, moves);
+					addWhiteQueenMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::wK:
-					appendWhiteKingMoves(board, sq, fastSqLookup, moves);
+					addWhiteKingMoves(board, sq, fastSqLookup, moves);
 					break;
 			}
 		}
@@ -1027,22 +1027,22 @@ namespace moveGenerationHelpers
 			switch (board.getPiece(sq))
 			{
 				case pieces::bP:
-					appendBlackPawnMoves(board, sq, fastSqLookup, moves);
+					addBlackPawnMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bN:
-					appendBlackKnightMoves(board, sq, fastSqLookup, moves);
+					addBlackKnightMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bB:
-					appendBlackBishopMoves(board, sq, fastSqLookup, moves);
+					addBlackBishopMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bR:
-					appendBlackRookMoves(board, sq, fastSqLookup, moves);
+					addBlackRookMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bQ:
-					appendBlackQueenMoves(board, sq, fastSqLookup, moves);
+					addBlackQueenMoves(board, sq, fastSqLookup, moves);
 					break;
 				case pieces::bK:
-					appendBlackKingMoves(board, sq, fastSqLookup, moves);
+					addBlackKingMoves(board, sq, fastSqLookup, moves);
 					break;
 			}
 		}
