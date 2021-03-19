@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace
+namespace moveGenerationHelpers
 {
 	Piece getPieceAtEndOfSweep(const BoardState& board, const std::vector<Square>& sweep)
 	{
@@ -146,9 +146,83 @@ namespace
 		return isSquareReachableByWhite(board, kSq, fastSqLookup);
 	}
 
-	void appendIfNotInCheck(BoardState& board, pieces::Color side, const Move& move,
+	// Ensures that the moving side is not in check priot to adding the move.
+	void addWhiteIfValid(BoardState& board, const Move& move,
 		std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
 	{
+		assert(board.getTurn() == pieces::Color::WHITE);
+#ifndef NDEBUG
+		const BoardState boardPreMove = board;
+#endif
+
+		// Temporarily make the move, before looking if in check.
+		auto& pieces = board.getPieces();
+		pieces[move.fromSquare] = pieces::none;
+		if (move.capturedPiece != pieces::none)
+		{
+			pieces[move.capturedSquare] = pieces::none;
+		}
+
+		pieces[move.toSquare] = move.movingPiece;
+
+		// Handle rook move if casteling.
+		if (move.movingPiece == pieces::wK && move.fromSquare == squares::e1)
+		{
+			if (move.toSquare == squares::g1)
+			{
+				pieces[squares::h1] = pieces::none;
+				pieces[squares::f1] = pieces::wR;
+			}
+			else if (move.toSquare == squares::c1)
+			{
+				pieces[squares::a1] = pieces::none;
+				pieces[squares::d1] = pieces::wR;
+			}
+		}
+
+		if (!isWhiteInCheck(board, fastSqLookup))
+		{
+			moves.push_back(move);
+		}
+
+
+		// Undo temporary move.
+		pieces[move.toSquare] = pieces::none;
+		if (move.capturedPiece != pieces::none)
+		{
+			pieces[move.capturedSquare] = move.capturedPiece;
+		}
+
+		pieces[move.fromSquare] = move.movingPiece;
+
+		// Undo rook move when casteling if this was a casteling move.
+		if (move.movingPiece == pieces::wK && move.fromSquare == squares::e1)
+		{
+			if (move.toSquare == squares::g1)
+			{
+				pieces[squares::h1] = pieces::wR;
+				pieces[squares::f1] = pieces::none;
+			}
+			else if (move.toSquare == squares::c1)
+			{
+				pieces[squares::a1] = pieces::wR;
+				pieces[squares::d1] = pieces::none;
+			}
+		}
+
+#ifndef NDEBUG
+		assert(boardPreMove.getPieces() == board.getPieces());
+		assert(boardPreMove.getCastleAvailability() == board.getCastleAvailability());
+		assert(boardPreMove.getEnPassantSquare() == board.getEnPassantSquare());
+		assert(boardPreMove.getTurn() == board.getTurn());
+#endif
+	}
+
+	// Ensures that the moving side is not in check priot to adding the move.
+	void addBlackIfValid(BoardState& board, const Move& move,
+		std::vector<Move>& moves, const FastSqLookup& fastSqLookup)
+	{
+		assert(board.getTurn() == pieces::Color::BLACK);
 #ifndef NDEBUG
 		const BoardState boardPreMove = board;
 #endif
@@ -164,52 +238,23 @@ namespace
 		pieces[move.toSquare] = move.movingPiece;
 
 		// Handle rook move if casteling.
-		if (side == pieces::Color::WHITE)
+		if (move.movingPiece == pieces::bK && move.fromSquare == squares::e8)
 		{
-			if (move.movingPiece == pieces::wK && move.fromSquare == squares::e1)
+			if (move.toSquare == squares::g8)
 			{
-				if (move.toSquare == squares::g1)
-				{
-					pieces[squares::h1] = pieces::none;
-					pieces[squares::f1] = pieces::wR;
-				}
-				else if (move.toSquare == squares::c1)
-				{
-					pieces[squares::a1] = pieces::none;
-					pieces[squares::d1] = pieces::wR;
-				}
+				pieces[squares::h8] = pieces::none;
+				pieces[squares::f8] = pieces::bR;
 			}
-		}
-		else
-		{
-			if (move.movingPiece == pieces::bK && move.fromSquare == squares::e8)
+			else if (move.toSquare == squares::c8)
 			{
-				if (move.toSquare == squares::g8)
-				{
-					pieces[squares::h8] = pieces::none;
-					pieces[squares::f8] = pieces::bR;
-				}
-				else if (move.toSquare == squares::c8)
-				{
-					pieces[squares::a8] = pieces::none;
-					pieces[squares::d8] = pieces::bR;
-				}
+				pieces[squares::a8] = pieces::none;
+				pieces[squares::d8] = pieces::bR;
 			}
 		}
 
-		if (side == pieces::Color::WHITE)
+		if (!isBlackInCheck(board, fastSqLookup))
 		{
-			if (!isWhiteInCheck(board, fastSqLookup))
-			{
-				moves.push_back(move);
-			}
-		}
-		else
-		{
-			if (!isBlackInCheck(board, fastSqLookup))
-			{
-				moves.push_back(move);
-			}
+			moves.push_back(move);
 		}
 
 		// Undo temporary move.
@@ -222,36 +267,17 @@ namespace
 		pieces[move.fromSquare] = move.movingPiece;
 
 		// Undo rook move when casteling if this was a casteling move.
-		if (side == pieces::Color::WHITE)
+		if (move.movingPiece == pieces::bK && move.fromSquare == squares::e8)
 		{
-			if (move.movingPiece == pieces::wK && move.fromSquare == squares::e1)
+			if (move.toSquare == squares::g8)
 			{
-				if (move.toSquare == squares::g1)
-				{
-					pieces[squares::h1] = pieces::wR;
-					pieces[squares::f1] = pieces::none;
-				}
-				else if (move.toSquare == squares::c1)
-				{
-					pieces[squares::a1] = pieces::wR;
-					pieces[squares::d1] = pieces::none;
-				}
+				pieces[squares::h8] = pieces::bR;
+				pieces[squares::f8] = pieces::none;
 			}
-		}
-		else
-		{
-			if (move.movingPiece == pieces::bK && move.fromSquare == squares::e8)
+			else if (move.toSquare == squares::c8)
 			{
-				if (move.toSquare == squares::g8)
-				{
-					pieces[squares::h8] = pieces::bR;
-					pieces[squares::f8] = pieces::none;
-				}
-				else if (move.toSquare == squares::c8)
-				{
-					pieces[squares::a8] = pieces::bR;
-					pieces[squares::d8] = pieces::none;
-				}
+				pieces[squares::a8] = pieces::bR;
+				pieces[squares::d8] = pieces::none;
 			}
 		}
 
@@ -381,13 +407,12 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				appendIfNotInCheck(board, pieces::Color::WHITE,
-					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				addWhiteIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
-				appendIfNotInCheck(board, pieces::Color::WHITE,
-					createWhiteRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				addWhiteIfValid(board, createWhiteRegularCapturingMove(board, sq, nextSq),
+					moves, fastSqLookup);
 				return;
 			}
 			else
@@ -408,13 +433,12 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				appendIfNotInCheck(board, pieces::Color::BLACK,
-					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				addBlackIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				appendIfNotInCheck(board, pieces::Color::BLACK,
-					createBlackRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				addBlackIfValid(board, createBlackRegularCapturingMove(board, sq, nextSq),
+					moves, fastSqLookup);
 				return;
 			}
 			else
@@ -435,13 +459,12 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				appendIfNotInCheck(board, pieces::Color::WHITE,
-					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
+				addWhiteIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
-				appendIfNotInCheck(board, pieces::Color::WHITE,
-					createWhiteRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
+				addWhiteIfValid(board, createWhiteRegularCapturingMove(board, sq, nextSq),
+					moves, fastSqLookup);
 			}
 		}
 	}
@@ -457,12 +480,12 @@ namespace
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				appendIfNotInCheck(board, pieces::Color::BLACK,
+				addBlackIfValid(board,
 					createRegularSilentMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				appendIfNotInCheck(board, pieces::Color::BLACK,
+				addBlackIfValid(board,
 					createBlackRegularCapturingMove(board, sq, nextSq), moves, fastSqLookup);
 			}
 		}
@@ -532,14 +555,14 @@ namespace
 				Move move = createRegularSilentMove(board, sq, nextSq);
 				move.prohibitsWKcastling = prohibitsWKcastle;
 				move.prohibitsWQcastling = prohibitsWQcastle;
-				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				addWhiteIfValid(board, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
 				Move move = createWhiteRegularCapturingMove(board, sq, nextSq);
 				move.prohibitsWKcastling = prohibitsWKcastle;
 				move.prohibitsWQcastling = prohibitsWQcastle;
-				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				addWhiteIfValid(board, move, moves, fastSqLookup);
 				return;
 			}
 			else
@@ -565,14 +588,14 @@ namespace
 				Move move = createRegularSilentMove(board, sq, nextSq);
 				move.prohibitsBKcastling = prohibitsBKcastle;
 				move.prohibitsBQcastling = prohibitsBQcastle;
-				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				addBlackIfValid(board, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
 				Move move = createBlackRegularCapturingMove(board, sq, nextSq);
 				move.prohibitsBKcastling = prohibitsBKcastle;
 				move.prohibitsBQcastling = prohibitsBQcastle;
-				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				addBlackIfValid(board, move, moves, fastSqLookup);
 				return;
 			}
 			else
@@ -593,7 +616,7 @@ namespace
 		{
 			Move move = createRegularSilentMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			addWhiteIfValid(board, move, moves, fastSqLookup);
 		}
 	}
 
@@ -607,7 +630,7 @@ namespace
 		{
 			Move move = createRegularSilentMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			addBlackIfValid(board, move, moves, fastSqLookup);
 		}
 	}
 
@@ -622,7 +645,7 @@ namespace
 		{
 			Move move = createWhiteRegularCapturingMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			addWhiteIfValid(board, move, moves, fastSqLookup);
 		}
 	}
 
@@ -637,7 +660,7 @@ namespace
 		{
 			Move move = createBlackRegularCapturingMove(board, fromSquare, toSquare);
 			move.pawnPromotionPiece = promotion;
-			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			addBlackIfValid(board, move, moves, fastSqLookup);
 		}
 	}
 
@@ -659,14 +682,14 @@ namespace
 				Move move = createRegularSilentMove(board, sq, toSq);
 				move.prohibitsWKcastling = castleKAvailable;
 				move.prohibitsWQcastling = castleQAvailable;
-				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				addWhiteIfValid(board, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
 				Move move = createWhiteRegularCapturingMove(board, sq, toSq);
 				move.prohibitsWKcastling = castleKAvailable;
 				move.prohibitsWQcastling = castleQAvailable;
-				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				addWhiteIfValid(board, move, moves, fastSqLookup);
 			}
 		}
 
@@ -680,7 +703,7 @@ namespace
 			Move move = createRegularSilentMove(board, sq, squares::g1);
 			move.prohibitsWKcastling = castleKAvailable;
 			move.prohibitsWQcastling = castleQAvailable;
-			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			addWhiteIfValid(board, move, moves, fastSqLookup);
 		}
 
 		if (sq == squares::e1 && board.getPiece(squares::b1) == pieces::none &&
@@ -692,7 +715,7 @@ namespace
 			Move move = createRegularSilentMove(board, sq, squares::c1);
 			move.prohibitsWKcastling = castleKAvailable;
 			move.prohibitsWQcastling = castleQAvailable;
-			appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+			addWhiteIfValid(board, move, moves, fastSqLookup);
 		}
 	}
 
@@ -714,14 +737,14 @@ namespace
 				Move move = createRegularSilentMove(board, sq, toSq);
 				move.prohibitsBKcastling = castleKAvailable;
 				move.prohibitsBQcastling = castleQAvailable;
-				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				addBlackIfValid(board, move, moves, fastSqLookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
 				Move move = createBlackRegularCapturingMove(board, sq, toSq);
 				move.prohibitsBKcastling = castleKAvailable;
 				move.prohibitsBQcastling = castleQAvailable;
-				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				addBlackIfValid(board, move, moves, fastSqLookup);
 			}
 		}
 
@@ -735,7 +758,7 @@ namespace
 			Move move = createRegularSilentMove(board, sq, squares::g8);
 			move.prohibitsBKcastling = castleKAvailable;
 			move.prohibitsBQcastling = castleQAvailable;
-			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			addBlackIfValid(board, move, moves, fastSqLookup);
 		}
 
 		if (sq == squares::e8 && board.getPiece(squares::b8) == pieces::none &&
@@ -747,7 +770,7 @@ namespace
 			Move move = createRegularSilentMove(board, sq, squares::c8);
 			move.prohibitsBKcastling = castleKAvailable;
 			move.prohibitsBQcastling = castleQAvailable;
-			appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+			addBlackIfValid(board, move, moves, fastSqLookup);
 		}
 	}
 
@@ -770,7 +793,7 @@ namespace
 			}
 			else
 			{
-				appendIfNotInCheck(board, pieces::Color::WHITE, createRegularSilentMove(
+				addWhiteIfValid(board, createRegularSilentMove(
 					board, sq, singleAdvanceSq), moves, fastSqLookup);
 			}
 				
@@ -781,7 +804,7 @@ namespace
 			{
 				Move move = createRegularSilentMove(board, sq, doubleAdvanceSq);
 				move.enPassantCreatedSquare = singleAdvanceSq; // One square behind the pawn.
-				appendIfNotInCheck(board, pieces::Color::WHITE, move, moves, fastSqLookup);
+				addWhiteIfValid(board, move, moves, fastSqLookup);
 			}
 		}
 
@@ -797,14 +820,14 @@ namespace
 				}
 				else
 				{
-					appendIfNotInCheck(board, pieces::Color::WHITE,
+					addWhiteIfValid(board,
 						createWhiteRegularCapturingMove(board, sq, captureSq), moves, fastSqLookup);
 				}
 			}
 			else if (captureSq == board.getEnPassantSquare())
 			{
 				assert(board.getPiece(captureSq - 8) == pieces::bP);
-				appendIfNotInCheck(board, pieces::Color::WHITE, Move(pieces::wP, sq,
+				addWhiteIfValid(board, Move(pieces::wP, sq,
 					captureSq, captureSq, pieces::bP, captureSq - 8), moves, fastSqLookup);
 			}
 		}
@@ -829,7 +852,7 @@ namespace
 			}
 			else
 			{
-				appendIfNotInCheck(board, pieces::Color::BLACK, createRegularSilentMove(
+				addBlackIfValid(board, createRegularSilentMove(
 					board, sq, singleAdvanceSq), moves, fastSqLookup);
 			}
 
@@ -840,7 +863,7 @@ namespace
 			{
 				Move move = createRegularSilentMove(board, sq, doubleAdvanceSq);
 				move.enPassantCreatedSquare = singleAdvanceSq; // One square behind the pawn.
-				appendIfNotInCheck(board, pieces::Color::BLACK, move, moves, fastSqLookup);
+				addBlackIfValid(board, move, moves, fastSqLookup);
 			}
 		}
 
@@ -856,14 +879,14 @@ namespace
 				}
 				else
 				{
-					appendIfNotInCheck(board, pieces::Color::BLACK,
+					addBlackIfValid(board,
 						createBlackRegularCapturingMove(board, sq, captureSq), moves, fastSqLookup);
 				}
 			}
 			else if (captureSq == board.getEnPassantSquare())
 			{
 				assert(board.getPiece(captureSq + 8) == pieces::wP);
-				appendIfNotInCheck(board, pieces::Color::BLACK, Move(pieces::bP, sq, captureSq,
+				addBlackIfValid(board, Move(pieces::bP, sq, captureSq,
 					captureSq, pieces::wP, captureSq + 8), moves, fastSqLookup);
 			}
 		}
@@ -1032,10 +1055,10 @@ std::vector<Move> Engine::getLegalMoves(BoardState& board) const
 {
 	if (board.getTurn() == pieces::Color::WHITE)
 	{
-		return getLegalWhiteMoves(board, fastSqLookup);
+		return moveGenerationHelpers::getLegalWhiteMoves(board, fastSqLookup);
 	}
 	else
 	{
-		return getLegalBlackMoves(board, fastSqLookup);
+		return moveGenerationHelpers::getLegalBlackMoves(board, fastSqLookup);
 	}
 }
