@@ -70,6 +70,11 @@ public:
 		return blackPawnCaptureSquares;
 	}
 
+	bool areSquaresInLinearLineOfSight(Square sq1, Square sq2) const
+	{
+		return inlinearLineOfSight[sq1][sq2];
+	}
+
 private:
 	void init();
 
@@ -89,4 +94,6 @@ private:
 
 	std::array<std::vector<Square>, squares::num> whitePawnCaptureSquares;
 	std::array<std::vector<Square>, squares::num> blackPawnCaptureSquares;
+
+	std::array<std::array<bool, squares::num>, squares::num> inlinearLineOfSight;
 };

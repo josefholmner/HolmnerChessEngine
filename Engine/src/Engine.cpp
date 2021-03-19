@@ -14,7 +14,8 @@ namespace moveGenerationHelpers
 		Lookup(const FastSqLookup& fastSqLookup) : fSqL{fastSqLookup}{}
 
 		const FastSqLookup& fSqL;
-		Square movingSideKingPreMove;
+		Square movingSideKingPreMove = squares::none;
+		bool movingSideInCheckPreMove;
 	};
 
 
@@ -182,6 +183,19 @@ namespace moveGenerationHelpers
 		const BoardState boardPreMove = board;
 #endif
 
+		// Optimization: if the side whos turn it is was not in check before making the move, a
+		// move that involves moving a piece that is not in line with its own king prior to making
+		// the move cannot cause the moving side to move itself into check. This is true as long as
+		// the moving piece is not the king itself or if making an en passant capture. We use this
+		// fact here to not having to do the move, and then seeing if we are in check or not.
+		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, lookup.movingSideKingPreMove) &&
+			!lookup.movingSideInCheckPreMove && move.movingPiece != pieces::wK &&
+			move.toSquare != board.getEnPassantSquare())
+		{
+			moves.push_back(move);
+			return;
+		}
+
 		// Temporarily make the move, before looking if in check.
 		auto& pieces = board.getPieces();
 		pieces[move.fromSquare] = pieces::none;
@@ -211,7 +225,6 @@ namespace moveGenerationHelpers
 		{
 			moves.push_back(move);
 		}
-
 
 		// Undo temporary move.
 		pieces[move.toSquare] = pieces::none;
@@ -253,6 +266,19 @@ namespace moveGenerationHelpers
 #ifndef NDEBUG
 		const BoardState boardPreMove = board;
 #endif
+
+		// Optimization: if the side whos turn it is was not in check before making the move, a
+		// move that involves moving a piece that is not in line with its own king prior to making
+		// the move cannot cause the moving side to move itself into check. This is true as long as
+		// the moving piece is not the king itself or if making an en passant capture. We use this
+		// fact here to not having to do the move, and then seeing if we are in check or not.
+		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, lookup.movingSideKingPreMove) &&
+			!lookup.movingSideInCheckPreMove && move.movingPiece != pieces::bK &&
+			move.toSquare != board.getEnPassantSquare())
+		{
+			moves.push_back(move);
+			return;
+		}
 
 		// Temporarily make the move, before looking if in check.
 		auto& pieces = board.getPieces();
@@ -1008,8 +1034,9 @@ namespace moveGenerationHelpers
 		moves.reserve(probableMax);
 
 		Lookup lookup(fastSqLookup);
-		lookup.movingSideKingPreMove = findBlackKingSquare(board);
-		assert(board.getPiece(lookup.movingSideKingPreMove) == pieces::bK);
+		lookup.movingSideKingPreMove = findWhiteKingSquare(board);
+		lookup.movingSideInCheckPreMove = isWhiteInCheck(board, lookup);
+		assert(board.getPiece(lookup.movingSideKingPreMove) == pieces::wK);
 
 		for (Square sq = squares::a1; sq < squares::num; sq++)
 		{
@@ -1050,6 +1077,7 @@ namespace moveGenerationHelpers
 
 		Lookup lookup(fastSqLookup);
 		lookup.movingSideKingPreMove = findBlackKingSquare(board);
+		lookup.movingSideInCheckPreMove = isBlackInCheck(board, lookup);
 		assert(board.getPiece(lookup.movingSideKingPreMove) == pieces::bK);
 
 		for (Square sq = squares::a1; sq < squares::num; sq++)

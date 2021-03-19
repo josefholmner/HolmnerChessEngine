@@ -58,6 +58,16 @@ namespace
 
 		return reachableSqs;
 	}
+
+	bool contains(std::vector<Square> vec, Square sq)
+	{
+		if (std::find(vec.begin(), vec.end(), sq) != vec.end())
+		{
+			return true;
+		}
+
+		return false;
+	}
 }
 
 FastSqLookup::FastSqLookup() noexcept
@@ -87,11 +97,11 @@ void FastSqLookup::init()
 		std::vector<Square> straightTRmin;
 		std::vector<Square> straightTRmax;
 		std::vector<Square> straightTFmin;
-		std::vector<Square> straightTFmax;		
+		std::vector<Square> straightTFmax;
 		sweepSearch({ 0, -1, -8 }, sq, 0, straightTRmin);
 		sweepSearch({ 7, -1, 8 }, sq, 0, straightTRmax);
 		sweepSearch({ -1, 0, -1 }, sq, 0, straightTFmin);
-		sweepSearch({ -1, 7, 1 }, sq, 0, straightTFmax);		
+		sweepSearch({ -1, 7, 1 }, sq, 0, straightTFmax);
 		straightTowardsRankMin[sq] = straightTRmin;
 		straightTowardsRankMax[sq] = straightTRmax;
 		straightTowardsFileMin[sq] = straightTFmin;
@@ -106,7 +116,7 @@ void FastSqLookup::init()
 		}
 		if (diagTowardsH8[sq].size() > 0) {
 			kingNonCastlingReachableSquares[sq].push_back(diagTowardsH8[sq][0]);
-		}		
+		}
 		if (diagTowardsA1[sq].size() > 0) {
 			kingNonCastlingReachableSquares[sq].push_back(diagTowardsA1[sq][0]);
 		}
@@ -131,5 +141,19 @@ void FastSqLookup::init()
 		if (diagTowardsH8[sq].size() > 0) { whitePawnCaptureSquares[sq].push_back(diagTowardsH8[sq][0]); }
 		if (diagTowardsA1[sq].size() > 0) { blackPawnCaptureSquares[sq].push_back(diagTowardsA1[sq][0]); }
 		if (diagTowardsH1[sq].size() > 0) { blackPawnCaptureSquares[sq].push_back(diagTowardsH1[sq][0]); }
+
+		for (Square sightSq = squares::a1; sightSq < squares::num; sightSq++)
+		{
+			if (sq == sightSq) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(diagTowardsA8[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(diagTowardsH8[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(diagTowardsA1[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(diagTowardsH1[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(straightTowardsRankMin[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(straightTowardsRankMax[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(straightTowardsFileMin[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else if (contains(straightTowardsFileMax[sq], sightSq)) { inlinearLineOfSight[sq][sightSq] = true; }
+			else { inlinearLineOfSight[sq][sightSq] = false; }
+		}
 	}
 }
