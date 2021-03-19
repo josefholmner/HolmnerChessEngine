@@ -15,7 +15,7 @@ namespace moveGenerationHelpers
 
 		const FastSqLookup& fSqL;
 		Square movingSideKingPreMove = squares::none;
-		bool movingSideInCheckPreMove;
+		bool movingSideInCheckPreMove = true;
 	};
 
 
@@ -28,8 +28,8 @@ namespace moveGenerationHelpers
 			{
 				assert(EngineUtilities::isNonNonePiece(other));
 				return other;
+			}
 		}
-	}
 
 		return pieces::none;
 	}
@@ -154,29 +154,31 @@ namespace moveGenerationHelpers
 	{
 		if (board.getPiece(lookup.movingSideKingPreMove) == pieces::wK)
 		{	
+			// This is an optimization, the king position pre-move is a good guess of where the king
+			// will be after a move (true of course for all moves not involving the king itself).
+			// In that case we dont have to to the slow findWhiteKingSquare(board).
 			return isSquareReachableByBlack(board, lookup.movingSideKingPreMove, lookup);
 		}
 
-		Square kSq = findWhiteKingSquare(board);
-		assert(board.getPiece(kSq) == pieces::wK);
-		return isSquareReachableByBlack(board, kSq, lookup);
+		return isSquareReachableByBlack(board, findWhiteKingSquare(board), lookup);
 	}
 
 	bool isBlackInCheck(const BoardState& board, const Lookup& lookup)
 	{
 		if (board.getPiece(lookup.movingSideKingPreMove) == pieces::bK)
 		{
+			// This is an optimization, the king position pre-move is a good guess of where the king
+			// will be after a move (true of course for all moves not involving the king itself).
+			// In that case we dont have to to the slow findWhiteKingSquare(board).
 			return isSquareReachableByWhite(board, lookup.movingSideKingPreMove, lookup);
 		}
 
-		Square kSq = findBlackKingSquare(board);
-		assert(board.getPiece(kSq) == pieces::bK);
-		return isSquareReachableByWhite(board, kSq, lookup);
+		return isSquareReachableByWhite(board, findBlackKingSquare(board), lookup);
 	}
 
-	// Ensures that the moving side is not in check priot to adding the move.
-	void addWhiteIfValid(BoardState& board, const Move& move,
-		std::vector<Move>& moves, const Lookup& lookup)
+	// Ensures that the moving side is not in check prior to adding the move.
+	void addWhiteIfValid(BoardState& board, const Move& move, std::vector<Move>& moves,
+		const Lookup& lookup)
 	{
 		assert(board.getTurn() == pieces::Color::WHITE);
 #ifndef NDEBUG
@@ -258,7 +260,7 @@ namespace moveGenerationHelpers
 #endif
 	}
 
-	// Ensures that the moving side is not in check priot to adding the move.
+	// Ensures that the moving side is not in check prior to adding the move.
 	void addBlackIfValid(BoardState& board, const Move& move,
 		std::vector<Move>& moves, const Lookup& lookup)
 	{
@@ -346,48 +348,28 @@ namespace moveGenerationHelpers
 	{
 		assert(board.getPiece(captureSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::BLACK);
-		if (captureSquare == squares::a1 && board.getCastleAvailability().find('Q')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return captureSquare == squares::a1 && board.getCastleAvailability().find('Q')->second;
 	}
 
 	bool rookCaptureProhibitsWKcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::BLACK);
-		if (captureSquare == squares::h1 && board.getCastleAvailability().find('K')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return captureSquare == squares::h1 && board.getCastleAvailability().find('K')->second;
 	}
 
 	bool rookCaptureProhibitsBQcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::WHITE);
-		if (captureSquare == squares::a8 && board.getCastleAvailability().find('q')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return captureSquare == squares::a8 && board.getCastleAvailability().find('q')->second;
 	}
 
 	bool rookCaptureProhibitsBKcastling(const BoardState& board, Square captureSquare)
 	{
 		assert(board.getPiece(captureSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::WHITE);
-		if (captureSquare == squares::h8 && board.getCastleAvailability().find('k')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return captureSquare == squares::h8 && board.getCastleAvailability().find('k')->second;
 	}
 
 
@@ -533,13 +515,12 @@ namespace moveGenerationHelpers
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				addBlackIfValid(board,
-					createRegularSilentMove(board, sq, nextSq), moves, lookup);
+				addBlackIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
-				addBlackIfValid(board,
-					createBlackRegularCapturingMove(board, sq, nextSq), moves, lookup);
+				addBlackIfValid(board, createBlackRegularCapturingMove(board, sq, nextSq),
+					moves, lookup);
 			}
 		}
 	}
@@ -548,48 +529,28 @@ namespace moveGenerationHelpers
 	{
 		assert(board.getPiece(fromSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::WHITE);
-		if (fromSquare == squares::h1 && board.getCastleAvailability().find('K')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return fromSquare == squares::h1 && board.getCastleAvailability().find('K')->second;
 	}
 
 	bool rookMoveProhibitsWQCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::wR);
 		assert(board.getTurn() == pieces::Color::WHITE);
-		if (fromSquare == squares::a1 && board.getCastleAvailability().find('Q')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return fromSquare == squares::a1 && board.getCastleAvailability().find('Q')->second;
 	}
 
 	bool rookMoveProhibitsBKCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::BLACK);
-		if (fromSquare == squares::h8 && board.getCastleAvailability().find('k')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return fromSquare == squares::h8 && board.getCastleAvailability().find('k')->second;
 	}
 
 	bool rookMoveProhibitsBQCastling(const BoardState& board, Square fromSquare)
 	{
 		assert(board.getPiece(fromSquare) == pieces::bR);
 		assert(board.getTurn() == pieces::Color::BLACK);
-		if (fromSquare == squares::a8 && board.getCastleAvailability().find('q')->second)
-		{
-			return true;
-		}
-
-		return false;
+		return fromSquare == squares::a8 && board.getCastleAvailability().find('q')->second;
 	}
 
 	void addWhiteRookSweepMoves(BoardState& board, Square sq,
@@ -777,7 +738,6 @@ namespace moveGenerationHelpers
 	{
 		assert(board.getTurn() == pieces::Color::BLACK);
 		assert(board.getPiece(sq) == pieces::bK);
-
 		const bool castleKAvailable = board.getCastleAvailability().find('k')->second;
 		const bool castleQAvailable = board.getCastleAvailability().find('q')->second;
 
@@ -833,7 +793,6 @@ namespace moveGenerationHelpers
 		assert(board.getTurn() == pieces::Color::WHITE);
 		assert(board.getPiece(sq) == pieces::wP);
 		assert(ranks::toRank(sq) <= 6); // A pawn should never be at the last rank, ready to move.
-
 		const Rank rank = ranks::toRank(sq);
 
 		// Single pawn advance.
@@ -1004,10 +963,8 @@ namespace moveGenerationHelpers
 		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getDiagTowardsA1(), moves, lookup);
 		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsRankMin(), moves, lookup);
 		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsRankMax(), moves, lookup);
-		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMin(), moves,
-			lookup);
-		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMax(), moves,
-			lookup);
+		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMin(), moves, lookup);
+		addWhiteRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMax(), moves, lookup);
 	}
 
 	void addBlackQueenMoves(BoardState& board, Square sq, const Lookup& lookup,
@@ -1017,14 +974,10 @@ namespace moveGenerationHelpers
 		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getDiagTowardsA8(), moves, lookup);
 		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getDiagTowardsH1(), moves, lookup);
 		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getDiagTowardsA1(), moves, lookup);
-		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsRankMin(), moves,
-			lookup);
-		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsRankMax(), moves,
-			lookup);
-		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMin(), moves,
-			lookup);
-		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMax(), moves,
-			lookup);
+		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsRankMin(), moves, lookup);
+		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsRankMax(), moves, lookup);
+		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMin(), moves, lookup);
+		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMax(), moves, lookup);
 	}
 
 	std::vector<Move> getLegalWhiteMoves(BoardState& board, const FastSqLookup& fastSqLookup)

@@ -61,12 +61,7 @@ namespace
 
 	bool contains(std::vector<Square> vec, Square sq)
 	{
-		if (std::find(vec.begin(), vec.end(), sq) != vec.end())
-		{
-			return true;
-		}
-
-		return false;
+		return std::find(vec.begin(), vec.end(), sq) != vec.end();
 	}
 }
 

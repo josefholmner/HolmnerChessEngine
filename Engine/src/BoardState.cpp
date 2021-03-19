@@ -198,47 +198,6 @@ namespace
 		return castle;
 	}
 
-	void handleCastelingFlagsMakeMove(const Move& move, BoardState& board)
-	{
-		if (move.prohibitsWKcastling)
-		{
-			board.getCastleAvailability()['K'] = false;
-		}
-		if (move.prohibitsWQcastling)
-		{
-			board.getCastleAvailability()['Q'] = false;
-		}
-		if (move.prohibitsBKcastling)
-		{
-			board.getCastleAvailability()['k'] = false;
-		}
-		if (move.prohibitsBQcastling)
-		{
-			board.getCastleAvailability()['q'] = false;
-		}
-	}
-
-	void handleCastelingFlagsUnmakeMove(const Move& move, BoardState& board)
-	{
-		
-		if (move.prohibitsWKcastling)
-		{
-			board.getCastleAvailability()['K'] = true;
-		}
-		if (move.prohibitsWQcastling)
-		{
-			board.getCastleAvailability()['Q'] = true;
-		}
-		if (move.prohibitsBKcastling)
-		{
-			board.getCastleAvailability()['k'] = true;
-		}
-		if (move.prohibitsBQcastling)
-		{
-			board.getCastleAvailability()['q'] = true;
-		}
-	}
-
 	bool isEnPassantSqValid(const BoardState& board)
 	{
 		const Square eSq = board.getEnPassantSquare();
@@ -443,7 +402,11 @@ void BoardState::makeMove(const Move& move)
 {
 	using namespace pieces;
 
-	handleCastelingFlagsMakeMove(move, *this);
+	// Handle castling availability.
+	if (move.prohibitsWKcastling){ casleAvailability['K'] = false; }
+	if (move.prohibitsWQcastling){ casleAvailability['Q'] = false; }
+	if (move.prohibitsBKcastling){ casleAvailability['k'] = false; }
+	if (move.prohibitsBQcastling){ casleAvailability['q'] = false; }
 
 	// Must be set for all moves since any move will remove previous en passant square.
 	enPassantSquare = move.enPassantCreatedSquare;
@@ -471,7 +434,12 @@ void BoardState::unmakeMove(const Move& move)
 {
 	using namespace pieces;
 
-	handleCastelingFlagsUnmakeMove(move, *this);
+	// Handle castling availability.
+	if (move.prohibitsWKcastling) { casleAvailability['K'] = true; }
+	if (move.prohibitsWQcastling) { casleAvailability['Q'] = true; }
+	if (move.prohibitsBKcastling) { casleAvailability['k'] = true; }
+	if (move.prohibitsBQcastling) { casleAvailability['q'] = true; }
+
 	enPassantSquare = move.previousEnPassantSquare;
 
 	switch (move.movingPiece)
