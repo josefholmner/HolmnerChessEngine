@@ -1,6 +1,7 @@
 #include "PrivateInclude/FastSqLookup.h"
 
 #include <array>
+#include <algorithm>
 
 namespace
 {
