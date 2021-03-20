@@ -1077,7 +1077,7 @@ std::vector<Move> Engine::getLegalMoves(BoardState& board) const
 }
 
 
-namespace MoveCountHelpers
+namespace moveCountHelpers
 {
 	size_t countMovesRecursive(const Engine& engine, BoardState& board, int32_t depth)
 	{
@@ -1121,5 +1121,5 @@ std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t d
 		return {};
 	}
 
-	return MoveCountHelpers::countMovesRecursive(*this, board, depth);
+	return moveCountHelpers::countMovesRecursive(*this, board, depth);
 }
