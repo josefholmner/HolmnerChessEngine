@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 
 namespace
 {
@@ -200,6 +201,30 @@ namespace
 		return castle;
 	}
 
+	Square findWhiteKingSquare(const BoardState& board)
+	{
+		const auto& pieces = board.getPieces();
+		const auto itr = std::find(pieces.begin(), pieces.end(), pieces::wK);
+		if(itr == pieces.end())
+		{
+			return pieces::none;
+		}
+
+		return std::distance(pieces.begin(), itr);
+	}
+
+	Square findBlackKingSquare(const BoardState& board)
+	{
+		const auto& pieces = board.getPieces();
+		const auto itr = std::find(pieces.begin(), pieces.end(), pieces::bK);
+		if (itr == pieces.end())
+		{
+			return pieces::none;
+		}
+
+		return std::distance(pieces.begin(), itr);
+	}
+
 	bool isEnPassantSqValid(const BoardState& board)
 	{
 		const Square eSq = board.getEnPassantSquare();
@@ -324,6 +349,14 @@ namespace
 
 		return true;
 	}
+
+	bool isKingSquaresValid(const BoardState& board)
+	{
+		const Square wKsq = board.getWhiteKingSquare();
+		const Square bKsq = board.getBlackKingSquare();
+		return EngineUtilities::isNonNoneSquare(wKsq) && EngineUtilities::isNonNoneSquare(bKsq) &&
+			board.getPiece(wKsq) == pieces::wK && board.getPiece(bKsq) == pieces::bK;
+	}
 }
 
 bool BoardState::initFromFEN(const std::string& FEN)
@@ -376,6 +409,10 @@ bool BoardState::initFromFEN(const std::string& FEN)
 	{
 		return false;
 	}
+
+	// Set king squares.
+	wKingSq = findWhiteKingSquare(*this);
+	bKingSq = findBlackKingSquare(*this);
 
 	if (!isValid())
 	{
@@ -465,7 +502,8 @@ void BoardState::unmakeMove(const Move& move)
 
 bool BoardState::isValid() const
 {
-	return isPieceCountValid(*this) && isEnPassantSqValid(*this) && isCastlinAvailabilityValid(*this);
+	return isPieceCountValid(*this) && isEnPassantSqValid(*this) &&
+		isCastlinAvailabilityValid(*this) && isKingSquaresValid(*this);
 }
 
 void BoardState::makePawnMove(const Move& move)
@@ -495,6 +533,8 @@ void BoardState::makeKingMove(const Move& move)
 {
 	if (turn == pieces::Color::WHITE)
 	{
+		wKingSq = move.toSquare;
+
 		// Perform casteling (rook only).
 		if (move.fromSquare == squares::e1)
 		{
@@ -514,6 +554,8 @@ void BoardState::makeKingMove(const Move& move)
 	}
 	else
 	{
+		bKingSq = move.toSquare;
+
 		// Perform casteling (rook only).
 		if (move.fromSquare == squares::e8)
 		{
@@ -540,6 +582,8 @@ void BoardState::unmakeKingMove(const Move& move)
 	// At this point turn has switched sides, therefore the color check may seem wrong but is correct.
 	if (turn == pieces::Color::BLACK)
 	{
+		wKingSq = move.fromSquare;
+
 		// Unmake casteling (rook only).
 		if (move.fromSquare == squares::e1)
 		{
@@ -559,6 +603,8 @@ void BoardState::unmakeKingMove(const Move& move)
 	}
 	else
 	{
+		bKingSq = move.fromSquare;
+
 		// Unmake casteling (rook only).
 		if (move.fromSquare == squares::e8)
 		{

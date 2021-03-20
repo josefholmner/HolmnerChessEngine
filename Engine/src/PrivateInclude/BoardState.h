@@ -56,6 +56,26 @@ public:
 		return enPassantSquare;
 	}
 
+	Square getWhiteKingSquare() const
+	{
+		return wKingSq;
+	}
+
+	void setWhiteKingSquare(Square sq)
+	{
+		wKingSq = sq;
+	}
+
+	Square getBlackKingSquare() const
+	{
+		return bKingSq;
+	}
+
+	void setBlackKingSquare(Square sq)
+	{
+		bKingSq = sq;
+	}
+
 private:
 	void makePawnMove(const Move& move);
 	void unmakePawnMove(const Move& move);
@@ -71,4 +91,6 @@ private:
 	std::unordered_map<char, bool> casleAvailability;
 	pieces::Color turn;
 	Square enPassantSquare = squares::none;
+	Square wKingSq = squares::none;
+	Square bKingSq = squares::none;
 };

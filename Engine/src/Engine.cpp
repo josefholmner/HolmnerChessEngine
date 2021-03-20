@@ -3,7 +3,6 @@
 #include "PrivateInclude/Move.h"
 #include "PrivateInclude/EngineUtilities.h"
 
-#include <algorithm>
 #include <cassert>
 
 namespace moveGenerationHelpers
@@ -13,7 +12,6 @@ namespace moveGenerationHelpers
 		Lookup(const FastSqLookup& fastSqLookup) : fSqL{fastSqLookup}{}
 
 		const FastSqLookup& fSqL;
-		Square movingSideKingPreMove = squares::none;
 		bool movingSideInCheckPreMove = true;
 	};
 
@@ -133,46 +131,16 @@ namespace moveGenerationHelpers
 		return false;
 	}
 
-	Square findWhiteKingSquare(const BoardState& board)
-	{
-		const auto& pieces = board.getPieces();
-		const auto itr = std::find(pieces.begin(), pieces.end(), pieces::wK);
-		assert(itr != pieces.end()); // A king must be present on the board.
-		return std::distance(pieces.begin(), itr);
-	}
-
-	Square findBlackKingSquare(const BoardState& board)
-	{
-		const auto& pieces = board.getPieces();
-		const auto itr = std::find(pieces.begin(), pieces.end(), pieces::bK);
-		assert(itr != pieces.end()); // A king must be present on the board.
-		return std::distance(pieces.begin(), itr);
-	}
-
 	bool isWhiteInCheck(const BoardState& board, const Lookup& lookup)
 	{
-		if (board.getPiece(lookup.movingSideKingPreMove) == pieces::wK)
-		{	
-			// This is an optimization, the king position pre-move is a good guess of where the king
-			// will be after a move (true of course for all moves not involving the king itself).
-			// In that case we dont have to to the slow findWhiteKingSquare(board).
-			return isSquareReachableByBlack(board, lookup.movingSideKingPreMove, lookup);
-		}
-
-		return isSquareReachableByBlack(board, findWhiteKingSquare(board), lookup);
+		assert(board.getPiece(board.getWhiteKingSquare()) == pieces::wK);
+		return isSquareReachableByBlack(board, board.getWhiteKingSquare(), lookup);
 	}
 
 	bool isBlackInCheck(const BoardState& board, const Lookup& lookup)
 	{
-		if (board.getPiece(lookup.movingSideKingPreMove) == pieces::bK)
-		{
-			// This is an optimization, the king position pre-move is a good guess of where the king
-			// will be after a move (true of course for all moves not involving the king itself).
-			// In that case we dont have to to the slow findWhiteKingSquare(board).
-			return isSquareReachableByWhite(board, lookup.movingSideKingPreMove, lookup);
-		}
-
-		return isSquareReachableByWhite(board, findBlackKingSquare(board), lookup);
+		assert(board.getPiece(board.getBlackKingSquare()) == pieces::bK);
+		return isSquareReachableByWhite(board, board.getBlackKingSquare(), lookup);
 	}
 
 	// Ensures that the moving side is not in check prior to adding the move.
@@ -189,7 +157,7 @@ namespace moveGenerationHelpers
 		// the move cannot cause the moving side to move itself into check. This is true as long as
 		// the moving piece is not the king itself or if making an en passant capture. We use this
 		// fact here to not having to do the move, and then seeing if we are in check or not.
-		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, lookup.movingSideKingPreMove) &&
+		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, board.getWhiteKingSquare()) &&
 			!lookup.movingSideInCheckPreMove && move.movingPiece != pieces::wK &&
 			move.toSquare != board.getEnPassantSquare())
 		{
@@ -207,18 +175,22 @@ namespace moveGenerationHelpers
 
 		pieces[move.toSquare] = move.movingPiece;
 
-		// Handle rook move if casteling.
-		if (move.movingPiece == pieces::wK && move.fromSquare == squares::e1)
+		// Handle rook move if casteling and set king square.
+		if (move.movingPiece == pieces::wK)
 		{
-			if (move.toSquare == squares::g1)
+			board.setWhiteKingSquare(move.toSquare);
+			if (move.fromSquare == squares::e1)
 			{
-				pieces[squares::h1] = pieces::none;
-				pieces[squares::f1] = pieces::wR;
-			}
-			else if (move.toSquare == squares::c1)
-			{
-				pieces[squares::a1] = pieces::none;
-				pieces[squares::d1] = pieces::wR;
+				if (move.toSquare == squares::g1)
+				{
+					pieces[squares::h1] = pieces::none;
+					pieces[squares::f1] = pieces::wR;
+				}
+				else if (move.toSquare == squares::c1)
+				{
+					pieces[squares::a1] = pieces::none;
+					pieces[squares::d1] = pieces::wR;
+				}
 			}
 		}
 
@@ -237,17 +209,21 @@ namespace moveGenerationHelpers
 		pieces[move.fromSquare] = move.movingPiece;
 
 		// Undo rook move when casteling if this was a casteling move.
-		if (move.movingPiece == pieces::wK && move.fromSquare == squares::e1)
+		if (move.movingPiece == pieces::wK)
 		{
-			if (move.toSquare == squares::g1)
+			board.setWhiteKingSquare(move.fromSquare);
+			if (move.fromSquare == squares::e1)
 			{
-				pieces[squares::h1] = pieces::wR;
-				pieces[squares::f1] = pieces::none;
-			}
-			else if (move.toSquare == squares::c1)
-			{
-				pieces[squares::a1] = pieces::wR;
-				pieces[squares::d1] = pieces::none;
+				if (move.toSquare == squares::g1)
+				{
+					pieces[squares::h1] = pieces::wR;
+					pieces[squares::f1] = pieces::none;
+				}
+				else if (move.toSquare == squares::c1)
+				{
+					pieces[squares::a1] = pieces::wR;
+					pieces[squares::d1] = pieces::none;
+				}
 			}
 		}
 
@@ -273,7 +249,7 @@ namespace moveGenerationHelpers
 		// the move cannot cause the moving side to move itself into check. This is true as long as
 		// the moving piece is not the king itself or if making an en passant capture. We use this
 		// fact here to not having to do the move, and then seeing if we are in check or not.
-		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, lookup.movingSideKingPreMove) &&
+		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, board.getBlackKingSquare()) &&
 			!lookup.movingSideInCheckPreMove && move.movingPiece != pieces::bK &&
 			move.toSquare != board.getEnPassantSquare())
 		{
@@ -292,17 +268,21 @@ namespace moveGenerationHelpers
 		pieces[move.toSquare] = move.movingPiece;
 
 		// Handle rook move if casteling.
-		if (move.movingPiece == pieces::bK && move.fromSquare == squares::e8)
+		if (move.movingPiece == pieces::bK)
 		{
-			if (move.toSquare == squares::g8)
+			board.setBlackKingSquare(move.toSquare);
+			if (move.fromSquare == squares::e8)
 			{
-				pieces[squares::h8] = pieces::none;
-				pieces[squares::f8] = pieces::bR;
-			}
-			else if (move.toSquare == squares::c8)
-			{
-				pieces[squares::a8] = pieces::none;
-				pieces[squares::d8] = pieces::bR;
+				if (move.toSquare == squares::g8)
+				{
+					pieces[squares::h8] = pieces::none;
+					pieces[squares::f8] = pieces::bR;
+				}
+				else if (move.toSquare == squares::c8)
+				{
+					pieces[squares::a8] = pieces::none;
+					pieces[squares::d8] = pieces::bR;
+				}
 			}
 		}
 
@@ -321,17 +301,21 @@ namespace moveGenerationHelpers
 		pieces[move.fromSquare] = move.movingPiece;
 
 		// Undo rook move when casteling if this was a casteling move.
-		if (move.movingPiece == pieces::bK && move.fromSquare == squares::e8)
+		if (move.movingPiece == pieces::bK)
 		{
-			if (move.toSquare == squares::g8)
+			board.setBlackKingSquare(move.fromSquare);
+			if (move.fromSquare == squares::e8)
 			{
-				pieces[squares::h8] = pieces::bR;
-				pieces[squares::f8] = pieces::none;
-			}
-			else if (move.toSquare == squares::c8)
-			{
-				pieces[squares::a8] = pieces::bR;
-				pieces[squares::d8] = pieces::none;
+				if (move.toSquare == squares::g8)
+				{
+					pieces[squares::h8] = pieces::bR;
+					pieces[squares::f8] = pieces::none;
+				}
+				else if (move.toSquare == squares::c8)
+				{
+					pieces[squares::a8] = pieces::bR;
+					pieces[squares::d8] = pieces::none;
+				}
 			}
 		}
 
@@ -986,9 +970,7 @@ namespace moveGenerationHelpers
 		moves.reserve(probableMax);
 
 		Lookup lookup(fastSqLookup);
-		lookup.movingSideKingPreMove = findWhiteKingSquare(board);
 		lookup.movingSideInCheckPreMove = isWhiteInCheck(board, lookup);
-		assert(board.getPiece(lookup.movingSideKingPreMove) == pieces::wK);
 
 		for (Square sq = squares::a1; sq < squares::num; sq++)
 		{
@@ -1028,9 +1010,7 @@ namespace moveGenerationHelpers
 		moves.reserve(probableMax);
 
 		Lookup lookup(fastSqLookup);
-		lookup.movingSideKingPreMove = findBlackKingSquare(board);
 		lookup.movingSideInCheckPreMove = isBlackInCheck(board, lookup);
-		assert(board.getPiece(lookup.movingSideKingPreMove) == pieces::bK);
 
 		for (Square sq = squares::a1; sq < squares::num; sq++)
 		{
@@ -1113,13 +1093,17 @@ namespace moveCountHelpers
 
 std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t depth) const
 {
-	assert(engine != nullptr);
-
 	BoardState board;
 	if (!board.initFromFEN(FEN))
 	{
 		return {};
 	}
+
+	/*board.initFromFEN("rnbqkbnr/ppppppp1/6p1/8/6P1/6P1/PPPPPPR1/RNBQKBN1 w Qkq - 0 1");
+	int32_t score = boardEvaluator.getScore(board, fastSqLookup);
+	board.printBoard();
+	EngineUtilities::log("Score: " + std::to_string(score));*/
+
 
 	return moveCountHelpers::countMovesRecursive(*this, board, depth);
 }
