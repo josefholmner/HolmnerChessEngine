@@ -3,12 +3,11 @@
 #include "PiecesAndSquares.h"
 
 #include <string>
-#include <vector>
 #include <array>
 #include <unordered_map>
 #include <optional>
-#include <cassert>
-#include "Move.h"
+
+struct Move;
 
 class BoardState
 {

@@ -8,7 +8,7 @@
 /**
 * The FastSqLookup enables fast lookup of e.g. squares that are on the same diagonal or same
 * rank/file (among other things) as some specific square. Note that the construction of this
-* object is slow, but once it has been constructed the lookup's are very fast. This means that
+* object is slow, but once it has been constructed the lookups are very fast. This means that
 * instances of this class should be kept and stored somewhere for repeated use if possible.
 */
 class FastSqLookup

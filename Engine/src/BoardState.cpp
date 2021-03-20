@@ -1,9 +1,11 @@
 #include "PrivateInclude/BoardState.h"
 
 #include "PrivateInclude/EngineUtilities.h"
+#include "PrivateInclude/Move.h"
 #include "Common/CommonUtilities.h"
 
 #include <iostream>
+#include <cassert>
 
 namespace
 {
