@@ -29,6 +29,6 @@ SFML (version 2.51 recommended) (**sudo apt-get install libsfml-dev**)
 1. Start a command prompt in /HolmnerChessEngine
 2. mkdir build
 3. cd build
-4. cmake ..
+4. cmake -DCMAKE_BUILD_TYPE=Release ..
 5. make
 6. Executable will be located in HolmnerChessGui/ after build.
