@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FastSqLookup.h"
+#include "BoardEvaluator.h"
 #include "BoardState.h"
 
 #include <vector>
@@ -17,4 +18,5 @@ public:
 
 private:
 	FastSqLookup fastSqLookup;
+	BoardEvaluator boardEvaluator;
 };

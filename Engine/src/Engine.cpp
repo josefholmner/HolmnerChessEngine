@@ -1099,11 +1099,5 @@ std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t d
 		return {};
 	}
 
-	/*board.initFromFEN("rnbqkbnr/ppppppp1/6p1/8/6P1/6P1/PPPPPPR1/RNBQKBN1 w Qkq - 0 1");
-	int32_t score = boardEvaluator.getScore(board, fastSqLookup);
-	board.printBoard();
-	EngineUtilities::log("Score: " + std::to_string(score));*/
-
-
 	return moveCountHelpers::countMovesRecursive(*this, board, depth);
 }
