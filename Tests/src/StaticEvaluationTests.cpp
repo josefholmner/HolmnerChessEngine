@@ -286,6 +286,18 @@ namespace
 			return false;
 		}
 
+		const std::string wKingEndGCentered = "1k6/8/8/5p2/5P2/3K4/8/8 w - - 0 1";
+		if (!test(engine, wKingEndGCentered, hceEngine::StaticEvaluationResult::WhiteBetter))
+		{
+			return false;
+		}
+
+		const std::string bKingEndGCentered = "8/8/4k3/5p2/5P2/8/8/K7 w - - 0 1";
+		if (!test(engine, bKingEndGCentered, hceEngine::StaticEvaluationResult::BlackBetter))
+		{
+			return false;
+		}
+
 		return true;
 	}
 }
