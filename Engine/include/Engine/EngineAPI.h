@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineAPIReturnDefinitions.h"
+
 #include <string>
 #include <optional>
 #include <memory>
@@ -14,7 +16,25 @@ namespace hceEngine
         EngineAPI();
         ~EngineAPI();
 
+        /**
+        * Given a FEN, returns the numbe of legal moves down to a certain depth.
+        * For large depths, this function may take a long time to return since the number of moves
+        * grows exponentially with the depth.
+        */
         std::optional<size_t> getNumLegalMoves(const std::string& FEN, int32_t depth) const;
+
+        /**
+        * Uses the engines internal static board evaluation function to determine the better side.
+        * 
+        * Important note: the static evaluation functions does NOT consider any "dynamic" aspect
+        * of a given position, e.g. whos turn it is, king checks, castle availability etc.
+        * It only uses simple heuristics about the position such as which pieces are on the board
+        * and their positions, king protection, major piece square coverage and similar things to
+        * evaluate the given position. This is mostly for internal use and should not be used as a
+        * substitute for actual deep analysis. This can be thought of as analysing the board with
+        * a depth of zero.
+        */
+        StaticEvaluationResult evaluateStatic(const std::string& FEN) const;
 
     private:
         std::unique_ptr<Engine> engine;

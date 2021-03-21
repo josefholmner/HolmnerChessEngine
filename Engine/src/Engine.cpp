@@ -1101,3 +1101,20 @@ std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t d
 
 	return moveCountHelpers::countMovesRecursive(*this, board, depth);
 }
+
+hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN) const
+{
+	BoardState board;
+	if (!board.initFromFEN(FEN))
+	{
+		EngineUtilities::logE("evaluateStatic failed, invalid FEN.");
+		return hceEngine::StaticEvaluationResult::Invalid;
+	}
+
+	const int32_t score = boardEvaluator.getScore(board, fastSqLookup);
+
+	if (score > 0) { return hceEngine::StaticEvaluationResult::WhiteBetter; }
+	if (score < 0) { return hceEngine::StaticEvaluationResult::BlackBetter; }
+
+	return hceEngine::StaticEvaluationResult::Equal;
+}

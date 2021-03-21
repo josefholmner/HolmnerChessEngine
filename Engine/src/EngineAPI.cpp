@@ -21,3 +21,9 @@ std::optional<size_t> hceEngine::EngineAPI::getNumLegalMoves(
     assert(engine != nullptr);
     return engine->getNumLegalMoves(FEN, depth);
 }
+
+hceEngine::StaticEvaluationResult hceEngine::EngineAPI::evaluateStatic(const std::string& FEN) const
+{
+    assert(engine != nullptr);
+    return engine->evaluateStatic(FEN);
+}
