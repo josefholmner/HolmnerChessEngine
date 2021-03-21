@@ -210,7 +210,7 @@ void FENTests::Run()
 	}
 
 	int32_t mills = stopWatch.getMilliseconds();
-	TestsUtilities::log("FEN Tests finished successfully. Generated: " + std::to_string(numMovesSum)
+	TestsUtilities::log("All FEN Tests finished successfully. Generated: " + std::to_string(numMovesSum)
 		+ " moves in: " + std::to_string(mills) + " ms, or: " +
 		std::to_string((numMovesSum / mills) * 1000) + " moves per second.");
 }
