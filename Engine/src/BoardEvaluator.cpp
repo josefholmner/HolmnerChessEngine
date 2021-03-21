@@ -32,7 +32,7 @@ namespace scoringConstants
 
 namespace
 {
-	int32_t getRankScore(Rank rank)
+	int32_t getRankScoreRewardCenter(Rank rank)
 	{
 		using namespace scoringConstants;
 		switch (rank)
@@ -53,6 +53,18 @@ namespace
 			EngineUtilities::logE("BoardEvaluator: invalid rank passed to getRankScore().");
 			return 0;
 		}
+	}
+
+	int32_t getRankScoreRewardTowardsRankMax(Rank rank)
+	{
+		using namespace scoringConstants;
+		return rankScoreMin + rank * rankScoreJump;
+	}
+
+	int32_t getRankScoreRewardTowardsRankMin(Rank rank)
+	{
+		using namespace scoringConstants;
+		return rankScoreMin + (7 - rank) * rankScoreJump;
 	}
 
 	int32_t getFileScore(File file)
@@ -309,21 +321,23 @@ void BoardEvaluator::init()
 
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
-		const int32_t rankBonus = getRankScore(ranks::toRank(sq));
+		const int32_t rankBonusRewardCenter = getRankScoreRewardCenter(ranks::toRank(sq));
+		const int32_t rankBonusRewardRankMax = getRankScoreRewardTowardsRankMax(ranks::toRank(sq));
+		const int32_t rankBonusRewardRankMin = getRankScoreRewardTowardsRankMin(ranks::toRank(sq));
 		const int32_t fileBonus = getFileScore(files::toFile(sq));
 
-		wKingEndgameStaticScores[sq] = rankBonus + fileBonus;
-		bKingEndgameStaticScores[sq] = -rankBonus - fileBonus;
+		wKingEndgameStaticScores[sq] = rankBonusRewardCenter + fileBonus;
+		bKingEndgameStaticScores[sq] = -rankBonusRewardCenter - fileBonus;
 		wQueenStaticScores[sq] = qBaseVal;
 		bQueenStaticScores[sq] = -qBaseVal;
 		wRookStaticScores[sq] = rBaseVal;
 		bRookStaticScores[sq] = -rBaseVal;
 		wBishopStaticScores[sq] = bBaseVal;
 		bBishopStaticScores[sq] = -bBaseVal;
-		wKnightStaticScores[sq] = nBaseVal + rankBonus + fileBonus;
-		bKnightStaticScores[sq] = -nBaseVal - rankBonus - fileBonus;
-		wPawnStaticScores[sq] = pBaseVal + rankBonus + fileBonus;
-		bPawnStaticScores[sq] = -pBaseVal - rankBonus - fileBonus;
+		wKnightStaticScores[sq] = nBaseVal + rankBonusRewardCenter + fileBonus;
+		bKnightStaticScores[sq] = -nBaseVal - rankBonusRewardCenter - fileBonus;
+		wPawnStaticScores[sq] = pBaseVal + rankBonusRewardRankMax + fileBonus;
+		bPawnStaticScores[sq] = -pBaseVal - rankBonusRewardRankMin - fileBonus;
 	}
 }
 
