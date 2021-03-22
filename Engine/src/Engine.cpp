@@ -1124,7 +1124,11 @@ namespace moveCountHelpers
 
 std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t depth) const
 {
-	// TODO: add depth check (only positive values), print error.
+	if (depth <= 0)
+	{
+		EngineUtilities::logE("getNumLegalMoves failed, depth must be at least 1.");
+		return {};
+	}
 
 	BoardState board;
 	if (!board.initFromFEN(FEN))
@@ -1161,7 +1165,11 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 
 hceEngine::BestMove Engine::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
 {
-	// TODO: add depth check (only positive values), print error.
+	if (depth <= 0)
+	{
+		EngineUtilities::logE("getBestMoveMiniMax failed, depth must be at least 1.");
+		return hceEngine::BestMove(); // TODO: add invalid flag to the BestMove.
+	}
 
 	BoardState board;
 	if (!board.initFromFEN(FEN))
