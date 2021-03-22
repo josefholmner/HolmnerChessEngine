@@ -20,10 +20,13 @@ public:
 
 	hceEngine::StaticEvaluationResult evaluateStatic(const std::string& FEN) const;
 
-	hceEngine::BestMove getBestMoveMiniMax(const std::string& FEN, int32_t depth) const;
+	hceEngine::ChessMove getBestMove(const std::string& FEN, int32_t depth) const;
+
+	hceEngine::ChessMove getBestMoveMiniMax(const std::string& FEN, int32_t depth) const;
 
 private:
 	int32_t negaMax(BoardState& board, int32_t depth) const;
+	int32_t alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_t depth) const;
 
 	FastSqLookup fastSqLookup;
 	BoardEvaluator boardEvaluator;

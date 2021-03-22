@@ -10,7 +10,7 @@ namespace hceEngine
 		Equal
 	};
 
-	struct BestMove
+	struct ChessMove
 	{
 
 	};
