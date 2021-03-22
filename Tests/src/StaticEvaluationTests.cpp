@@ -149,7 +149,7 @@ namespace
 			return false;
 		}
 
-		const std::string wKingprotected1 = "rnbq1rk1/pppp2p1/4pp1p/8/8/4P2P/PPPP1PP1/RNBQ1RK1 w - - 0 1";
+		const std::string wKingprotected1 = "rnbq1rk1/pppp1p2/4p1pp/8/8/4P2P/PPPP1PP1/RNBQ1RK1 w - - 0 1";
 		if (!test(engine, wKingprotected1, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
@@ -214,7 +214,7 @@ namespace
 			return false;
 		}
 
-		const std::string bPawnFurtherAdvanced = "7k/8/8/8/8/2P4p/8/K7 w - - 0 1";
+		const std::string bPawnFurtherAdvanced = "7k/8/8/8/P7/7p/8/K7 w - - 0 1";
 		if (!test(engine, bPawnFurtherAdvanced, hceEngine::StaticEvaluationResult::BlackBetter))
 		{
 			return false;
@@ -298,7 +298,7 @@ namespace
 			return false;
 		}
 
-		const std::string wPawnCentered = "rnbqkbnr/1ppppppp/8/p7/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
+		const std::string wPawnCentered = "rnb1k1nr/pp1ppp1p/2p5/6p1/4P3/2P5/PP1P1PPP/RNB1K1NR w KQkq - 0 1";
 		if (!test(engine, wPawnCentered, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
