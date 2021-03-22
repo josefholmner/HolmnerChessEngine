@@ -26,6 +26,9 @@ namespace scoringConstants
 	static constexpr int32_t pawnProtectingKing1RankAwayVal = 9;
 	static constexpr int32_t pawnProtectingKing2RanksAwayVal = 4;
 
+	static constexpr int32_t pawnAtCenterAdditionalVal = 4;
+	static constexpr int32_t pawnAtEdgeOfCenterAdditionalVal = 2;
+
 	//static constexpr int32_t rookCoverValPerSquare = 1;
 	//static constexpr int32_t bishopCoverValPerSquare = 1;
 }
@@ -346,6 +349,22 @@ void BoardEvaluator::init()
 		bKnightStaticScores[sq] = -nBaseVal - rankBonusRewardCenter - fileBonus;
 		wPawnStaticScores[sq] = pBaseVal + rankBonusRewardRankMax + fileBonus;
 		bPawnStaticScores[sq] = -pBaseVal - rankBonusRewardRankMin - fileBonus;
+	}
+
+	// Give extra scores for pawns at or around the center.
+	{
+		using namespace squares;
+		for (const Square sq : {d4, d5, e4, e5})
+		{
+			wPawnStaticScores[sq] += pawnAtCenterAdditionalVal;
+			bPawnStaticScores[sq] -= pawnAtCenterAdditionalVal;
+		}
+
+		for (const Square sq : {c3, c4, c5, c6, d3, d6, e3, e6, f3, f4, f5, f6})
+		{
+			wPawnStaticScores[sq] += pawnAtEdgeOfCenterAdditionalVal;
+			bPawnStaticScores[sq] -= pawnAtEdgeOfCenterAdditionalVal;
+		}
 	}
 }
 
