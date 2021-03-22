@@ -9,4 +9,9 @@ namespace hceEngine
 		BlackBetter,
 		Equal
 	};
+
+	struct BestMove
+	{
+
+	};
 }

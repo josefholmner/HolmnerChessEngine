@@ -4,6 +4,7 @@
 #include "PrivateInclude/EngineUtilities.h"
 
 #include <cassert>
+#include <limits>
 
 namespace moveGenerationHelpers
 {
@@ -1093,6 +1094,8 @@ namespace moveCountHelpers
 
 std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t depth) const
 {
+	// TODO: add depth check (only positive values), print error.
+
 	BoardState board;
 	if (!board.initFromFEN(FEN))
 	{
@@ -1112,9 +1115,68 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 	}
 
 	const int32_t score = boardEvaluator.getScore(board, fastSqLookup);
-
-	if (score > 0) { return hceEngine::StaticEvaluationResult::WhiteBetter; }
-	if (score < 0) { return hceEngine::StaticEvaluationResult::BlackBetter; }
+	if (board.getTurn() == pieces::Color::WHITE)
+	{
+		if (score < 0) { return hceEngine::StaticEvaluationResult::BlackBetter; }
+		else if (score > 0) { return hceEngine::StaticEvaluationResult::WhiteBetter; }
+	}
+	else
+	{
+		if (score < 0) { return hceEngine::StaticEvaluationResult::BlackBetter; }
+		else if (score > 0) { return hceEngine::StaticEvaluationResult::WhiteBetter; }
+	}
 
 	return hceEngine::StaticEvaluationResult::Equal;
+}
+
+hceEngine::BestMove Engine::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
+{
+	// TODO: add depth check (only positive values), print error.
+
+	BoardState board;
+	if (!board.initFromFEN(FEN))
+	{
+		EngineUtilities::logE("getBestMoveMiniMax failed, invalid FEN.");
+		return hceEngine::BestMove(); // TODO: add invalid flag to the BestMove.
+	}
+
+	Move bestMove;
+	int32_t bestScore = std::numeric_limits<int32_t>::min();
+	for (const Move& m : getLegalMoves(board))
+	{
+		board.makeMove(m);
+		int32_t score = -negaMax(board, depth - 1);
+		if (score > bestScore)
+		{
+			bestScore = score;
+			bestMove = m;
+		}
+
+		board.unmakeMove(m);
+	}
+
+	return hceEngine::BestMove(); // TODO fill with data.
+}
+
+int32_t Engine::negaMax(BoardState& board, int32_t depth) const
+{
+	if (depth <= 0)
+	{
+		return boardEvaluator.getScore(board, fastSqLookup);
+	}
+
+	int32_t bestScore = std::numeric_limits<int32_t>::min();
+	for (const Move& move : getLegalMoves(board))
+	{
+		board.makeMove(move);
+		int32_t score = -negaMax(board, depth - 1);
+		if (score > bestScore)
+		{
+			bestScore = score;
+		}
+
+		board.unmakeMove(move);
+	}
+
+	return bestScore;
 }

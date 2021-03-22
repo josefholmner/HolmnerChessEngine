@@ -8,6 +8,8 @@
 class Move
 {
 public:
+	Move() = default;
+
 	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Square inPreviousEnPassantSq) noexcept :
 		movingPiece{ inMovingPiece },
 		fromSquare{ inFromSquare },

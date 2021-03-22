@@ -312,7 +312,10 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 		score += getBlackBishopSquareCoverScore(board, lookup, s, numWhiteMajorPieces);
 	}
 
-	return score;
+
+	// Negate the score for black, so that a high score is always "good" for both sides.
+	// This makes negaMax style recursive functions possible.
+	return board.getTurn() == pieces::Color::WHITE ? score : -score;
 }
 
 void BoardEvaluator::init()

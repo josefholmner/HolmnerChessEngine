@@ -24,6 +24,11 @@ namespace hceEngine
         std::optional<size_t> getNumLegalMoves(const std::string& FEN, int32_t depth) const;
 
         /**
+        * Uses the simplest (and slow) minimax algorithm to find the best move given a FEN.
+        */
+        BestMove getBestMoveMiniMax(const std::string& FEN, int32_t depth) const;
+
+        /**
         * Uses the engines internal static board evaluation function to determine the better side.
         * 
         * Important note: the static evaluation functions does NOT consider any "dynamic" aspect
