@@ -161,19 +161,8 @@ namespace testHelpers
 	};
 }
 
-void printReleaseOrDebug()
-{
-#ifdef NDEBUG
-	TestsUtilities::log("FEN tests are running in a 'Release' build.");
-#else
-	TestsUtilities::log("FEN tests are running in a 'Debug' build.");
-#endif
-
-}
-
 void FENTests::Run()
 {
-	printReleaseOrDebug();
 	size_t numMovesSum = 0;
 	hceEngine::EngineAPI engine;
 	hceCommon::Stopwatch stopWatch;

@@ -298,6 +298,12 @@ namespace
 			return false;
 		}
 
+		const std::string wPawnCentered = "rnbqkbnr/1ppppppp/8/p7/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
+		if (!test(engine, wPawnCentered, hceEngine::StaticEvaluationResult::WhiteBetter))
+		{
+			return false;
+		}
+
 		return true;
 	}
 }
