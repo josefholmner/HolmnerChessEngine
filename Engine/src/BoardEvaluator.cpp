@@ -227,14 +227,15 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 	int32_t numWhiteMajorPieces = 0;
 	int32_t numBlackMajorPieces = 0;
 
-	std::vector<Square> wRooks;
-	std::vector<Square> bRooks;
-	std::vector<Square> wBishops;
-	std::vector<Square> bBishops;
-	wRooks.reserve(10); // Theoretical max number of rooks.
-	bRooks.reserve(10); // Theoretical max number of rooks.
-	wBishops.reserve(10); // Theoretical max number of bishops.
-	bBishops.reserve(10); // Theoretical max number of bishops.
+	// Theoretical max number of rooks or bishops is 10.
+	static std::array<Square, 10> wRooks;
+	static std::array<Square, 10> bRooks;
+	static std::array<Square, 10> wBishops;
+	static std::array<Square, 10> bBishops;
+	int32_t wRookCnt = 0;
+	int32_t bRookCnt = 0;
+	int32_t wBishopCnt = 0;
+	int32_t bBishopCnt = 0;
 	
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
@@ -251,13 +252,13 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 				score += wKnightStaticScores[sq];
 				break;
 			case pieces::wB:
-				wBishops.push_back(sq);
+				wBishops[wBishopCnt++] = sq;
 				numWhiteMajorPieces++;
 				score += wBishopStaticScores[sq];
 				break;
 			case pieces::wR:
 				numWhiteMajorPieces++;
-				wRooks.push_back(sq);
+				wRooks[wRookCnt++] = sq;
 				score += wRookStaticScores[sq];
 				break;
 			case pieces::wQ:
@@ -275,12 +276,12 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 				score += bKnightStaticScores[sq];
 				break;
 			case pieces::bB:
-				bBishops.push_back(sq);
+				bBishops[bBishopCnt++] = sq;
 				numBlackMajorPieces++;
 				score += bBishopStaticScores[sq];
 				break;
 			case pieces::bR:
-				bRooks.push_back(sq);
+				bRooks[bRookCnt++] = sq;
 				numBlackMajorPieces++;
 				score += bRookStaticScores[sq];
 				break;
@@ -299,17 +300,21 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 	score += getBlackKingScore(board, numWhiteMajorPieces);
 
 	// Give score for rook and bishop square coverage.
-	for (const Square s : wRooks) {
-		score += getWhiteRookSquareCoverScore(board, lookup, s, numBlackMajorPieces);
+	for (int32_t i = 0; i < wRookCnt; i++) {
+		score += getWhiteRookSquareCoverScore(
+			board, lookup, wRooks[i], numBlackMajorPieces);
 	}
-	for (const Square s : bRooks) {
-		score += getBlackRookSquareCoverScore(board, lookup, s, numWhiteMajorPieces);
+	for (int32_t i = 0; i < bRookCnt; i++) {
+		score += getBlackRookSquareCoverScore(
+			board, lookup, bRooks[i], numWhiteMajorPieces);
 	}
-	for (const Square s : wBishops) {
-		score += getWhiteBishopSquareCoverScore(board, lookup, s, numBlackMajorPieces);
+	for (int32_t i = 0; i < wBishopCnt; i++) {
+		score += getWhiteBishopSquareCoverScore(
+			board, lookup, wBishops[i], numBlackMajorPieces);
 	}
-	for (const Square s : bBishops) {
-		score += getBlackBishopSquareCoverScore(board, lookup, s, numWhiteMajorPieces);
+	for (int32_t i = 0; i < bBishopCnt; i++) {
+		score += getBlackBishopSquareCoverScore(
+			board, lookup, bBishops[i], numWhiteMajorPieces);
 	}
 
 
