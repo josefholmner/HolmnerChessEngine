@@ -314,7 +314,7 @@ void StaticEvaluationTests::Run()
 	
 	if (!testPieceAdvantages(engine))
 	{
-		TestsUtilities::log("Static evaluation: piece advantage tests failedfen.");
+		TestsUtilities::log("Static evaluation: piece advantage tests failed.");
 		return;
 	}
 
