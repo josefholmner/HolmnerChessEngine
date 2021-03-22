@@ -1,9 +1,10 @@
 
-#include "FENTests.h"
 #include "StaticEvaluationTests.h"
+#include "RawMinimaxPerformanceTests.h"
+#include "FENTests.h"
 #include "TestsUtilities.h"
 
-void printReleaseOrDebug()
+void printReleaseOrDebugBuild()
 {
 #ifdef NDEBUG
     TestsUtilities::log("Tests are running in a 'Release' build.");
@@ -13,14 +14,19 @@ void printReleaseOrDebug()
 
 }
 
-int main()
+void runAllTests()
 {
-    printReleaseOrDebug();
-
     StaticEvaluationTests::Run();
+    RawMinimaxPerformanceTests::Run();
     FENTests::Run();
 
     TestsUtilities::log("---------------");
     TestsUtilities::log("All tests done.");
+}
+
+int main()
+{
+    printReleaseOrDebugBuild();
+    runAllTests();
     return 0;
 }
