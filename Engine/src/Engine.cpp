@@ -156,14 +156,29 @@ namespace moveGenerationHelpers
 		// Optimization: if the side whos turn it is was not in check before making the move, a
 		// move that involves moving a piece that is not in line with its own king prior to making
 		// the move cannot cause the moving side to move itself into check. This is true as long as
-		// the moving piece is not the king itself or if making an en passant capture. We use this
-		// fact here to not having to do the move, and then seeing if we are in check or not.
-		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, board.getWhiteKingSquare()) &&
-			!lookup.movingSideInCheckPreMove && move.movingPiece != pieces::wK &&
-			move.toSquare != board.getEnPassantSquare())
+		// the moving piece is not the king itself or if making an en passant capture. 
+		// Simularly, if the moving side was already in check before the move, any non-capturing
+		// move with its end square not in line with its own king cannot make the moving side not
+		// in check. We use these facts here to not having to do the move to determine if it would
+		// cause a check or not.
+		if (lookup.movingSideInCheckPreMove)
 		{
-			moves.push_back(move);
-			return;
+			if (move.capturedPiece == pieces::none && !lookup.fSqL.areSquaresInLinearLineOfSight(
+				move.toSquare, board.getWhiteKingSquare()) && move.movingPiece != pieces::wK)
+			{
+				// Non-capturing, non-king move ending up not in line of sight of the king cannot
+				// make us not in check, so this move is invalid and we return early.
+				return;
+			}
+		}
+		else
+		{
+			if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, board.getWhiteKingSquare())
+				&& move.movingPiece != pieces::wK && move.toSquare != board.getEnPassantSquare())
+			{
+				moves.push_back(move);
+				return;
+			}
 		}
 
 		// Temporarily make the move, before looking if in check.
@@ -248,14 +263,29 @@ namespace moveGenerationHelpers
 		// Optimization: if the side whos turn it is was not in check before making the move, a
 		// move that involves moving a piece that is not in line with its own king prior to making
 		// the move cannot cause the moving side to move itself into check. This is true as long as
-		// the moving piece is not the king itself or if making an en passant capture. We use this
-		// fact here to not having to do the move, and then seeing if we are in check or not.
-		if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, board.getBlackKingSquare()) &&
-			!lookup.movingSideInCheckPreMove && move.movingPiece != pieces::bK &&
-			move.toSquare != board.getEnPassantSquare())
+		// the moving piece is not the king itself or if making an en passant capture. 
+		// Simularly, if the moving side was already in check before the move, any non-capturing
+		// move with its end square not in line with its own king cannot make the moving side not
+		// in check. We use these facts here to not having to do the move to determine if it would
+		// cause a check or not.
+		if (lookup.movingSideInCheckPreMove)
 		{
-			moves.push_back(move);
-			return;
+			if (move.capturedPiece == pieces::none && !lookup.fSqL.areSquaresInLinearLineOfSight(
+				move.toSquare, board.getBlackKingSquare()) && move.movingPiece != pieces::bK)
+			{
+				// Non-capturing, non-king move ending up not in line of sight of the king cannot
+				// make us not in check, so this move is invalid and we return early.
+				return;
+			}
+		}
+		else
+		{
+			if (!lookup.fSqL.areSquaresInLinearLineOfSight(move.fromSquare, board.getBlackKingSquare())
+				&& move.movingPiece != pieces::bK && move.toSquare != board.getEnPassantSquare())
+			{
+				moves.push_back(move);
+				return;
+			}
 		}
 
 		// Temporarily make the move, before looking if in check.
