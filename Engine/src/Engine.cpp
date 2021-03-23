@@ -1308,11 +1308,12 @@ int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_
 	if (depth <= 0)
 	{
 		//return boardEvaluator.getScore(board, fastSqLookup);
-		return alphaBetaQuiescence(board, alpha, beta, searchHelpers::quiescenceMaxDepth, info);
+		return alphaBetaQuiescence(board, alpha, beta, 0, info);
 	}
 
 	auto& moves = getLegalMoves(board);
-	std::sort(moves.rbegin(), moves.rend());
+	sortMoves(board, moves);
+
 	for (const Move& move : moves)
 	{
 		board.makeMove(move);
@@ -1335,17 +1336,11 @@ int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_
 }
 
 int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t beta,
-	int32_t depth, searchHelpers::SearchInfo& info) const
+	int32_t currDepth, searchHelpers::SearchInfo& info) const
 {
-	const int32_t currentDepth = searchHelpers::quiescenceMaxDepth - depth;
-	if (currentDepth > info.quiescenceMaxDepth)
+	if (currDepth > info.quiescenceMaxDepth)
 	{
-		info.quiescenceMaxDepth = currentDepth;
-	}
-
-	if (depth <= 0)
-	{
-		return boardEvaluator.getScore(board, fastSqLookup);
+		info.quiescenceMaxDepth = currDepth;
 	}
 
 	const int32_t boardScore = boardEvaluator.getScore(board, fastSqLookup);
@@ -1360,14 +1355,15 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 	}
 
 	auto& moves = getCaptureAndPromotionMoves(board);
-	std::sort(moves.rbegin(), moves.rend());
+	sortMoves(board, moves);
+
 	for (const Move& move : moves)
 	{
 		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
 
 		board.makeMove(move);
 		info.nodesVisited++;
-		int32_t score = -alphaBetaQuiescence(board, -beta, -alpha, depth - 1, info);
+		int32_t score = -alphaBetaQuiescence(board, -beta, -alpha, currDepth + 1, info);
 		board.unmakeMove(move);
 		if (score >= beta)
 		{
@@ -1382,4 +1378,16 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 	}
 
 	return alpha;
+}
+
+void Engine::sortMoves(BoardState& board, std::vector<Move>& moves) const
+{
+	for (Move& move : moves)
+	{
+		board.makeMove(move);
+		move.moveScore = boardEvaluator.getScore(board, fastSqLookup);
+		board.unmakeMove(move);
+	}
+
+	std::sort(moves.begin(), moves.end());
 }

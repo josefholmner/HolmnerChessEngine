@@ -50,8 +50,8 @@ void GetBestMovePerformanceTests::Run()
 	TestsUtilities::log("***** GET BEST MOVE PERFORMANCE TESTS START *****");
 	hceEngine::EngineAPI engine;
 
-	static constexpr int32_t startPosDepth = 6;
-	static constexpr int32_t midgameDepth = 5;
+	static constexpr int32_t startPosDepth = 7;
+	static constexpr int32_t midgameDepth = 6;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
 

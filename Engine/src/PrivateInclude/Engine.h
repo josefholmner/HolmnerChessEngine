@@ -30,8 +30,9 @@ private:
 	int32_t negaMax(BoardState& board, int32_t depth, searchHelpers::SearchInfo& info) const;
 	int32_t alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_t depth,
 		searchHelpers::SearchInfo& info) const;
-	int32_t alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t beta, int32_t depth,
+	int32_t alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t beta, int32_t currDepth,
 		searchHelpers::SearchInfo& info) const;
+	void sortMoves(BoardState& board, std::vector<Move>& moves) const;
 
 	FastSqLookup fastSqLookup;
 	BoardEvaluator boardEvaluator;

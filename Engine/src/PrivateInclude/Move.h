@@ -11,7 +11,7 @@ class Move
 public:
 	Move() = default;
 
-	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Square inPreviousEnPassantSq) noexcept :
+	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Square inPreviousEnPassantSq) :
 		movingPiece{ inMovingPiece },
 		fromSquare{ inFromSquare },
 		toSquare{ inToSqaure },
@@ -24,7 +24,7 @@ public:
 	}
 	
 	Move(Piece inMovingPiece, Square inFromSquare, Square inToSqaure, Square inPreviousEnPassantSq,
-		Piece inCapturedPiece, Square inCapturedSquare) noexcept :
+		Piece inCapturedPiece, Square inCapturedSquare) :
 		movingPiece{inMovingPiece},
 		fromSquare{inFromSquare},
 		toSquare{inToSqaure},
@@ -41,7 +41,7 @@ public:
 
 	bool operator < (const Move& other) const
 	{
-		return getQuickScore() < other.getQuickScore();
+		return moveScore < other.moveScore;
 	}
 
 	Piece movingPiece = pieces::none;	
@@ -60,5 +60,5 @@ public:
 	bool prohibitsBKcastling = false; // Black king side.
 	bool prohibitsBQcastling = false; // Black queen side.
 
-	int32_t getQuickScore() const;
+	int32_t moveScore = 0;
 };
