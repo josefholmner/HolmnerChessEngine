@@ -4,6 +4,7 @@
 #include "PrivateInclude/EngineUtilities.h"
 
 #include <cassert>
+#include <algorithm>
 
 namespace moveGenerationHelpers
 {
@@ -1200,13 +1201,15 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 		return hceEngine::SearchResult(); // TODO: add invalid flag to the ChessMove.
 	}
 
+	searchHelpers::SearchInfo info;
 	Move bestMove;
 	int32_t bestScore = searchHelpers::minusInf;
 	for (const Move& m : getLegalMoves(board))
 	{
 		board.makeMove(m);
+		info.nodesVisited++;
 		int32_t score = -alphaBeta(board, 
-			-1000000, 1000000, depth - 1);
+			-1000000, 1000000, depth - 1, info);
 		if (score > bestScore)
 		{
 			bestScore = score;
@@ -1216,7 +1219,12 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 		board.unmakeMove(m);
 	}
 
-	return hceEngine::SearchResult(); // TODO fill with data.
+	hceEngine::SearchResult result;
+	result.engineInfo.depthsCompletelyCovered = depth;
+	result.engineInfo.maxDepthVisited = (size_t)depth + (size_t)info.quiescenceMaxDepth;
+	result.engineInfo.nodesVisited = info.nodesVisited;
+	result.bestMove.positionEvaluation = bestScore;
+	return result;
 }
 
 hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
@@ -1240,6 +1248,7 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32
 	for (const Move& m : getLegalMoves(board))
 	{
 		board.makeMove(m);
+		info.nodesVisited++;
 		int32_t score = -negaMax(board, depth - 1, info);
 		if (score > bestScore)
 		{
@@ -1253,8 +1262,8 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32
 	hceEngine::SearchResult result;
 	result.engineInfo.depthsCompletelyCovered = depth;
 	result.engineInfo.maxDepthVisited = depth; // No quiescence search.
-	result.engineInfo.leafNodesVisited = info.leafNodesEvaluated;
-	result.engineInfo.positionEvaluation = bestScore;
+	result.engineInfo.nodesVisited = info.nodesVisited;
+	result.bestMove.positionEvaluation = bestScore;
 	return result;
 }
 
@@ -1274,7 +1283,6 @@ int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchI
 {
 	if (depth <= 0)
 	{
-		info.leafNodesEvaluated++;
 		return boardEvaluator.getScore(board, fastSqLookup);
 	}
 
@@ -1282,6 +1290,7 @@ int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchI
 	for (const Move& move : getLegalMoves(board))
 	{
 		board.makeMove(move);
+		info.nodesVisited++;
 		int32_t score = -negaMax(board, depth - 1, info);
 		board.unmakeMove(move);
 		if (score > bestScore)
@@ -1293,17 +1302,72 @@ int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchI
 	return bestScore;
 }
 
-int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_t depth) const
+int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_t depth,
+	searchHelpers::SearchInfo& info) const
 {
+	if (depth <= 0)
+	{
+		//return boardEvaluator.getScore(board, fastSqLookup);
+		return alphaBetaQuiescence(board, alpha, beta, searchHelpers::quiescenceMaxDepth, info);
+	}
+
+	auto& moves = getLegalMoves(board);
+	std::sort(moves.rbegin(), moves.rend());
+	for (const Move& move : moves)
+	{
+		board.makeMove(move);
+		info.nodesVisited++;
+		int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, info);
+		board.unmakeMove(move);
+		if (score >= beta)
+		{
+			// Prune.
+			return beta;
+		}
+
+		if (score > alpha)
+		{
+			alpha = score;
+		}
+	}
+
+	return alpha;
+}
+
+int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t beta,
+	int32_t depth, searchHelpers::SearchInfo& info) const
+{
+	const int32_t currentDepth = searchHelpers::quiescenceMaxDepth - depth;
+	if (currentDepth > info.quiescenceMaxDepth)
+	{
+		info.quiescenceMaxDepth = currentDepth;
+	}
+
 	if (depth <= 0)
 	{
 		return boardEvaluator.getScore(board, fastSqLookup);
 	}
 
-	for (const Move& move : getLegalMoves(board))
+	const int32_t boardScore = boardEvaluator.getScore(board, fastSqLookup);
+	if (boardScore >= beta)
 	{
+		return beta;
+	}
+
+	if (alpha < boardScore)
+	{
+		alpha = boardScore;
+	}
+
+	auto& moves = getCaptureAndPromotionMoves(board);
+	std::sort(moves.rbegin(), moves.rend());
+	for (const Move& move : moves)
+	{
+		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
+
 		board.makeMove(move);
-		int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1);
+		info.nodesVisited++;
+		int32_t score = -alphaBetaQuiescence(board, -beta, -alpha, depth - 1, info);
 		board.unmakeMove(move);
 		if (score >= beta)
 		{
