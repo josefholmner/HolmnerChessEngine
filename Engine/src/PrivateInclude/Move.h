@@ -2,6 +2,7 @@
 
 #include "PiecesAndSquares.h"
 #include "EngineUtilities.h"
+#include "SearchHelpers.h"
 
 #include <cassert>
 
@@ -38,6 +39,11 @@ public:
 		assert(EngineUtilities::isNonNoneSquare(inCapturedSquare));
 	}
 
+	bool operator < (const Move& other) const
+	{
+		return getQuickScore() < other.getQuickScore();
+	}
+
 	Piece movingPiece = pieces::none;	
 	Square fromSquare = squares::none;
 	Square toSquare = squares::none;
@@ -53,4 +59,6 @@ public:
 	bool prohibitsWQcastling = false; // White queen side.
 	bool prohibitsBKcastling = false; // Black king side.
 	bool prohibitsBQcastling = false; // Black queen side.
+
+	int32_t getQuickScore() const;
 };
