@@ -26,8 +26,7 @@ namespace hceEngine
 
 	struct EngineInfo
 	{
-		int32_t positionEvaluation;
-		size_t leafNodesVisited;
+		size_t nodesVisited;
 		size_t depthsCompletelyCovered;
 		size_t maxDepthVisited;
 	};
@@ -40,6 +39,7 @@ namespace hceEngine
 		std::string movingPiece;
 		std::string capturedPiece;
 		std::string pawnPromotionPiece;
+		int32_t positionEvaluation;
 	};
 
 	struct SearchResult
