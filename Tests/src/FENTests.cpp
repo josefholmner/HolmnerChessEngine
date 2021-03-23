@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <cassert>
+#include <algorithm>
 
 namespace testHelpers
 {
