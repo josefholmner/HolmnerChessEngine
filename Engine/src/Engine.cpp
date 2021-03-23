@@ -13,6 +13,7 @@ namespace moveGenerationHelpers
 
 		const FastSqLookup& fSqL;
 		bool movingSideInCheckPreMove = true;
+		bool includeOnlyCapturesAndPromotions = false;
 	};
 
 
@@ -455,7 +456,10 @@ namespace moveGenerationHelpers
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				addWhiteIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
+				if (!lookup.includeOnlyCapturesAndPromotions)
+				{
+					addWhiteIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
+				}
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
@@ -481,7 +485,10 @@ namespace moveGenerationHelpers
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				addBlackIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
+				if (!lookup.includeOnlyCapturesAndPromotions)
+				{
+					addBlackIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
+				}
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
@@ -505,7 +512,7 @@ namespace moveGenerationHelpers
 		for (const Square nextSq : trySqs[sq])
 		{
 			const Piece other = board.getPiece(nextSq);
-			if (other == pieces::none)
+			if (other == pieces::none && !lookup.includeOnlyCapturesAndPromotions)
 			{
 				addWhiteIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
 			}
@@ -526,7 +533,7 @@ namespace moveGenerationHelpers
 		for (const Square nextSq : trySqs[sq])
 		{
 			const Piece other = board.getPiece(nextSq);
-			if (other == pieces::none)
+			if (other == pieces::none && !lookup.includeOnlyCapturesAndPromotions)
 			{
 				addBlackIfValid(board, createRegularSilentMove(board, sq, nextSq), moves, lookup);
 			}
@@ -579,10 +586,13 @@ namespace moveGenerationHelpers
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				Move move = createRegularSilentMove(board, sq, nextSq);
-				move.prohibitsWKcastling = prohibitsWKcastle;
-				move.prohibitsWQcastling = prohibitsWQcastle;
-				addWhiteIfValid(board, move, moves, lookup);
+				if (!lookup.includeOnlyCapturesAndPromotions)
+				{
+					Move move = createRegularSilentMove(board, sq, nextSq);
+					move.prohibitsWKcastling = prohibitsWKcastle;
+					move.prohibitsWQcastling = prohibitsWQcastle;
+					addWhiteIfValid(board, move, moves, lookup);
+				}
 			}
 			else if (EngineUtilities::isBlack(other))
 			{
@@ -612,10 +622,13 @@ namespace moveGenerationHelpers
 			const Piece other = board.getPiece(nextSq);
 			if (other == pieces::none)
 			{
-				Move move = createRegularSilentMove(board, sq, nextSq);
-				move.prohibitsBKcastling = prohibitsBKcastle;
-				move.prohibitsBQcastling = prohibitsBQcastle;
-				addBlackIfValid(board, move, moves, lookup);
+				if (!lookup.includeOnlyCapturesAndPromotions)
+				{
+					Move move = createRegularSilentMove(board, sq, nextSq);
+					move.prohibitsBKcastling = prohibitsBKcastle;
+					move.prohibitsBQcastling = prohibitsBQcastle;
+					addBlackIfValid(board, move, moves, lookup);
+				}
 			}
 			else if (EngineUtilities::isWhite(other))
 			{
@@ -704,7 +717,7 @@ namespace moveGenerationHelpers
 		for (const Square toSq : lookup.fSqL.getkingNonCastlingReachableSquares()[sq])
 		{
 			const Piece other = board.getPiece(toSq);
-			if (other == pieces::none)
+			if (other == pieces::none && !lookup.includeOnlyCapturesAndPromotions)
 			{
 				Move move = createRegularSilentMove(board, sq, toSq);
 				move.prohibitsWKcastling = castleKAvailable;
@@ -724,7 +737,8 @@ namespace moveGenerationHelpers
 		if (sq == squares::e1 && board.getPiece(squares::f1) == pieces::none &&
 			board.getPiece(squares::g1) == pieces::none && castleKAvailable &&
 			!isSquareReachableByBlack(board, squares::f1, lookup) &&
-			!isSquareReachableByBlack(board, squares::e1, lookup))
+			!isSquareReachableByBlack(board, squares::e1, lookup) &&
+			!lookup.includeOnlyCapturesAndPromotions)
 		{
 			assert(board.getPiece(squares::h1) == pieces::wR);
 			Move move = createRegularSilentMove(board, sq, squares::g1);
@@ -736,7 +750,8 @@ namespace moveGenerationHelpers
 		if (sq == squares::e1 && board.getPiece(squares::b1) == pieces::none &&
 			board.getPiece(squares::c1) == pieces::none && board.getPiece(squares::d1) == pieces::none
 			&& castleQAvailable && !isSquareReachableByBlack(board, squares::d1, lookup)
-			&& !isSquareReachableByBlack(board, squares::e1, lookup))
+			&& !isSquareReachableByBlack(board, squares::e1, lookup)
+			&& !lookup.includeOnlyCapturesAndPromotions)
 		{
 			assert(board.getPiece(squares::a1) == pieces::wR);
 			Move move = createRegularSilentMove(board, sq, squares::c1);
@@ -758,7 +773,7 @@ namespace moveGenerationHelpers
 		for (const Square toSq : lookup.fSqL.getkingNonCastlingReachableSquares()[sq])
 		{
 			const Piece other = board.getPiece(toSq);
-			if (other == pieces::none)
+			if (other == pieces::none && !lookup.includeOnlyCapturesAndPromotions)
 			{
 				Move move = createRegularSilentMove(board, sq, toSq);
 				move.prohibitsBKcastling = castleKAvailable;
@@ -778,7 +793,8 @@ namespace moveGenerationHelpers
 		if (sq == squares::e8 && board.getPiece(squares::f8) == pieces::none &&
 			board.getPiece(squares::g8) == pieces::none && castleKAvailable &&
 			!isSquareReachableByWhite(board, squares::f8, lookup) &&
-			!isSquareReachableByWhite(board, squares::e8, lookup))
+			!isSquareReachableByWhite(board, squares::e8, lookup) &&
+			!lookup.includeOnlyCapturesAndPromotions)
 		{
 			assert(board.getPiece(squares::h8) == pieces::bR);
 			Move move = createRegularSilentMove(board, sq, squares::g8);
@@ -790,7 +806,8 @@ namespace moveGenerationHelpers
 		if (sq == squares::e8 && board.getPiece(squares::b8) == pieces::none &&
 			board.getPiece(squares::c8) == pieces::none && board.getPiece(squares::d8) == pieces::none
 			&& castleQAvailable && !isSquareReachableByWhite(board, squares::d8, lookup) &&
-			!isSquareReachableByWhite(board, squares::e8, lookup))
+			!isSquareReachableByWhite(board, squares::e8, lookup) &&
+			!lookup.includeOnlyCapturesAndPromotions)
 		{
 			assert(board.getPiece(squares::a8) == pieces::bR);
 			Move move = createRegularSilentMove(board, sq, squares::c8);
@@ -816,7 +833,7 @@ namespace moveGenerationHelpers
 			{
 				addWhitePawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, lookup);
 			}
-			else
+			else if (!lookup.includeOnlyCapturesAndPromotions)
 			{
 				addWhiteIfValid(board, createRegularSilentMove(
 					board, sq, singleAdvanceSq), moves, lookup);
@@ -825,7 +842,8 @@ namespace moveGenerationHelpers
 
 			// Double pawn advance.
 			const Square doubleAdvanceSq = sq + 16;
-			if (rank == 1 && board.getPiece(doubleAdvanceSq) == pieces::none)
+			if (rank == 1 && board.getPiece(doubleAdvanceSq) == pieces::none
+				&& !lookup.includeOnlyCapturesAndPromotions)
 			{
 				Move move = createRegularSilentMove(board, sq, doubleAdvanceSq);
 				move.enPassantCreatedSquare = singleAdvanceSq; // One square behind the pawn.
@@ -875,7 +893,7 @@ namespace moveGenerationHelpers
 			{
 				addBlackPawnAdvanceWithPromotions(board, sq, singleAdvanceSq, moves, lookup);
 			}
-			else
+			else if(!lookup.includeOnlyCapturesAndPromotions)
 			{
 				addBlackIfValid(board, createRegularSilentMove(
 					board, sq, singleAdvanceSq), moves, lookup);
@@ -884,7 +902,8 @@ namespace moveGenerationHelpers
 
 			// Double pawn advance.
 			const Square doubleAdvanceSq = sq - 16;
-			if (rank == 6 && board.getPiece(doubleAdvanceSq) == pieces::none)
+			if (rank == 6 && board.getPiece(doubleAdvanceSq) == pieces::none
+				&& !lookup.includeOnlyCapturesAndPromotions)
 			{
 				Move move = createRegularSilentMove(board, sq, doubleAdvanceSq);
 				move.enPassantCreatedSquare = singleAdvanceSq; // One square behind the pawn.
@@ -993,7 +1012,8 @@ namespace moveGenerationHelpers
 		addBlackRegularSweepMoves(board, sq, lookup.fSqL.getstraightTowardsFileMax(), moves, lookup);
 	}
 
-	std::vector<Move> getLegalWhiteMoves(BoardState& board, const FastSqLookup& fastSqLookup)
+	std::vector<Move> getLegalWhiteMoves(BoardState& board, const FastSqLookup& fastSqLookup,
+		bool onlyCapturesAndPromotions = false)
 	{
 		static constexpr size_t probableMax = 80;
 		std::vector<Move> moves;
@@ -1001,6 +1021,7 @@ namespace moveGenerationHelpers
 
 		Lookup lookup(fastSqLookup);
 		lookup.movingSideInCheckPreMove = isWhiteInCheck(board, lookup);
+		lookup.includeOnlyCapturesAndPromotions = onlyCapturesAndPromotions;
 
 		for (Square sq = squares::a1; sq < squares::num; sq++)
 		{
@@ -1033,7 +1054,8 @@ namespace moveGenerationHelpers
 		return moves;
 	}
 
-	std::vector<Move> getLegalBlackMoves(BoardState& board, const FastSqLookup& fastSqLookup)
+	std::vector<Move> getLegalBlackMoves(BoardState& board, const FastSqLookup& fastSqLookup,
+		bool onlyCapturesAndPromotions = false)
 	{
 		static constexpr size_t probableMax = 80;
 		std::vector<Move> moves;
@@ -1041,6 +1063,7 @@ namespace moveGenerationHelpers
 
 		Lookup lookup(fastSqLookup);
 		lookup.movingSideInCheckPreMove = isBlackInCheck(board, lookup);
+		lookup.includeOnlyCapturesAndPromotions = onlyCapturesAndPromotions;
 
 		for (Square sq = squares::a1; sq < squares::num; sq++)
 		{
@@ -1233,6 +1256,18 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32
 	result.engineInfo.leafNodesVisited = info.leafNodesEvaluated;
 	result.engineInfo.positionEvaluation = bestScore;
 	return result;
+}
+
+std::vector<Move> Engine::getCaptureAndPromotionMoves(BoardState& board) const
+{
+	if (board.getTurn() == pieces::Color::WHITE)
+	{
+		return moveGenerationHelpers::getLegalWhiteMoves(board, fastSqLookup, true);
+	}
+	else
+	{
+		return moveGenerationHelpers::getLegalBlackMoves(board, fastSqLookup, true);
+	}
 }
 
 int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchInfo& info) const
