@@ -310,6 +310,8 @@ namespace
 
 void StaticEvaluationTests::Run()
 {
+	TestsUtilities::log("***** STATIC EVALUATION TESTS START *****");
+
 	hceEngine::EngineAPI engine;
 	
 	if (!testPieceAdvantages(engine))
@@ -331,4 +333,5 @@ void StaticEvaluationTests::Run()
 	}
 
 	TestsUtilities::log("All static evaluation tests finished successfully.");
+	TestsUtilities::log("***** STATIC EVALUATION TESTS END *****\n\n");
 }

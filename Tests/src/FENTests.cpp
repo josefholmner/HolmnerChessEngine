@@ -163,6 +163,7 @@ namespace testHelpers
 
 void FENTests::Run()
 {
+	TestsUtilities::log("***** FEN TESTS START *****");
 	size_t numMovesSum = 0;
 	hceEngine::EngineAPI engine;
 	hceCommon::Stopwatch stopWatch;
@@ -201,5 +202,7 @@ void FENTests::Run()
 	int32_t mills = stopWatch.getMilliseconds();
 	TestsUtilities::log("All FEN Tests finished successfully. Generated: " + std::to_string(numMovesSum)
 		+ " moves in: " + std::to_string(mills) + " ms, or: " +
-		std::to_string((numMovesSum / mills) * 1000) + " moves per second.");
+		std::to_string((numMovesSum / std::max(mills,1)) * 1000) + " moves per second.");
+
+	TestsUtilities::log("***** FEN TESTS END *****\n\n");
 }

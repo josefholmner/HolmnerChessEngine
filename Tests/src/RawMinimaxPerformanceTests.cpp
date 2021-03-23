@@ -4,6 +4,23 @@
 #include "Engine/EngineAPI.h"
 #include "Common/StopWatch.h"
 
+#include <algorithm>
+
+namespace
+{
+	void printResut(const std::string& positionName, const hceEngine::SearchResult& result,
+		int32_t milliseconds)
+	{
+		const int32_t leafNodes = result.engineInfo.leafNodesVisited;
+		TestsUtilities::log(positionName + " analyzed with minimax to to depth: " + 
+			std::to_string(result.engineInfo.depthsCompletelyCovered) + " took: " +
+			std::to_string(milliseconds) + "ms.\nLeaf nodes visited and scored: " + 
+			std::to_string(leafNodes) +
+			+ " which is: " + std::to_string((leafNodes/std::max(milliseconds, 1)) * 1000) + " leaf nodes "
+			+ "per second.\n");
+	}
+}
+
 void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
 {
 	// Test mid-game position (slow) minmax analysation performance.
@@ -12,8 +29,7 @@ void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t 
 	stopwatch.start();
 	const auto res = engine.getBestMoveMiniMax(midgamePos, depth);
 	const int32_t midgameTime = stopwatch.getMilliseconds();
-	TestsUtilities::log("Mid-game position to depth: " + std::to_string(depth) + " took: " +
-		std::to_string(midgameTime) + "ms.");
+	printResut("Mid-game position", res, midgameTime);
 }
 
 void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
@@ -24,12 +40,12 @@ void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t
 	stopwatch.start();
 	const auto res = engine.getBestMoveMiniMax(startPos, depth);
 	const int32_t startPosTime = stopwatch.getMilliseconds();
-	TestsUtilities::log("Starting position to depth: " + std::to_string(depth) + " took: " +
-		std::to_string(startPosTime) + "ms.");
+	printResut("Staring position", res, startPosTime);
 }
 
 void RawMinimaxPerformanceTests::Run()
 {
+	TestsUtilities::log("***** RAW MINIMAX PERFORMANCE TESTS START *****");
 	hceEngine::EngineAPI engine;
 
 	static constexpr int32_t startPosDepth = 6;
@@ -38,4 +54,5 @@ void RawMinimaxPerformanceTests::Run()
 	testMidGameAnalysisPerformance(engine, midgameDepth);
 
 	TestsUtilities::log("All raw minimax performance tests done.");
+	TestsUtilities::log("***** RAW MINIMAX PERFORMANCE TESTS END *****\n\n");
 }

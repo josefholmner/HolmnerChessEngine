@@ -7,9 +7,9 @@
 void printReleaseOrDebugBuild()
 {
 #ifdef NDEBUG
-    TestsUtilities::log("Tests are running in a 'Release' build.");
+    TestsUtilities::log("Tests are running in a 'Release' build.\n");
 #else
-    TestsUtilities::log("Tests are running in a 'Debug' build.");
+    TestsUtilities::log("Tests are running in a 'Debug' build.\n");
 #endif
 
 }
