@@ -1,8 +1,9 @@
 
+#include "TestsUtilities.h"
 #include "StaticEvaluationTests.h"
+#include "GetBestMovePerformanceTests.h"
 #include "RawMinimaxPerformanceTests.h"
 #include "FENTests.h"
-#include "TestsUtilities.h"
 
 void printReleaseOrDebugBuild()
 {
@@ -17,6 +18,7 @@ void printReleaseOrDebugBuild()
 void runAllTests()
 {
     StaticEvaluationTests::Run();
+    GetBestMovePerformanceTests::Run();
     RawMinimaxPerformanceTests::Run();
     FENTests::Run();
 

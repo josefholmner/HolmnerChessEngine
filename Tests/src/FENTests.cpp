@@ -170,7 +170,7 @@ void FENTests::Run()
 	hceCommon::Stopwatch stopWatch;
 	stopWatch.start();
 
-	static constexpr int32_t maxDepth = 4;
+	static constexpr int32_t maxDepth = 5;
 	for (size_t depth = 1; depth <= maxDepth; depth++)
 	{
 		for (size_t i = 0; i < testHelpers::FENTestsStrVector.size(); i++)
