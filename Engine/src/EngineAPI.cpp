@@ -24,12 +24,12 @@ std::optional<size_t> EngineAPI::getNumLegalMoves(
     return engine->getNumLegalMoves(FEN, depth);
 }
 
-ChessMove hceEngine::EngineAPI::getBestMove(const std::string& FEN, int32_t depth) const
+SearchResult hceEngine::EngineAPI::getBestMove(const std::string& FEN, int32_t depth) const
 {
     return engine->getBestMove(FEN, depth);
 }
 
-ChessMove EngineAPI::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
+SearchResult EngineAPI::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
 {
     assert(engine != nullptr);
     return engine->getBestMoveMiniMax(FEN, depth);

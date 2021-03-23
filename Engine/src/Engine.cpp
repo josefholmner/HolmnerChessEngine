@@ -1162,30 +1162,23 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 	return hceEngine::StaticEvaluationResult::Equal;
 }
 
-namespace searchConstants
-{
-	// Used because std::numeric_limits<int32_t>::min()/max() is not symmetrical.
-	static constexpr int32_t PlusInf = 10000000;
-	static constexpr int32_t MinusInf = -PlusInf;
-}
-
-hceEngine::ChessMove Engine::getBestMove(const std::string& FEN, int32_t depth) const
+hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t depth) const
 {
 	if (depth <= 0)
 	{
 		EngineUtilities::logE("getBestMove failed, depth must be at least 1.");
-		return hceEngine::ChessMove(); // TODO: add invalid flag to the ChessMove.
+		return hceEngine::SearchResult(); // TODO: add invalid flag to the ChessMove.
 	}
 
 	BoardState board;
 	if (!board.initFromFEN(FEN))
 	{
 		EngineUtilities::logE("getBestMove failed, invalid FEN.");
-		return hceEngine::ChessMove(); // TODO: add invalid flag to the ChessMove.
+		return hceEngine::SearchResult(); // TODO: add invalid flag to the ChessMove.
 	}
 
 	Move bestMove;
-	int32_t bestScore = searchConstants::MinusInf;
+	int32_t bestScore = searchHelpers::minusInf;
 	for (const Move& m : getLegalMoves(board))
 	{
 		board.makeMove(m);
@@ -1200,30 +1193,31 @@ hceEngine::ChessMove Engine::getBestMove(const std::string& FEN, int32_t depth) 
 		board.unmakeMove(m);
 	}
 
-	return hceEngine::ChessMove(); // TODO fill with data.
+	return hceEngine::SearchResult(); // TODO fill with data.
 }
 
-hceEngine::ChessMove Engine::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
+hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
 {
 	if (depth <= 0)
 	{
 		EngineUtilities::logE("getBestMoveMiniMax failed, depth must be at least 1.");
-		return hceEngine::ChessMove(); // TODO: add invalid flag to the ChessMove.
+		return hceEngine::SearchResult(); // TODO: add invalid flag to the ChessMove.
 	}
 
 	BoardState board;
 	if (!board.initFromFEN(FEN))
 	{
 		EngineUtilities::logE("getBestMoveMiniMax failed, invalid FEN.");
-		return hceEngine::ChessMove(); // TODO: add invalid flag to the ChessMove.
+		return hceEngine::SearchResult(); // TODO: add invalid flag to the ChessMove.
 	}
 
+	searchHelpers::SearchInfo info;
 	Move bestMove;
-	int32_t bestScore = searchConstants::MinusInf;
+	int32_t bestScore = searchHelpers::minusInf;
 	for (const Move& m : getLegalMoves(board))
 	{
 		board.makeMove(m);
-		int32_t score = -negaMax(board, depth - 1);
+		int32_t score = -negaMax(board, depth - 1, info);
 		if (score > bestScore)
 		{
 			bestScore = score;
@@ -1233,21 +1227,27 @@ hceEngine::ChessMove Engine::getBestMoveMiniMax(const std::string& FEN, int32_t 
 		board.unmakeMove(m);
 	}
 
-	return hceEngine::ChessMove(); // TODO fill with data.
+	hceEngine::SearchResult result;
+	result.engineInfo.depthsCompletelyCovered = depth;
+	result.engineInfo.maxDepthVisited = depth; // No quiescence search.
+	result.engineInfo.leafNodesVisited = info.leafNodesEvaluated;
+	result.engineInfo.positionEvaluation = bestScore;
+	return result;
 }
 
-int32_t Engine::negaMax(BoardState& board, int32_t depth) const
+int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchInfo& info) const
 {
 	if (depth <= 0)
 	{
+		info.leafNodesEvaluated++;
 		return boardEvaluator.getScore(board, fastSqLookup);
 	}
 
-	int32_t bestScore = searchConstants::MinusInf;
+	int32_t bestScore = searchHelpers::minusInf;
 	for (const Move& move : getLegalMoves(board))
 	{
 		board.makeMove(move);
-		int32_t score = -negaMax(board, depth - 1);
+		int32_t score = -negaMax(board, depth - 1, info);
 		board.unmakeMove(move);
 		if (score > bestScore)
 		{
