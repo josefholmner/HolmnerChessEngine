@@ -22,9 +22,20 @@ namespace
 			+ "visited per second.\n");
 	}
 
+	void testEndGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	{
+		// Test end-game position (fast) alpha-beta with quiescence search performance.
+		hceCommon::Stopwatch stopwatch;
+		static const std::string endgamePos = "4k3/p1p1pp2/4b3/3p4/3P4/P7/1P2PP2/1N2K3 w - - 0 1";
+		stopwatch.start();
+		const auto res = engine.getBestMove(endgamePos, depth);
+		const int32_t endgameTime = stopwatch.getMilliseconds();
+		printResut("End-game position", res, endgameTime);
+	}
+
 	void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
 	{
-		// Test starting position (fast) alpha-beta with quiescence search performance.
+		// Test mid-game position (fast) alpha-beta with quiescence search performance.
 		hceCommon::Stopwatch stopwatch;
 		static const std::string midgamePos = "r3k2r/pppqbppp/2npbn2/4p3/4P3/2NPBN2/PPPQBPPP/R3K2R w KQkq - 0 1";
 		stopwatch.start();
@@ -52,8 +63,10 @@ void GetBestMovePerformanceTests::Run()
 
 	static constexpr int32_t startPosDepth = 8;
 	static constexpr int32_t midgameDepth = 7;
+	static constexpr int32_t endgameDepth = 9;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
+	testEndGameAnalysisPerformance(engine, endgameDepth);
 
 	TestsUtilities::log("All get best move performance tests done.");
 	TestsUtilities::log("***** GET BEST MOVE PERFORMANCE TESTS END *****\n\n");
