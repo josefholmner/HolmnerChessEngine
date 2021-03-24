@@ -48,7 +48,7 @@ void RawMinimaxPerformanceTests::Run()
 	TestsUtilities::log("***** RAW MINIMAX PERFORMANCE TESTS START *****");
 	hceEngine::EngineAPI engine;
 
-	static constexpr int32_t startPosDepth = 6;
+	static constexpr int32_t startPosDepth = 5;
 	static constexpr int32_t midgameDepth = 5;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
