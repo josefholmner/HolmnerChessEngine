@@ -15,6 +15,7 @@ namespace hceEngine
 
 	enum class MoveType
 	{
+		Invalid,
 		None,
 		Silent,
 		Capture,
