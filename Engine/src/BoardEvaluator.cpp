@@ -16,18 +16,18 @@ namespace scoringConstants
 	static constexpr int32_t rankScoreJump = 2;
 	static constexpr int32_t fileScoreJump = 2;
 
-	static constexpr int32_t pBaseVal = 10;
+	static constexpr int32_t pBaseVal = 20;
 	static constexpr int32_t nBaseVal = pBaseVal * 3;
 	static constexpr int32_t bBaseVal = pBaseVal * 3;
 	static constexpr int32_t rBaseVal = pBaseVal * 5;
 	static constexpr int32_t qBaseVal = pBaseVal * 9;
 
-	static constexpr int32_t kingToTheSideVal = 9;
-	static constexpr int32_t pawnProtectingKing1RankAwayVal = 9;
-	static constexpr int32_t pawnProtectingKing2RanksAwayVal = 4;
+	static constexpr int32_t kingToTheSideVal = 18;
+	static constexpr int32_t pawnProtectingKing1RankAwayVal = 18;
+	static constexpr int32_t pawnProtectingKing2RanksAwayVal = 8;
 
-	static constexpr int32_t pawnAtCenterAdditionalVal = 4;
-	static constexpr int32_t pawnAtEdgeOfCenterAdditionalVal = 2;
+	static constexpr int32_t pawnAtCenterAdditionalVal = 3;
+	static constexpr int32_t pawnAtEdgeOfCenterAdditionalVal = 1;
 
 	//static constexpr int32_t rookCoverValPerSquare = 1;
 	//static constexpr int32_t bishopCoverValPerSquare = 1;
