@@ -60,7 +60,7 @@ namespace
 		return reachableSqs;
 	}
 
-	bool contains(std::vector<Square> vec, Square sq)
+	bool contains(const std::vector<Square>& vec, Square sq)
 	{
 		return std::find(vec.begin(), vec.end(), sq) != vec.end();
 	}
