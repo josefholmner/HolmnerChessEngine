@@ -220,26 +220,14 @@ namespace
 			return false;
 		}
 
-		const std::string wRookOpenFile = "1nr2rk1/pppp1ppp/4p3/8/8/1P2P3/PP1P1PPP/1NR2RK1 w - - 0 1";
+		const std::string wRookOpenFile = "1nr2rk1/3p1ppp/1pp1p3/8/8/1P2P3/P2P1PPP/1NR2RK1 w - - 0 1";
 		if (!test(engine, wRookOpenFile, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
 		}
 
-		const std::string bRookOpenFile = "1nr2rk1/pp1p1ppp/1p2p3/8/8/4P3/PPPP1PPP/1NR2RK1 w - - 0 1";
+		const std::string bRookOpenFile = "1nr2rk1/p2p1ppp/1p2p3/8/8/1PP1P3/3P1PPP/1NR2RK1 w - - 0 1";
 		if (!test(engine, bRookOpenFile, hceEngine::StaticEvaluationResult::BlackBetter))
-		{
-			return false;
-		}
-
-		const std::string wRookEndGMoreSqCovered = "4r1k1/pppp1ppp/4p3/4R3/8/1P2P3/PP1P1PPP/6K1 w - - 0 1";
-		if (!test(engine, wRookEndGMoreSqCovered, hceEngine::StaticEvaluationResult::WhiteBetter))
-		{
-			return false;
-		}
-
-		const std::string bRookEndGMoreSqCovered = "6k1/pppp1ppp/4p3/4r3/8/1P2P3/PP1P1PPP/4R1K1 w - - 0 1";
-		if (!test(engine, bRookEndGMoreSqCovered, hceEngine::StaticEvaluationResult::BlackBetter))
 		{
 			return false;
 		}
@@ -274,14 +262,8 @@ namespace
 			return false;
 		}
 
-		const std::string bBishopHigherSqCover2 = "4k3/4p3/4b3/3p1p2/3P1P2/4B3/3P4/4K3 w - - 0 1";
+		const std::string bBishopHigherSqCover2 = "8/2k1p3/4b3/3p1p2/3P1P2/4B3/8/2K1P3 w - - 0 1";
 		if (!test(engine, bBishopHigherSqCover2, hceEngine::StaticEvaluationResult::BlackBetter))
-		{
-			return false;
-		}
-
-		const std::string wBishopHigherSqCover2 = "4k3/3p4/4b3/3p1p2/3P1P2/4B3/4P3/4K3 w - - 0 1";
-		if (!test(engine, wBishopHigherSqCover2, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
 		}
@@ -300,6 +282,54 @@ namespace
 
 		const std::string wPawnCentered = "rnb1k1nr/pp1ppp1p/2p5/6p1/4P3/2P5/PP1P1PPP/RNB1K1NR w KQkq - 0 1";
 		if (!test(engine, wPawnCentered, hceEngine::StaticEvaluationResult::WhiteBetter))
+		{
+			return false;
+		}
+
+		const std::string bRookClosedFile = "2rqkbnr/1pp1pppp/8/3p4/3P4/8/PP2PPPP/2RQKBNR w Kk - 0 1";
+		if (!test(engine, bRookClosedFile, hceEngine::StaticEvaluationResult::WhiteBetter))
+		{
+			return false;
+		}
+
+		const std::string wRookClosedFile = "r2qkbnr/1pp1pppp/8/3p4/3P4/8/1PP1PPPP/2RQKBNR w Kkq - 0 1";
+		if (!test(engine, wRookClosedFile, hceEngine::StaticEvaluationResult::BlackBetter))
+		{
+			return false;
+		}
+
+		const std::string wHasDoublePawns = "rnbqkbnr/ppp2ppp/4p3/3p4/3P4/4PP1P/PPP4P/RNBQKBNR w KQkq - 0 1";
+		if (!test(engine, wHasDoublePawns, hceEngine::StaticEvaluationResult::BlackBetter))
+		{
+			return false;
+		}
+
+		const std::string bHasDoublePawns = "rnbqkbnr/ppp4p/4pp1p/3p4/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1";
+		if (!test(engine, bHasDoublePawns, hceEngine::StaticEvaluationResult::WhiteBetter))
+		{
+			return false;
+		}
+
+		const std::string wPawnIsland = "4k3/ppp2ppp/8/8/8/8/PPP1P1PP/4K3 w - - 0 1";
+		if (!test(engine, wPawnIsland, hceEngine::StaticEvaluationResult::BlackBetter))
+		{
+			return false;
+		}
+
+		const std::string bPawnIsland = "4k3/ppp1p1pp/8/8/8/8/PPP2PPP/4K3 w - - 0 1";
+		if (!test(engine, bPawnIsland, hceEngine::StaticEvaluationResult::WhiteBetter))
+		{
+			return false;
+		}
+
+		const std::string wMorePawnIslands = "4k3/p4pp1/8/8/8/8/P2P1P2/4K3 w - - 0 1";
+		if (!test(engine, wMorePawnIslands, hceEngine::StaticEvaluationResult::BlackBetter))
+		{
+			return false;
+		}
+
+		const std::string bMorePawnIslands = "4k3/p3p1p1/8/8/8/8/1PP4P/4K3 w - - 0 1";
+		if (!test(engine, bMorePawnIslands, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
 		}

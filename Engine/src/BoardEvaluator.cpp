@@ -29,6 +29,11 @@ namespace scoringConstants
 	static constexpr int32_t pawnAtCenterAdditionalVal = 3;
 	static constexpr int32_t pawnAtEdgeOfCenterAdditionalVal = 1;
 
+	static constexpr int32_t doublePawnsPunishmentVal = 10;
+	static constexpr int32_t pawnIslandPunishmentVal = 10;
+
+	static constexpr int32_t rookOpenFileVal = 10;
+
 	//static constexpr int32_t rookCoverValPerSquare = 1;
 	//static constexpr int32_t bishopCoverValPerSquare = 1;
 }
@@ -93,13 +98,25 @@ namespace
 		}
 	}
 
-	int32_t getNumEmptySquaresInSweep(const BoardState& board, const std::vector<Square>& direction,
+	bool isPawn(Piece piece)
+	{
+		switch (piece)
+		{
+			case pieces::wP:
+			case pieces::bP:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	int32_t getNumNonPawnSquaresInSweep(const BoardState& board, const std::vector<Square>& direction,
 		Square sq)
 	{
 		int32_t num = 0;
 		for (const Square s : direction)
 		{
-			if (board.getPiece(s) == pieces::none)
+			if (!isPawn(board.getPiece(s)))
 			{
 				num += 1;
 			}
@@ -112,88 +129,36 @@ namespace
 		return num;
 	}
 
-	int32_t getWhiteRookSquareCoverForwardsScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq)
-	{
-		return getNumEmptySquaresInSweep(board, lookup.getstraightTowardsRankMax()[sq], sq);
-	}
-
-	int32_t getBlackRookSquareCoverForwardsScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq)
-	{
-		return -getNumEmptySquaresInSweep(board, lookup.getstraightTowardsRankMin()[sq], sq);
-	}
-
-	int32_t getWhiteRookSquareCoverAllDirsScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq)
-	{
-		return getNumEmptySquaresInSweep(board, lookup.getstraightTowardsRankMax()[sq], sq) + 
-			getNumEmptySquaresInSweep(board, lookup.getstraightTowardsRankMin()[sq], sq) +
-			getNumEmptySquaresInSweep(board, lookup.getstraightTowardsFileMax()[sq], sq) + 
-			getNumEmptySquaresInSweep(board, lookup.getstraightTowardsFileMin()[sq], sq);
-	}
-
-	int32_t getBlackRookSquareCoverAllDirsScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq)
-	{
-		return -getNumEmptySquaresInSweep(board, lookup.getstraightTowardsRankMax()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getstraightTowardsRankMin()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getstraightTowardsFileMax()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getstraightTowardsFileMin()[sq], sq);
-	}
-
 	int32_t getWhiteBishopSquareCoverForwardsScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
-		return getNumEmptySquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) + 
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq);
+		return getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq);
 	}
 
 	int32_t getBlackBishopSquareCoverForwardsScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
-		return -getNumEmptySquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
+		return -getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
 	int32_t getWhiteBishopSquareCoverAllDirsScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
-		return getNumEmptySquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) +
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) +
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
+		return getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) +
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) +
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
 	int32_t getBlackBishopSquareCoverAllDirsScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
-		return -getNumEmptySquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
-			getNumEmptySquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
-	}
-
-	int32_t getWhiteRookSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq, int32_t numBlackMajorPieces)
-	{
-		if (numBlackMajorPieces <= 1)
-		{
-			return getWhiteRookSquareCoverAllDirsScore(board, lookup, sq);
-		}
-
-		return getWhiteRookSquareCoverForwardsScore(board, lookup, sq);
-	}
-
-	int32_t getBlackRookSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq, int32_t numWhiteMajorPieces)
-	{
-		if (numWhiteMajorPieces <= 1)
-		{
-			return getBlackRookSquareCoverAllDirsScore(board, lookup, sq);
-		}
-
-		return getBlackRookSquareCoverForwardsScore(board, lookup, sq);
+		return -getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) -
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) -
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
 	int32_t getWhiteBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
@@ -217,6 +182,30 @@ namespace
 
 		return getBlackBishopSquareCoverForwardsScore(board, lookup, sq);
 	}
+
+	int32_t getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, int32_t val)
+	{
+		int32_t count = 0;
+		if (filesOccupied[files::file1] && !filesOccupied[files::file2])
+		{
+			count += val;
+		}
+
+		if (!filesOccupied[files::file7] && filesOccupied[files::file8])
+		{
+			count += val;
+		}
+
+		for (File f = files::file3; f < files::num; f++)
+		{
+			if (!filesOccupied[f - 2] && filesOccupied[f - 1] && !filesOccupied[f])
+			{
+				count += val;
+			}
+		}
+
+		return count;
+	}
 }
 
 BoardEvaluator::BoardEvaluator()
@@ -239,6 +228,9 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 	int32_t bRookCnt = 0;
 	int32_t wBishopCnt = 0;
 	int32_t bBishopCnt = 0;
+
+	std::array<bool, files::num> filesOccupiedBybP = { false };
+	std::array<bool, files::num> filesOccupiedBywP = { false };
 	
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
@@ -248,7 +240,18 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 		switch (board.getPiece(sq))
 		{
 			case pieces::wP:
+			{
 				score += wPawnStaticScores[sq];
+				const File f = files::toFile(sq);
+				if (filesOccupiedBywP[f])
+				{
+					score -= scoringConstants::doublePawnsPunishmentVal;
+				}
+				else
+				{
+					filesOccupiedBywP[f] = true;
+				}
+			}
 				break;
 			case pieces::wN:
 				numWhiteMajorPieces++;
@@ -272,7 +275,18 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 				// King scores are handled elsewhere.
 				break;
 			case pieces::bP:
+			{
 				score += bPawnStaticScores[sq];
+				const File f = files::toFile(sq);
+				if (filesOccupiedBybP[f])
+				{
+					score += scoringConstants::doublePawnsPunishmentVal;
+				}
+				else
+				{
+					filesOccupiedBybP[f] = true;
+				}
+			}
 				break;
 			case pieces::bN:
 				numBlackMajorPieces++;
@@ -302,15 +316,24 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 	score += getWhiteKingScore(board, numBlackMajorPieces);
 	score += getBlackKingScore(board, numWhiteMajorPieces);
 
-	// Give score for rook and bishop square coverage.
-	for (int32_t i = 0; i < wRookCnt; i++) {
-		score += getWhiteRookSquareCoverScore(
-			board, lookup, wRooks[i], numBlackMajorPieces);
+	// Give score for rook on open file.
+	for (int32_t i = 0; i < wRookCnt; i++)
+	{
+		if (!filesOccupiedBywP[files::toFile(wRooks[i])])
+		{
+			score += scoringConstants::rookOpenFileVal;
+		}
 	}
-	for (int32_t i = 0; i < bRookCnt; i++) {
-		score += getBlackRookSquareCoverScore(
-			board, lookup, bRooks[i], numWhiteMajorPieces);
+
+	for (int32_t i = 0; i < bRookCnt; i++)
+	{
+		if (!filesOccupiedBybP[files::toFile(bRooks[i])])
+		{
+			score -= scoringConstants::rookOpenFileVal;
+		}
 	}
+
+	// Give score for bishop square coverage.
 	for (int32_t i = 0; i < wBishopCnt; i++) {
 		score += getWhiteBishopSquareCoverScore(
 			board, lookup, wBishops[i], numBlackMajorPieces);
@@ -320,6 +343,9 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 			board, lookup, bBishops[i], numWhiteMajorPieces);
 	}
 
+	// Punish pawn islands.
+	score -= getPawnIslandsVal(filesOccupiedBywP, scoringConstants::pawnIslandPunishmentVal);
+	score += getPawnIslandsVal(filesOccupiedBybP, scoringConstants::pawnIslandPunishmentVal);
 
 	// Negate the score for black, so that a high score is always "good" for both sides.
 	// This makes negaMax style recursive functions possible.
