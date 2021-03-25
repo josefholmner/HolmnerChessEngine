@@ -1218,7 +1218,9 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 	static constexpr int32_t beta = searchHelpers::plusInf;
 	int32_t bestScore = searchHelpers::minusInf;
 
-	for (const Move& m : getLegalMoves(board))
+	auto& moves = getLegalMoves(board);
+	sortMoves(board, moves);
+	for (const Move& m : moves)
 	{
 		board.makeMove(m);
 		info.nodesVisited++;
