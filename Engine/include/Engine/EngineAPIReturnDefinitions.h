@@ -34,13 +34,13 @@ namespace hceEngine
 
 	struct ChessMove
 	{
-		MoveType type;
+		MoveType type = MoveType::Invalid;
 		std::string fromSquare;
 		std::string toSquare;
 		std::string movingPiece;
 		std::string capturedPiece;
 		std::string pawnPromotionPiece;
-		int32_t positionEvaluation;
+		int32_t positionEvaluation = 0;
 	};
 
 	struct SearchResult
