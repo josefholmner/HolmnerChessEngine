@@ -47,9 +47,15 @@ private:
 
 	int32_t getPieceMoveQuickScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
+	
 	int32_t getWhiteBishopMoveQuickScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
 	int32_t getBlackBishopMoveQuickScore(const BoardState& board, const Move& move,
+		const FastSqLookup& lookup) const;
+
+	int32_t getWhiteRookMoveQuickScore(const BoardState& board, const Move& move,
+		const FastSqLookup& lookup) const;
+	int32_t getBlackRookMoveQuickScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
 
 	std::array<int32_t, squares::num> wQueenStaticScores;

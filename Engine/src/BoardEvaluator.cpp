@@ -144,6 +144,28 @@ namespace
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
+	const std::array<bool, files::num> getFilesOccupiedByPawn(const BoardState& board,
+		Piece pawn)
+	{
+		assert(isPawn(pawn));
+		std::array<bool, files::num> filesOccupied = { false };
+
+		// Pawns never occupy first or last rank, so we don't have to iterate over those squares.
+		for (Square sq = squares::a2; sq <= squares::h7; sq++)
+		{
+			assert(EngineUtilities::isValidPiece(board.getPiece(sq)));
+			assert(EngineUtilities::isNonNoneSquare(sq));
+
+			if (board.getPiece(sq) == pawn)
+			{
+				const File file = files::toFile(sq);
+				filesOccupied[file] = true;
+			}
+		}
+
+		return filesOccupied;
+	}
+
 	int32_t getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, int32_t val)
 	{
 		int32_t count = 0;
@@ -168,19 +190,17 @@ namespace
 		return count;
 	}
 
-	bool isKnightBishopOrQueen(Piece piece)
+	bool isNonPawnNonKing(Piece piece)
 	{
 		switch (piece)
 		{
-			case pieces::wN:
-			case pieces::bN:
-			case pieces::wB:
-			case pieces::bB:
-			case pieces::wQ:
-			case pieces::bQ:
-				return true;
-			default:
+			case pieces::wP:
+			case pieces::bP:
+			case pieces::wK:
+			case pieces::bK:
 				return false;
+			default:
+				return true;
 		}
 	}
 }
@@ -331,7 +351,7 @@ bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
 		return false;
 	}
 
-	return isKnightBishopOrQueen(move.movingPiece);
+	return isNonPawnNonKing(move.movingPiece);
 }
 
 void BoardEvaluator::init()
@@ -481,6 +501,10 @@ int32_t BoardEvaluator::getPieceMoveQuickScore(const BoardState& board, const Mo
 			return getWhiteBishopMoveQuickScore(board, move, lookup);
 		case pieces::bB:
 			return getBlackBishopMoveQuickScore(board, move, lookup);
+		case pieces::wR:
+			return getWhiteRookMoveQuickScore(board, move, lookup);
+		case pieces::bR:
+			return getBlackRookMoveQuickScore(board, move, lookup);
 		case pieces::wQ:
 			return wQueenStaticScores[move.toSquare] - wQueenStaticScores[move.fromSquare];
 		case pieces::bQ:
@@ -506,5 +530,49 @@ int32_t BoardEvaluator::getBlackBishopMoveQuickScore(const BoardState& board, co
 	int32_t score = bBishopStaticScores[move.toSquare] - bBishopStaticScores[move.fromSquare];
 	score += getBlackBishopSquareCoverScore(board, lookup, move.toSquare);
 	score -= getBlackBishopSquareCoverScore(board, lookup, move.fromSquare);
+	return score;
+}
+
+int32_t BoardEvaluator::getWhiteRookMoveQuickScore(const BoardState& board, const Move& move, const FastSqLookup& lookup) const
+{
+	int32_t score = wRookStaticScores[move.toSquare] - wRookStaticScores[move.fromSquare];
+
+	// Handle change in open file score.
+	const File newFile = files::toFile(move.toSquare);
+	const File oldFile = files::toFile(move.fromSquare);
+	const std::array<bool, files::num> filesOccupiedBywPawns =
+		getFilesOccupiedByPawn(board, pieces::wP);
+	if (!filesOccupiedBywPawns[newFile])
+	{
+		score += scoringConstants::rookOpenFileVal;
+	}
+
+	if (!filesOccupiedBywPawns[oldFile])
+	{
+		score -= scoringConstants::rookOpenFileVal;
+	}
+
+	return score;
+}
+
+int32_t BoardEvaluator::getBlackRookMoveQuickScore(const BoardState& board, const Move& move, const FastSqLookup& lookup) const
+{
+	int32_t score = bRookStaticScores[move.toSquare] - bRookStaticScores[move.fromSquare];
+
+	// Handle change in open file score.
+	const File newFile = files::toFile(move.toSquare);
+	const File oldFile = files::toFile(move.fromSquare);
+	const std::array<bool, files::num> filesOccupiedBybPawns =
+		getFilesOccupiedByPawn(board, pieces::bP);
+	if (!filesOccupiedBybPawns[newFile])
+	{
+		score -= scoringConstants::rookOpenFileVal;
+	}
+
+	if (!filesOccupiedBybPawns[oldFile])
+	{
+		score += scoringConstants::rookOpenFileVal;
+	}
+
 	return score;
 }
