@@ -1,8 +1,6 @@
 #include "PrivateInclude/BoardEvaluator.h"
 
 #include "PrivateInclude/EngineUtilities.h"
-#include "PrivateInclude/BoardState.h"
-#include "PrivateInclude/FastSqLookup.h"
 
 #include <cassert>
 #include <vector>
@@ -198,13 +196,27 @@ namespace
 
 		for (File f = files::file3; f < files::num; f++)
 		{
-			if (!filesOccupied[f - 2] && filesOccupied[f - 1] && !filesOccupied[f])
+			if (!filesOccupied[(size_t)f - 2] && filesOccupied[(size_t)f - 1] && !filesOccupied[f])
 			{
 				count += val;
 			}
 		}
 
 		return count;
+	}
+
+	bool isKnightOrQueen(Piece piece)
+	{
+		switch (piece)
+		{
+			case pieces::wN:
+			case pieces::bN:
+			case pieces::wQ:
+			case pieces::bQ:
+				return true;
+			default:
+				return false;
+		}
 	}
 }
 
@@ -352,6 +364,19 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 	return board.getTurn() == pieces::Color::WHITE ? score : -score;
 }
 
+int32_t BoardEvaluator::getScoreDelta(const BoardState& board, const Move& move) const
+{
+	assert(canUseGetScoreDelta(move));
+
+	return board.getTurn() == pieces::Color::WHITE ?
+		getPieceMoveQuickScore(move) : -getPieceMoveQuickScore(move);
+}
+
+bool BoardEvaluator::canUseGetScoreDelta(const Move& move) const
+{
+	return isKnightOrQueen(move.movingPiece) && move.capturedPiece == pieces::none;
+}
+
 void BoardEvaluator::init()
 {
 	using namespace scoringConstants;
@@ -482,4 +507,24 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 	}
 
 	return score;
+}
+
+int32_t BoardEvaluator::getPieceMoveQuickScore(const Move& move) const
+{
+	assert(canUseGetScoreDelta(move));
+
+	switch (move.movingPiece)
+	{
+		case pieces::wN:
+			return wKnightStaticScores[move.toSquare] - wKnightStaticScores[move.fromSquare];
+		case pieces::bN:
+			return bKnightStaticScores[move.toSquare] - bKnightStaticScores[move.fromSquare];
+		case pieces::wQ:
+			return wQueenStaticScores[move.toSquare] - wQueenStaticScores[move.fromSquare];
+		case pieces::bQ:
+			return bQueenStaticScores[move.toSquare] - bQueenStaticScores[move.fromSquare];
+		default:
+			EngineUtilities::logE("Piece passed to getPieceMoveQuickScore that cannot be used.");
+			return 0;
+	}
 }

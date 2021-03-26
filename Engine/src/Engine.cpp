@@ -1334,7 +1334,7 @@ int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_
 	}
 
 	auto& moves = getLegalMoves(board);
-	setStaticEvalAndSortMoves(board, moves);
+	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 	for (const Move& move : moves)
 	{
 		board.makeMove(move);
@@ -1377,7 +1377,7 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 	}
 
 	auto& moves = getCaptureAndPromotionMoves(board);
-	setStaticEvalAndSortMoves(board, moves);
+	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 	for (const Move& move : moves)
 	{
 		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
@@ -1406,9 +1406,37 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	for (Move& move : moves)
 	{
 		board.makeMove(move);
+		assert(board.isValid());
 		move.staticEval = boardEvaluator.getScore(board, fastSqLookup);
 		board.unmakeMove(move);
 	}
 
+	assert(board.isValid());
+	std::sort(moves.begin(), moves.end());
+}
+
+void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves, int32_t staticEval) const
+{
+	for (Move& move : moves)
+	{
+		if (boardEvaluator.canUseGetScoreDelta(move))
+		{
+			move.staticEval = -boardEvaluator.getScoreDelta(board, move) - staticEval;
+
+#ifndef NDEBUG
+			board.makeMove(move);
+			assert(move.staticEval == boardEvaluator.getScore(board, fastSqLookup));
+			board.unmakeMove(move);
+#endif
+		}
+		else
+		{
+			board.makeMove(move);
+			assert(board.isValid());
+			move.staticEval = boardEvaluator.getScore(board, fastSqLookup);
+			board.unmakeMove(move);
+		}
+	}
+	assert(board.isValid());
 	std::sort(moves.begin(), moves.end());
 }
