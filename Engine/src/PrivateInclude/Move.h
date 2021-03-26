@@ -41,7 +41,7 @@ public:
 
 	bool operator < (const Move& other) const
 	{
-		return moveScore < other.moveScore;
+		return staticEval < other.staticEval;
 	}
 
 	Piece movingPiece = pieces::none;	
@@ -60,5 +60,6 @@ public:
 	bool prohibitsBKcastling = false; // Black king side.
 	bool prohibitsBQcastling = false; // Black queen side.
 
-	int32_t moveScore = 0;
+	// The static evaluation of the board when this move has been made.
+	int32_t staticEval = 0;
 };

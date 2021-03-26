@@ -1219,12 +1219,12 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 	int32_t bestScore = searchHelpers::minusInf;
 
 	auto& moves = getLegalMoves(board);
-	sortMoves(board, moves);
+	setStaticEvalAndSortMoves(board, moves);
 	for (const Move& m : moves)
 	{
 		board.makeMove(m);
 		info.nodesVisited++;
-		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, info);
+		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, m.staticEval, info);
 		if (score > bestScore)
 		{
 			bestScore = score;
@@ -1326,20 +1326,20 @@ int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchI
 }
 
 int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_t depth,
-	searchHelpers::SearchInfo& info) const
+	int32_t staticEval, searchHelpers::SearchInfo& info) const
 {
 	if (depth <= 0)
 	{
-		return alphaBetaQuiescence(board, alpha, beta, 0, info);
+		return alphaBetaQuiescence(board, alpha, beta, 0, staticEval, info);
 	}
 
 	auto& moves = getLegalMoves(board);
-	sortMoves(board, moves);
+	setStaticEvalAndSortMoves(board, moves);
 	for (const Move& move : moves)
 	{
 		board.makeMove(move);
 		info.nodesVisited++;
-		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, info);
+		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, move.staticEval, info);
 		board.unmakeMove(move);
 		if (score >= beta)
 		{
@@ -1357,32 +1357,34 @@ int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_
 }
 
 int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t beta,
-	int32_t currDepth, searchHelpers::SearchInfo& info) const
+	int32_t currDepth, int32_t staticEval, searchHelpers::SearchInfo& info) const
 {
 	if (currDepth > info.quiescenceMaxDepth)
 	{
 		info.quiescenceMaxDepth = currDepth;
 	}
 
-	const int32_t boardScore = boardEvaluator.getScore(board, fastSqLookup);
-	if (boardScore >= beta)
+	// Optimization: the staticEval was calculated one node above this during move sorting, so we
+	// don't have to call the evaluation function here again.
+	if (staticEval >= beta)
 	{
 		return beta;
 	}
 
-	if (alpha < boardScore)
+	if (alpha < staticEval)
 	{
-		alpha = boardScore;
+		alpha = staticEval;
 	}
 
 	auto& moves = getCaptureAndPromotionMoves(board);
-	sortMoves(board, moves);
+	setStaticEvalAndSortMoves(board, moves);
 	for (const Move& move : moves)
 	{
 		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
 		board.makeMove(move);
 		info.nodesVisited++;
-		const int32_t score = -alphaBetaQuiescence(board, -beta, -alpha, currDepth + 1, info);
+		const int32_t score = -alphaBetaQuiescence(board, -beta, -alpha, currDepth + 1,
+			move.staticEval, info);
 		board.unmakeMove(move);
 		if (score >= beta)
 		{
@@ -1399,12 +1401,12 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 	return alpha;
 }
 
-void Engine::sortMoves(BoardState& board, std::vector<Move>& moves) const
+void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves) const
 {
 	for (Move& move : moves)
 	{
 		board.makeMove(move);
-		move.moveScore = boardEvaluator.getScore(board, fastSqLookup);
+		move.staticEval = boardEvaluator.getScore(board, fastSqLookup);
 		board.unmakeMove(move);
 	}
 
