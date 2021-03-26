@@ -16,3 +16,12 @@ void TestsUtilities::logE(const std::string& msg)
 {
 	hceCommon::Logger::log(hceCommon::Logger::Type::Error, "Tests", msg);
 }
+
+bool TestsUtilities::isReleaseBuild()
+{
+#ifdef NDEBUG
+	return true;
+#else
+	return false;
+#endif
+}
