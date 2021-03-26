@@ -189,33 +189,7 @@ namespace moveGenerationHelpers
 		}
 
 		// Temporarily make the move, before looking if in check.
-		auto& pieces = board.getPieces();
-		pieces[move.fromSquare] = pieces::none;
-		if (move.capturedPiece != pieces::none)
-		{
-			pieces[move.capturedSquare] = pieces::none;
-		}
-
-		pieces[move.toSquare] = move.movingPiece;
-
-		// Handle rook move if casteling and set king square.
-		if (move.movingPiece == pieces::wK)
-		{
-			board.setWhiteKingSquare(move.toSquare);
-			if (move.fromSquare == squares::e1)
-			{
-				if (move.toSquare == squares::g1)
-				{
-					pieces[squares::h1] = pieces::none;
-					pieces[squares::f1] = pieces::wR;
-				}
-				else if (move.toSquare == squares::c1)
-				{
-					pieces[squares::a1] = pieces::none;
-					pieces[squares::d1] = pieces::wR;
-				}
-			}
-		}
+		board.makeMovePiecesOnly(move);
 
 		if (!isWhiteInCheck(board, lookup))
 		{
@@ -223,32 +197,7 @@ namespace moveGenerationHelpers
 		}
 
 		// Undo temporary move.
-		pieces[move.toSquare] = pieces::none;
-		if (move.capturedPiece != pieces::none)
-		{
-			pieces[move.capturedSquare] = move.capturedPiece;
-		}
-
-		pieces[move.fromSquare] = move.movingPiece;
-
-		// Undo rook move when casteling if this was a casteling move.
-		if (move.movingPiece == pieces::wK)
-		{
-			board.setWhiteKingSquare(move.fromSquare);
-			if (move.fromSquare == squares::e1)
-			{
-				if (move.toSquare == squares::g1)
-				{
-					pieces[squares::h1] = pieces::wR;
-					pieces[squares::f1] = pieces::none;
-				}
-				else if (move.toSquare == squares::c1)
-				{
-					pieces[squares::a1] = pieces::wR;
-					pieces[squares::d1] = pieces::none;
-				}
-			}
-		}
+		board.unmakeMovePiecesOnly(move);
 
 #ifndef NDEBUG
 		assert(boardPreMove.getPieces() == board.getPieces());
@@ -296,33 +245,7 @@ namespace moveGenerationHelpers
 		}
 
 		// Temporarily make the move, before looking if in check.
-		auto& pieces = board.getPieces();
-		pieces[move.fromSquare] = pieces::none;
-		if (move.capturedPiece != pieces::none)
-		{
-			pieces[move.capturedSquare] = pieces::none;
-		}
-		
-		pieces[move.toSquare] = move.movingPiece;
-
-		// Handle rook move if casteling.
-		if (move.movingPiece == pieces::bK)
-		{
-			board.setBlackKingSquare(move.toSquare);
-			if (move.fromSquare == squares::e8)
-			{
-				if (move.toSquare == squares::g8)
-				{
-					pieces[squares::h8] = pieces::none;
-					pieces[squares::f8] = pieces::bR;
-				}
-				else if (move.toSquare == squares::c8)
-				{
-					pieces[squares::a8] = pieces::none;
-					pieces[squares::d8] = pieces::bR;
-				}
-			}
-		}
+		board.makeMovePiecesOnly(move);
 
 		if (!isBlackInCheck(board, lookup))
 		{
@@ -330,32 +253,7 @@ namespace moveGenerationHelpers
 		}
 
 		// Undo temporary move.
-		pieces[move.toSquare] = pieces::none;
-		if (move.capturedPiece != pieces::none)
-		{
-			pieces[move.capturedSquare] = move.capturedPiece;
-		}
-
-		pieces[move.fromSquare] = move.movingPiece;
-
-		// Undo rook move when casteling if this was a casteling move.
-		if (move.movingPiece == pieces::bK)
-		{
-			board.setBlackKingSquare(move.fromSquare);
-			if (move.fromSquare == squares::e8)
-			{
-				if (move.toSquare == squares::g8)
-				{
-					pieces[squares::h8] = pieces::bR;
-					pieces[squares::f8] = pieces::none;
-				}
-				else if (move.toSquare == squares::c8)
-				{
-					pieces[squares::a8] = pieces::bR;
-					pieces[squares::d8] = pieces::none;
-				}
-			}
-		}
+		board.unmakeMovePiecesOnly(move);
 
 #ifndef NDEBUG
 		assert(boardPreMove.getPieces() == board.getPieces());

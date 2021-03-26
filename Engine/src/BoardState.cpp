@@ -500,6 +500,64 @@ void BoardState::unmakeMove(const Move& move)
 	turn = turn == Color::WHITE ? Color::BLACK : Color::WHITE;
 }
 
+void BoardState::makeMovePiecesOnly(const Move& move)
+{
+	pieces[move.fromSquare] = pieces::none;
+	if (move.capturedPiece != pieces::none)
+	{
+		pieces[move.capturedSquare] = pieces::none;
+	}
+
+	pieces[move.toSquare] = move.movingPiece;
+
+	// Handle rook move if casteling and set king square.
+	if (turn == pieces::Color::WHITE)
+	{
+		if (move.movingPiece == pieces::wK)
+		{
+			wKingSq = move.toSquare;
+			makeWhiteRookMoveIfCastling(move);
+		}
+	}
+	else
+	{
+		if (move.movingPiece == pieces::bK)
+		{
+			bKingSq = move.toSquare;
+			makeBlackRookMoveIfCastling(move);
+		}
+	}
+}
+
+void BoardState::unmakeMovePiecesOnly(const Move& move)
+{
+	pieces[move.toSquare] = pieces::none;
+	if (move.capturedPiece != pieces::none)
+	{
+		pieces[move.capturedSquare] = move.capturedPiece;
+	}
+
+	pieces[move.fromSquare] = move.movingPiece;
+
+	// Undo rook move when casteling if this was a casteling move.
+	if (turn == pieces::Color::WHITE)
+	{
+		if (move.movingPiece == pieces::wK)
+		{
+			wKingSq = move.fromSquare;
+			unmakeWhiteRookMoveIfCastling(move);
+		}
+	}
+	else
+	{
+		if (move.movingPiece == pieces::bK)
+		{
+			bKingSq = move.fromSquare;
+			unmakeBlackRookMoveIfCastling(move);
+		}
+	}
+}
+
 bool BoardState::isValid() const
 {
 	return isPieceCountValid(*this) && isEnPassantSqValid(*this) &&
@@ -534,44 +592,12 @@ void BoardState::makeKingMove(const Move& move)
 	if (turn == pieces::Color::WHITE)
 	{
 		wKingSq = move.toSquare;
-
-		// Perform casteling (rook only).
-		if (move.fromSquare == squares::e1)
-		{
-			if (move.toSquare == squares::g1)
-			{
-				assert(pieces[squares::h1] == pieces::wR);
-				pieces[squares::h1] = pieces::none;
-				pieces[squares::f1] = pieces::wR;
-			}
-			else if (move.toSquare == squares::c1)
-			{
-				assert(pieces[squares::a1] == pieces::wR);
-				pieces[squares::a1] = pieces::none;
-				pieces[squares::d1] = pieces::wR;
-			}
-		}
+		makeWhiteRookMoveIfCastling(move);
 	}
 	else
 	{
 		bKingSq = move.toSquare;
-
-		// Perform casteling (rook only).
-		if (move.fromSquare == squares::e8)
-		{
-			if (move.toSquare == squares::g8)
-			{
-				assert(pieces[squares::h8] == pieces::bR);
-				pieces[squares::h8] = pieces::none;
-				pieces[squares::f8] = pieces::bR;
-			}
-			else if (move.toSquare == squares::c8)
-			{
-				assert(pieces[squares::a8] == pieces::bR);
-				pieces[squares::a8] = pieces::none;
-				pieces[squares::d8] = pieces::bR;
-			}
-		}
+		makeBlackRookMoveIfCastling(move);
 	}
 
 	makeNonSpecializedMove(move);
@@ -583,47 +609,95 @@ void BoardState::unmakeKingMove(const Move& move)
 	if (turn == pieces::Color::BLACK)
 	{
 		wKingSq = move.fromSquare;
-
-		// Unmake casteling (rook only).
-		if (move.fromSquare == squares::e1)
-		{
-			if (move.toSquare == squares::g1)
-			{
-				assert(pieces[squares::h1] == pieces::none);
-				pieces[squares::h1] = pieces::wR;
-				pieces[squares::f1] = pieces::none;
-			}
-			else if (move.toSquare == squares::c1)
-			{
-				assert(pieces[squares::a1] == pieces::none);
-				pieces[squares::a1] = pieces::wR;
-				pieces[squares::d1] = pieces::none;
-			}
-		}
+		unmakeWhiteRookMoveIfCastling(move);
 	}
 	else
 	{
 		bKingSq = move.fromSquare;
-
-		// Unmake casteling (rook only).
-		if (move.fromSquare == squares::e8)
-		{
-			if (move.toSquare == squares::g8)
-			{
-				assert(pieces[squares::h8] == pieces::none);
-				pieces[squares::h8] = pieces::bR;
-				pieces[squares::f8] = pieces::none;
-			}
-			else if (move.toSquare == squares::c8)
-			{
-				assert(pieces[squares::a8] == pieces::none);
-				pieces[squares::a8] = pieces::bR;
-				pieces[squares::d8] = pieces::none;
-			}
-		}
+		unmakeBlackRookMoveIfCastling(move);
 	}
 
 	unmakeNonSpecializedMove(move);
+}
+
+void BoardState::makeWhiteRookMoveIfCastling(const Move& move)
+{
+	// Perform casteling (rook only).
+	if (move.fromSquare == squares::e1)
+	{
+		if (move.toSquare == squares::g1)
+		{
+			assert(pieces[squares::h1] == pieces::wR);
+			pieces[squares::h1] = pieces::none;
+			pieces[squares::f1] = pieces::wR;
+		}
+		else if (move.toSquare == squares::c1)
+		{
+			assert(pieces[squares::a1] == pieces::wR);
+			pieces[squares::a1] = pieces::none;
+			pieces[squares::d1] = pieces::wR;
+		}
+	}
+}
+
+void BoardState::makeBlackRookMoveIfCastling(const Move& move)
+{
+	// Perform casteling (rook only).
+	if (move.fromSquare == squares::e8)
+	{
+		if (move.toSquare == squares::g8)
+		{
+			assert(pieces[squares::h8] == pieces::bR);
+			pieces[squares::h8] = pieces::none;
+			pieces[squares::f8] = pieces::bR;
+		}
+		else if (move.toSquare == squares::c8)
+		{
+			assert(pieces[squares::a8] == pieces::bR);
+			pieces[squares::a8] = pieces::none;
+			pieces[squares::d8] = pieces::bR;
+		}
+	}
+}
+
+void BoardState::unmakeWhiteRookMoveIfCastling(const Move& move)
+{
+	// Unmake casteling (rook only).
+	if (move.fromSquare == squares::e1)
+	{
+		if (move.toSquare == squares::g1)
+		{
+			assert(pieces[squares::h1] == pieces::none);
+			pieces[squares::h1] = pieces::wR;
+			pieces[squares::f1] = pieces::none;
+		}
+		else if (move.toSquare == squares::c1)
+		{
+			assert(pieces[squares::a1] == pieces::none);
+			pieces[squares::a1] = pieces::wR;
+			pieces[squares::d1] = pieces::none;
+		}
+	}
+}
+
+void BoardState::unmakeBlackRookMoveIfCastling(const Move& move)
+{
+	// Unmake casteling (rook only).
+	if (move.fromSquare == squares::e8)
+	{
+		if (move.toSquare == squares::g8)
+		{
+			assert(pieces[squares::h8] == pieces::none);
+			pieces[squares::h8] = pieces::bR;
+			pieces[squares::f8] = pieces::none;
+		}
+		else if (move.toSquare == squares::c8)
+		{
+			assert(pieces[squares::a8] == pieces::none);
+			pieces[squares::a8] = pieces::bR;
+			pieces[squares::d8] = pieces::none;
+		}
+	}
 }
 
 void BoardState::makeNonSpecializedMove(const Move& move)

@@ -19,6 +19,11 @@ public:
 	void makeMove(const Move& move);
 	void unmakeMove(const Move& move);
 
+	// Note: these ONLY updates the pieces on the board, not e.g. en passant created squares,
+	// castling availability or even turn. Use with caution.
+	void makeMovePiecesOnly(const Move& move);
+	void unmakeMovePiecesOnly(const Move& move);
+
 	bool isValid() const;
 
 	pieces::Color getTurn() const
@@ -82,6 +87,12 @@ private:
 
 	void makeKingMove(const Move& move);
 	void unmakeKingMove(const Move& move);
+
+	void makeWhiteRookMoveIfCastling(const Move& move);
+	void makeBlackRookMoveIfCastling(const Move& move);
+
+	void unmakeWhiteRookMoveIfCastling(const Move& move);
+	void unmakeBlackRookMoveIfCastling(const Move& move);
 
 	// For any piece that is not a pawn, king or rook.
 	void makeNonSpecializedMove(const Move& move);
