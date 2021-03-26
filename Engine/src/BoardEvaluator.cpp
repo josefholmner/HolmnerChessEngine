@@ -346,6 +346,7 @@ int32_t BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const 
 
 bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
 {
+	assert(EngineUtilities::isNonNonePiece(move.movingPiece));
 	if (move.capturedPiece != pieces::none)
 	{
 		return false;
