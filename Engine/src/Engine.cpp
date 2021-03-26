@@ -1177,7 +1177,7 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 		return hceEngine::StaticEvaluationResult::Invalid;
 	}
 
-	const int32_t score = boardEvaluator.getScore(board, fastSqLookup);
+	const int32_t score = boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 	if (board.getTurn() == pieces::Color::WHITE)
 	{
 		if (score < 0) { return hceEngine::StaticEvaluationResult::BlackBetter; }
@@ -1306,7 +1306,7 @@ int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchI
 {
 	if (depth <= 0)
 	{
-		return boardEvaluator.getScore(board, fastSqLookup);
+		return boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 	}
 
 	int32_t bestScore = searchHelpers::minusInf;
@@ -1366,6 +1366,7 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 
 	// Optimization: the staticEval was calculated one node above this during move sorting, so we
 	// don't have to call the evaluation function here again.
+	assert(staticEval == boardEvaluator.getStaticEvaluation(board, fastSqLookup));
 	if (staticEval >= beta)
 	{
 		return beta;
@@ -1407,7 +1408,7 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	{
 		board.makeMove(move);
 		assert(board.isValid());
-		move.staticEval = boardEvaluator.getScore(board, fastSqLookup);
+		move.staticEval = boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 		board.unmakeMove(move);
 	}
 
@@ -1419,13 +1420,14 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 {
 	for (Move& move : moves)
 	{
-		if (boardEvaluator.canUseGetScoreDelta(move))
+		if (boardEvaluator.canUseGetStaticEvaluationDelta(move))
 		{
-			move.staticEval = -boardEvaluator.getScoreDelta(board, move) - staticEval;
+			move.staticEval =
+				-boardEvaluator.getStaticEvaluationDelta(board, move, fastSqLookup) - staticEval;
 
 #ifndef NDEBUG
 			board.makeMove(move);
-			assert(move.staticEval == boardEvaluator.getScore(board, fastSqLookup));
+			assert(move.staticEval == boardEvaluator.getStaticEvaluation(board, fastSqLookup));
 			board.unmakeMove(move);
 #endif
 		}
@@ -1433,7 +1435,7 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 		{
 			board.makeMove(move);
 			assert(board.isValid());
-			move.staticEval = boardEvaluator.getScore(board, fastSqLookup);
+			move.staticEval = boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 			board.unmakeMove(move);
 		}
 	}

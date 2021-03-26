@@ -32,7 +32,6 @@ namespace scoringConstants
 
 	static constexpr int32_t rookOpenFileVal = 10;
 
-	//static constexpr int32_t rookCoverValPerSquare = 1;
 	//static constexpr int32_t bishopCoverValPerSquare = 1;
 }
 
@@ -127,21 +126,7 @@ namespace
 		return num;
 	}
 
-	int32_t getWhiteBishopSquareCoverForwardsScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq)
-	{
-		return getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
-			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq);
-	}
-
-	int32_t getBlackBishopSquareCoverForwardsScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq)
-	{
-		return -getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
-			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
-	}
-
-	int32_t getWhiteBishopSquareCoverAllDirsScore(const BoardState& board, const FastSqLookup& lookup,
+	int32_t getWhiteBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
 		return getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
@@ -150,35 +135,13 @@ namespace
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
-	int32_t getBlackBishopSquareCoverAllDirsScore(const BoardState& board, const FastSqLookup& lookup,
+	int32_t getBlackBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
 		return -getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
-	}
-
-	int32_t getWhiteBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq, int32_t numBlackMajorPieces)
-	{
-		if (numBlackMajorPieces <= 1)
-		{
-			return getWhiteBishopSquareCoverAllDirsScore(board, lookup, sq);
-		}
-
-		return getWhiteBishopSquareCoverForwardsScore(board, lookup, sq);
-	}
-
-	int32_t getBlackBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
-		Square sq, int32_t numWhiteMajorPieces)
-	{
-		if (numWhiteMajorPieces <= 1)
-		{
-			return getBlackBishopSquareCoverAllDirsScore(board, lookup, sq);
-		}
-
-		return getBlackBishopSquareCoverForwardsScore(board, lookup, sq);
 	}
 
 	int32_t getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, int32_t val)
@@ -205,12 +168,14 @@ namespace
 		return count;
 	}
 
-	bool isKnightOrQueen(Piece piece)
+	bool isKnightBishopOrQueen(Piece piece)
 	{
 		switch (piece)
 		{
 			case pieces::wN:
 			case pieces::bN:
+			case pieces::wB:
+			case pieces::bB:
 			case pieces::wQ:
 			case pieces::bQ:
 				return true;
@@ -225,21 +190,17 @@ BoardEvaluator::BoardEvaluator()
 	init();
 }
 
-int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lookup) const
+int32_t BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const
 {
 	int32_t score = 0;
 	int32_t numWhiteMajorPieces = 0;
 	int32_t numBlackMajorPieces = 0;
 
-	// Theoretical max number of rooks or bishops is 10.
+	// Theoretical max number of rooks is 10.
 	static std::array<Square, 10> wRooks;
 	static std::array<Square, 10> bRooks;
-	static std::array<Square, 10> wBishops;
-	static std::array<Square, 10> bBishops;
 	int32_t wRookCnt = 0;
 	int32_t bRookCnt = 0;
-	int32_t wBishopCnt = 0;
-	int32_t bBishopCnt = 0;
 
 	std::array<bool, files::num> filesOccupiedBybP = { false };
 	std::array<bool, files::num> filesOccupiedBywP = { false };
@@ -270,9 +231,9 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 				score += wKnightStaticScores[sq];
 				break;
 			case pieces::wB:
-				wBishops[wBishopCnt++] = sq;
 				numWhiteMajorPieces++;
 				score += wBishopStaticScores[sq];
+				score += getWhiteBishopSquareCoverScore(board, lookup, sq);
 				break;
 			case pieces::wR:
 				numWhiteMajorPieces++;
@@ -305,9 +266,9 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 				score += bKnightStaticScores[sq];
 				break;
 			case pieces::bB:
-				bBishops[bBishopCnt++] = sq;
 				numBlackMajorPieces++;
 				score += bBishopStaticScores[sq];
+				score += getBlackBishopSquareCoverScore(board, lookup, sq);
 				break;
 			case pieces::bR:
 				bRooks[bRookCnt++] = sq;
@@ -345,16 +306,6 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 		}
 	}
 
-	// Give score for bishop square coverage.
-	for (int32_t i = 0; i < wBishopCnt; i++) {
-		score += getWhiteBishopSquareCoverScore(
-			board, lookup, wBishops[i], numBlackMajorPieces);
-	}
-	for (int32_t i = 0; i < bBishopCnt; i++) {
-		score += getBlackBishopSquareCoverScore(
-			board, lookup, bBishops[i], numWhiteMajorPieces);
-	}
-
 	// Punish pawn islands.
 	score -= getPawnIslandsVal(filesOccupiedBywP, scoringConstants::pawnIslandPunishmentVal);
 	score += getPawnIslandsVal(filesOccupiedBybP, scoringConstants::pawnIslandPunishmentVal);
@@ -364,17 +315,23 @@ int32_t BoardEvaluator::getScore(const BoardState& board, const FastSqLookup& lo
 	return board.getTurn() == pieces::Color::WHITE ? score : -score;
 }
 
-int32_t BoardEvaluator::getScoreDelta(const BoardState& board, const Move& move) const
+int32_t BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const Move& move,
+	const FastSqLookup& lookup) const
 {
-	assert(canUseGetScoreDelta(move));
+	assert(canUseGetStaticEvaluationDelta(move));
 
-	return board.getTurn() == pieces::Color::WHITE ?
-		getPieceMoveQuickScore(move) : -getPieceMoveQuickScore(move);
+	const int32_t delta = getPieceMoveQuickScore(board, move, lookup);
+	return board.getTurn() == pieces::Color::WHITE ? delta : -delta;
 }
 
-bool BoardEvaluator::canUseGetScoreDelta(const Move& move) const
+bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
 {
-	return isKnightOrQueen(move.movingPiece) && move.capturedPiece == pieces::none;
+	if (move.capturedPiece != pieces::none)
+	{
+		return false;
+	}
+
+	return isKnightBishopOrQueen(move.movingPiece);
 }
 
 void BoardEvaluator::init()
@@ -509,9 +466,10 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 	return score;
 }
 
-int32_t BoardEvaluator::getPieceMoveQuickScore(const Move& move) const
+int32_t BoardEvaluator::getPieceMoveQuickScore(const BoardState& board, const Move& move,
+	const FastSqLookup& lookup) const
 {
-	assert(canUseGetScoreDelta(move));
+	assert(canUseGetStaticEvaluationDelta(move));
 
 	switch (move.movingPiece)
 	{
@@ -519,6 +477,10 @@ int32_t BoardEvaluator::getPieceMoveQuickScore(const Move& move) const
 			return wKnightStaticScores[move.toSquare] - wKnightStaticScores[move.fromSquare];
 		case pieces::bN:
 			return bKnightStaticScores[move.toSquare] - bKnightStaticScores[move.fromSquare];
+		case pieces::wB:
+			return getWhiteBishopMoveQuickScore(board, move, lookup);
+		case pieces::bB:
+			return getBlackBishopMoveQuickScore(board, move, lookup);
 		case pieces::wQ:
 			return wQueenStaticScores[move.toSquare] - wQueenStaticScores[move.fromSquare];
 		case pieces::bQ:
@@ -527,4 +489,22 @@ int32_t BoardEvaluator::getPieceMoveQuickScore(const Move& move) const
 			EngineUtilities::logE("Piece passed to getPieceMoveQuickScore that cannot be used.");
 			return 0;
 	}
+}
+
+int32_t BoardEvaluator::getWhiteBishopMoveQuickScore(const BoardState& board, const Move& move,
+	const FastSqLookup& lookup) const
+{
+	int32_t score = wBishopStaticScores[move.toSquare] - wBishopStaticScores[move.fromSquare];
+	score += getWhiteBishopSquareCoverScore(board, lookup, move.toSquare);
+	score -= getWhiteBishopSquareCoverScore(board, lookup, move.fromSquare);
+	return score;
+}
+
+int32_t BoardEvaluator::getBlackBishopMoveQuickScore(const BoardState& board, const Move& move,
+	const FastSqLookup& lookup) const
+{
+	int32_t score = bBishopStaticScores[move.toSquare] - bBishopStaticScores[move.fromSquare];
+	score += getBlackBishopSquareCoverScore(board, lookup, move.toSquare);
+	score -= getBlackBishopSquareCoverScore(board, lookup, move.fromSquare);
+	return score;
 }
