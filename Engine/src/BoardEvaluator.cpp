@@ -336,11 +336,11 @@ int32_t BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastS
 }
 
 int32_t BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const Move& move,
-	const FastSqLookup& lookup) const
+	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	assert(canUseGetStaticEvaluationDelta(move));
 
-	const int32_t delta = getPieceMoveQuickScore(board, move, lookup);
+	const int32_t delta = getPieceMoveQuickScore(board, move, preMoveInfo, lookup);
 	return board.getTurn() == pieces::Color::WHITE ? delta : -delta;
 }
 
@@ -353,6 +353,15 @@ bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
 	}
 
 	return isNonPawnNonKing(move.movingPiece);
+}
+
+BoardEvaluator::PreMoveInfo BoardEvaluator::createPreMoveInfo(const BoardState& board)
+{
+	const Piece pawn = board.getTurn() == pieces::Color::WHITE ? pieces::wP : pieces::bP;
+	
+	PreMoveInfo info;
+	info.movingSidePawnsFileOccupation = getFilesOccupiedByPawn(board, pawn);
+	return info;
 }
 
 void BoardEvaluator::init()
@@ -488,7 +497,7 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 }
 
 int32_t BoardEvaluator::getPieceMoveQuickScore(const BoardState& board, const Move& move,
-	const FastSqLookup& lookup) const
+	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	assert(canUseGetStaticEvaluationDelta(move));
 
@@ -503,9 +512,9 @@ int32_t BoardEvaluator::getPieceMoveQuickScore(const BoardState& board, const Mo
 		case pieces::bB:
 			return getBlackBishopMoveQuickScore(board, move, lookup);
 		case pieces::wR:
-			return getWhiteRookMoveQuickScore(board, move, lookup);
+			return getWhiteRookMoveQuickScore(board, move, preMoveInfo, lookup);
 		case pieces::bR:
-			return getBlackRookMoveQuickScore(board, move, lookup);
+			return getBlackRookMoveQuickScore(board, move, preMoveInfo, lookup);
 		case pieces::wQ:
 			return wQueenStaticScores[move.toSquare] - wQueenStaticScores[move.fromSquare];
 		case pieces::bQ:
@@ -534,21 +543,20 @@ int32_t BoardEvaluator::getBlackBishopMoveQuickScore(const BoardState& board, co
 	return score;
 }
 
-int32_t BoardEvaluator::getWhiteRookMoveQuickScore(const BoardState& board, const Move& move, const FastSqLookup& lookup) const
+int32_t BoardEvaluator::getWhiteRookMoveQuickScore(const BoardState& board, const Move& move,
+	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	int32_t score = wRookStaticScores[move.toSquare] - wRookStaticScores[move.fromSquare];
 
 	// Handle change in open file score.
 	const File newFile = files::toFile(move.toSquare);
 	const File oldFile = files::toFile(move.fromSquare);
-	const std::array<bool, files::num> filesOccupiedBywPawns =
-		getFilesOccupiedByPawn(board, pieces::wP);
-	if (!filesOccupiedBywPawns[newFile])
+	if (!preMoveInfo.movingSidePawnsFileOccupation[newFile])
 	{
 		score += scoringConstants::rookOpenFileVal;
 	}
 
-	if (!filesOccupiedBywPawns[oldFile])
+	if (!preMoveInfo.movingSidePawnsFileOccupation[oldFile])
 	{
 		score -= scoringConstants::rookOpenFileVal;
 	}
@@ -556,21 +564,20 @@ int32_t BoardEvaluator::getWhiteRookMoveQuickScore(const BoardState& board, cons
 	return score;
 }
 
-int32_t BoardEvaluator::getBlackRookMoveQuickScore(const BoardState& board, const Move& move, const FastSqLookup& lookup) const
+int32_t BoardEvaluator::getBlackRookMoveQuickScore(const BoardState& board, const Move& move,
+	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	int32_t score = bRookStaticScores[move.toSquare] - bRookStaticScores[move.fromSquare];
 
 	// Handle change in open file score.
 	const File newFile = files::toFile(move.toSquare);
 	const File oldFile = files::toFile(move.fromSquare);
-	const std::array<bool, files::num> filesOccupiedBybPawns =
-		getFilesOccupiedByPawn(board, pieces::bP);
-	if (!filesOccupiedBybPawns[newFile])
+	if (!preMoveInfo.movingSidePawnsFileOccupation[newFile])
 	{
 		score -= scoringConstants::rookOpenFileVal;
 	}
 
-	if (!filesOccupiedBybPawns[oldFile])
+	if (!preMoveInfo.movingSidePawnsFileOccupation[oldFile])
 	{
 		score += scoringConstants::rookOpenFileVal;
 	}

@@ -1470,12 +1470,18 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 
 void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves, int32_t staticEval) const
 {
+	if (moves.size() == 0)
+	{
+		return;
+	}
+
+	const auto preMoveInfo = boardEvaluator.createPreMoveInfo(board);
 	for (Move& move : moves)
 	{
 		if (boardEvaluator.canUseGetStaticEvaluationDelta(move))
 		{
-			move.staticEval =
-				-boardEvaluator.getStaticEvaluationDelta(board, move, fastSqLookup) - staticEval;
+			move.staticEval = -boardEvaluator.getStaticEvaluationDelta(
+				board, move, preMoveInfo, fastSqLookup) - staticEval;
 
 #ifndef NDEBUG
 			board.makeMove(move);
