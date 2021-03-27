@@ -27,6 +27,18 @@ public:
 
 private:
 	std::vector<Move> getCaptureAndPromotionMoves(BoardState& board) const;
+
+	// Includes moves that causes moving side to in check after the move, i.e. pseudo-legal.
+	std::vector<Move> getPseudoLegalMoves(BoardState& board) const;
+	std::vector<Move> getPseudoLegalCaptureAndPromotionMoves(BoardState& board) const;
+
+	// Convenient tester-functions that checks that the pseudo-legal move generation is correct.
+	// Only to be used in testing situations, e.g. in debug builds.
+	bool dbgTestPseudoLegalMoveGeneration(BoardState& board,
+		const std::vector<Move>& pseudoLegalMoves, bool wasInCheckPreMove) const;
+	bool dbgTestPseudoLegalCaptAndPromotMoveGeneration(BoardState& board,
+		const std::vector<Move>& pseudoLegalMoves, bool wasInCheckPreMove) const;
+
 	
 	int32_t negaMax(BoardState& board, int32_t depth, searchHelpers::SearchInfo& info) const;
 	
@@ -38,8 +50,8 @@ private:
 	
 	void setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves) const;
 	
-	// Tries to use the fast score delta scheme offered by the BoardEvaluator. A valid static
-	// evaluation score must be provided to use this function!
+	// Tries to use the fast evaluation delta scheme offered by the BoardEvaluator. A valid pre-move
+	// static evaluation score must be provided to use this function!
 	void setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
 		int32_t staticEval) const;
 
