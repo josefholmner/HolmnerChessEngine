@@ -44,6 +44,17 @@ namespace
 		printResut("Mid-game position", res, midgameTime);
 	}
 
+	void testLateMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	{
+		// Test late mid-game position (fast) alpha-beta with quiescence search performance.
+		hceCommon::Stopwatch stopwatch;
+		static const std::string lateMidgamePos = "4r1k1/p4ppp/1rp1pnb1/3p4/P2P4/2QBP3/1PPN1PPP/6K1 w - - 0 1";
+		stopwatch.start();
+		const auto res = engine.getBestMove(lateMidgamePos, depth);
+		const int32_t lateMidgameTime = stopwatch.getMilliseconds();
+		printResut("Late mid-game position", res, lateMidgameTime);
+	}
+
 	void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
 	{
 		// Test starting position (fast) alpha-beta with quiescence search performance.
@@ -62,10 +73,12 @@ void GetBestMovePerformanceTests::Run()
 	hceEngine::EngineAPI engine;
 
 	static const int32_t startPosDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
-	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 7 : 4;
-	static const int32_t endgameDepth = TestsUtilities::isReleaseBuild() ? 9 : 6;
+	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
+	static const int32_t lateMidgameDepth = TestsUtilities::isReleaseBuild() ? 9 : 5;
+	static const int32_t endgameDepth = TestsUtilities::isReleaseBuild() ? 10 : 7;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
+	testLateMidGameAnalysisPerformance(engine, lateMidgameDepth);
 	testEndGameAnalysisPerformance(engine, endgameDepth);
 
 	TestsUtilities::log("All get best move performance tests done.");
