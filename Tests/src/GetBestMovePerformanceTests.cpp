@@ -75,7 +75,7 @@ void GetBestMovePerformanceTests::Run()
 	static const int32_t startPosDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
 	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
 	static const int32_t lateMidgameDepth = TestsUtilities::isReleaseBuild() ? 9 : 5;
-	static const int32_t endgameDepth = TestsUtilities::isReleaseBuild() ? 10 : 7;
+	static const int32_t endgameDepth = TestsUtilities::isReleaseBuild() ? 10 : 6;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
 	testLateMidGameAnalysisPerformance(engine, lateMidgameDepth);

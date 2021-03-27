@@ -11,12 +11,12 @@ namespace
 	void printResut(const std::string& positionName, const hceEngine::SearchResult& result,
 		int32_t milliseconds)
 	{
-		const int32_t leafNodes = result.engineInfo.nodesVisited;
+		const int32_t nodes = result.engineInfo.nodesVisited;
 		TestsUtilities::log(positionName + " analyzed with minimax to to depth: " +
 			std::to_string(result.engineInfo.depthsCompletelyCovered) + " took: " +
 			std::to_string(milliseconds) + "ms.\nNumber of nodes visited: " +
-			std::to_string(leafNodes) +
-			+" which is: " + std::to_string((leafNodes / std::max(milliseconds, 1)) * 1000) + " nodes "
+			std::to_string(nodes) +
+			+" which is: " + std::to_string((nodes / std::max(milliseconds, 1)) * 1000) + " nodes "
 			+ "visited per second.\n");
 	}
 
