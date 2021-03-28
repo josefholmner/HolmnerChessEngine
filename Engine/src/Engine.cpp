@@ -183,9 +183,9 @@ namespace moveGenerationHelpers
 		}
 
 		// Above optimizations failed, temporarily make the move, and look for check.
-		board.makeMovePiecesOnly(move);
+		board.makeMove(move);
 		const bool causesCheck = isWhiteInCheck(board, fastSqLookup);
-		board.unmakeMovePiecesOnly(move);
+		board.unmakeMove(move);
 		return causesCheck;
 	}
 
@@ -212,9 +212,9 @@ namespace moveGenerationHelpers
 		}
 
 		// Above optimizations failed, temporarily make the move, and look for check.
-		board.makeMovePiecesOnly(move);
+		board.makeMove(move);
 		const bool causesCheck = isBlackInCheck(board, fastSqLookup);
-		board.unmakeMovePiecesOnly(move);
+		board.unmakeMove(move);
 		return causesCheck;
 	}
 
@@ -263,26 +263,17 @@ namespace moveGenerationHelpers
 			return;
 		}
 
+#ifndef NDEBUG
+		const BoardState boardPreMove = board;
+#endif
+
 		if (doesWhiteMoveCauseMovingSideCheck(board, lookup.fSqL, move, lookup.movingSideInCheckPreMove))
 		{
 			// Filter out any moves that causes moving-side check since that is an invalid move.
 			return;
 		}
-		
-#ifndef NDEBUG
-		const BoardState boardPreMove = board;
-#endif
 
-		// Temporarily make the move, before looking if in check.
-		board.makeMovePiecesOnly(move);
-
-		if (!isWhiteInCheck(board, lookup.fSqL))
-		{
-			moves.push_back(move);
-		}
-
-		// Undo temporary move.
-		board.unmakeMovePiecesOnly(move);
+		moves.push_back(move);
 
 #ifndef NDEBUG
 		assert(boardPreMove.getPieces() == board.getPieces());
@@ -304,26 +295,18 @@ namespace moveGenerationHelpers
 			return;
 		}
 
+
+#ifndef NDEBUG
+		const BoardState boardPreMove = board;
+#endif
+
 		if (doesBlackMoveCauseMovingSideCheck(board, lookup.fSqL, move, lookup.movingSideInCheckPreMove))
 		{
 			// Filter out any moves that causes moving-side check since that is an invalid move.
 			return;
 		}
 
-#ifndef NDEBUG
-		const BoardState boardPreMove = board;
-#endif
-
-		// Temporarily make the move, before looking if in check.
-		board.makeMovePiecesOnly(move);
-
-		if (!isBlackInCheck(board, lookup.fSqL))
-		{
-			moves.push_back(move);
-		}
-
-		// Undo temporary move.
-		board.unmakeMovePiecesOnly(move);
+		moves.push_back(move);
 
 #ifndef NDEBUG
 		assert(boardPreMove.getPieces() == board.getPieces());
