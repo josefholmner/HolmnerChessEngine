@@ -22,7 +22,7 @@ public:
 	
 	struct PreMoveInfo
 	{
-		std::array<bool, files::num> movingSidePawnsFileOccupation;
+		std::array<bool, files::num> movingSidePawnsFileOccupation = { false };
 	};
 
 	// For some moves (NOT all!), the change in board static evaluation score that the move will cause
@@ -52,17 +52,17 @@ private:
 	int32_t getWhiteKingScore(const BoardState& board, int32_t numBlackMajorPieces) const;
 	int32_t getBlackKingScore(const BoardState& board, int32_t numWhiteMajorPieces) const;
 
-	int32_t getPieceMoveQuickScore(const BoardState& board, const Move& move,
+	int32_t getPieceMoveDeltaScore(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
 	
-	int32_t getWhiteBishopMoveQuickScore(const BoardState& board, const Move& move,
+	int32_t getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
-	int32_t getBlackBishopMoveQuickScore(const BoardState& board, const Move& move,
+	int32_t getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
 
-	int32_t getWhiteRookMoveQuickScore(const BoardState& board, const Move& move,
+	int32_t getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
-	int32_t getBlackRookMoveQuickScore(const BoardState& board, const Move& move,
+	int32_t getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
 
 	std::array<int32_t, squares::num> wQueenStaticScores;

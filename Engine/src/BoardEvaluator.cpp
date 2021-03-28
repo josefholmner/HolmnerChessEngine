@@ -24,6 +24,10 @@ namespace scoringConstants
 	static constexpr int32_t pawnProtectingKing1RankAwayVal = 18;
 	static constexpr int32_t pawnProtectingKing2RanksAwayVal = 8;
 
+	// The minimum number of opponent major pieces that has to be on the board for the king to
+	// be rewarded to be "hidden" to the side of the board behind pawns.
+	static constexpr int32_t minNumOpponentMajorPieceRewardKingSafety = 2;
+
 	static constexpr int32_t pawnAtCenterAdditionalVal = 3;
 	static constexpr int32_t pawnAtEdgeOfCenterAdditionalVal = 1;
 
@@ -144,26 +148,22 @@ namespace
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
-	const std::array<bool, files::num> getFilesOccupiedByPawn(const BoardState& board,
-		Piece pawn)
+	BoardEvaluator::PreMoveInfo createFromMovingSidePawn(const BoardState& board, Piece movingSidePawn)
 	{
-		assert(isPawn(pawn));
-		std::array<bool, files::num> filesOccupied = { false };
+		BoardEvaluator::PreMoveInfo info;
 
-		// Pawns never occupy first or last rank, so we don't have to iterate over those squares.
 		for (Square sq = squares::a2; sq <= squares::h7; sq++)
 		{
 			assert(EngineUtilities::isValidPiece(board.getPiece(sq)));
 			assert(EngineUtilities::isNonNoneSquare(sq));
 
-			if (board.getPiece(sq) == pawn)
+			if (board.getPiece(sq) == movingSidePawn)
 			{
-				const File file = files::toFile(sq);
-				filesOccupied[file] = true;
+				info.movingSidePawnsFileOccupation[files::toFile(sq)] = true;
 			}
 		}
 
-		return filesOccupied;
+		return info;
 	}
 
 	int32_t getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, int32_t val)
@@ -340,13 +340,14 @@ int32_t BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const 
 {
 	assert(canUseGetStaticEvaluationDelta(move));
 
-	const int32_t delta = getPieceMoveQuickScore(board, move, preMoveInfo, lookup);
+	const int32_t delta = getPieceMoveDeltaScore(board, move, preMoveInfo, lookup);
 	return board.getTurn() == pieces::Color::WHITE ? delta : -delta;
 }
 
 bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
 {
 	assert(EngineUtilities::isNonNonePiece(move.movingPiece));
+
 	if (move.capturedPiece != pieces::none)
 	{
 		return false;
@@ -357,11 +358,8 @@ bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
 
 BoardEvaluator::PreMoveInfo BoardEvaluator::createPreMoveInfo(const BoardState& board)
 {
-	const Piece pawn = board.getTurn() == pieces::Color::WHITE ? pieces::wP : pieces::bP;
-	
-	PreMoveInfo info;
-	info.movingSidePawnsFileOccupation = getFilesOccupiedByPawn(board, pawn);
-	return info;
+	const Piece movingSidePawn = board.getTurn() == pieces::Color::WHITE ? pieces::wP : pieces::bP;
+	return createFromMovingSidePawn(board, movingSidePawn);
 }
 
 void BoardEvaluator::init()
@@ -410,7 +408,7 @@ int32_t BoardEvaluator::getWhiteKingScore(const BoardState& board, int32_t numBl
 {
 	using namespace scoringConstants;
 
-	if (numBlackMajorPieces <= 1)
+	if (numBlackMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
 	{
 		return wKingEndgameStaticScores[board.getWhiteKingSquare()];
 	}
@@ -455,7 +453,7 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 {
 	using namespace scoringConstants;
 
-	if (numWhiteMajorPieces <= 1)
+	if (numWhiteMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
 	{
 		return -wKingEndgameStaticScores[board.getBlackKingSquare()];
 	}
@@ -496,7 +494,7 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 	return score;
 }
 
-int32_t BoardEvaluator::getPieceMoveQuickScore(const BoardState& board, const Move& move,
+int32_t BoardEvaluator::getPieceMoveDeltaScore(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	assert(canUseGetStaticEvaluationDelta(move));
@@ -508,24 +506,24 @@ int32_t BoardEvaluator::getPieceMoveQuickScore(const BoardState& board, const Mo
 		case pieces::bN:
 			return bKnightStaticScores[move.toSquare] - bKnightStaticScores[move.fromSquare];
 		case pieces::wB:
-			return getWhiteBishopMoveQuickScore(board, move, lookup);
+			return getWhiteBishopMoveDeltaScore(board, move, lookup);
 		case pieces::bB:
-			return getBlackBishopMoveQuickScore(board, move, lookup);
+			return getBlackBishopMoveDeltaScore(board, move, lookup);
 		case pieces::wR:
-			return getWhiteRookMoveQuickScore(board, move, preMoveInfo, lookup);
+			return getWhiteRookMoveDeltaScore(board, move, preMoveInfo, lookup);
 		case pieces::bR:
-			return getBlackRookMoveQuickScore(board, move, preMoveInfo, lookup);
+			return getBlackRookMoveDeltaScore(board, move, preMoveInfo, lookup);
 		case pieces::wQ:
 			return wQueenStaticScores[move.toSquare] - wQueenStaticScores[move.fromSquare];
 		case pieces::bQ:
 			return bQueenStaticScores[move.toSquare] - bQueenStaticScores[move.fromSquare];
 		default:
-			EngineUtilities::logE("Piece passed to getPieceMoveQuickScore that cannot be used.");
+			EngineUtilities::logE("Piece passed to getPieceMoveDeltaScore that cannot be used.");
 			return 0;
 	}
 }
 
-int32_t BoardEvaluator::getWhiteBishopMoveQuickScore(const BoardState& board, const Move& move,
+int32_t BoardEvaluator::getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
 	const FastSqLookup& lookup) const
 {
 	int32_t score = wBishopStaticScores[move.toSquare] - wBishopStaticScores[move.fromSquare];
@@ -534,7 +532,7 @@ int32_t BoardEvaluator::getWhiteBishopMoveQuickScore(const BoardState& board, co
 	return score;
 }
 
-int32_t BoardEvaluator::getBlackBishopMoveQuickScore(const BoardState& board, const Move& move,
+int32_t BoardEvaluator::getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
 	const FastSqLookup& lookup) const
 {
 	int32_t score = bBishopStaticScores[move.toSquare] - bBishopStaticScores[move.fromSquare];
@@ -543,7 +541,7 @@ int32_t BoardEvaluator::getBlackBishopMoveQuickScore(const BoardState& board, co
 	return score;
 }
 
-int32_t BoardEvaluator::getWhiteRookMoveQuickScore(const BoardState& board, const Move& move,
+int32_t BoardEvaluator::getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	int32_t score = wRookStaticScores[move.toSquare] - wRookStaticScores[move.fromSquare];
@@ -564,7 +562,7 @@ int32_t BoardEvaluator::getWhiteRookMoveQuickScore(const BoardState& board, cons
 	return score;
 }
 
-int32_t BoardEvaluator::getBlackRookMoveQuickScore(const BoardState& board, const Move& move,
+int32_t BoardEvaluator::getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	int32_t score = bRookStaticScores[move.toSquare] - bRookStaticScores[move.fromSquare];
