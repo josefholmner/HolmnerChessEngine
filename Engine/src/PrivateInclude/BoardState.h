@@ -19,11 +19,6 @@ public:
 	void makeMove(const Move& move);
 	void unmakeMove(const Move& move);
 
-	// Note: these ONLY updates the pieces on the board, not e.g. en passant created squares,
-	// castling availability or even turn. Use with caution.
-	void makeMovePiecesOnly(const Move& move);
-	void unmakeMovePiecesOnly(const Move& move);
-
 	bool isValid() const;
 
 	pieces::Color getTurn() const

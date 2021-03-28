@@ -500,64 +500,6 @@ void BoardState::unmakeMove(const Move& move)
 	turn = turn == Color::WHITE ? Color::BLACK : Color::WHITE;
 }
 
-void BoardState::makeMovePiecesOnly(const Move& move)
-{
-	pieces[move.fromSquare] = pieces::none;
-	if (move.capturedPiece != pieces::none)
-	{
-		pieces[move.capturedSquare] = pieces::none;
-	}
-
-	pieces[move.toSquare] = move.movingPiece;
-
-	// Handle rook move if casteling and set king square.
-	if (turn == pieces::Color::WHITE)
-	{
-		if (move.movingPiece == pieces::wK)
-		{
-			wKingSq = move.toSquare;
-			makeWhiteRookMoveIfCastling(move);
-		}
-	}
-	else
-	{
-		if (move.movingPiece == pieces::bK)
-		{
-			bKingSq = move.toSquare;
-			makeBlackRookMoveIfCastling(move);
-		}
-	}
-}
-
-void BoardState::unmakeMovePiecesOnly(const Move& move)
-{
-	pieces[move.toSquare] = pieces::none;
-	if (move.capturedPiece != pieces::none)
-	{
-		pieces[move.capturedSquare] = move.capturedPiece;
-	}
-
-	pieces[move.fromSquare] = move.movingPiece;
-
-	// Undo rook move when casteling if this was a casteling move.
-	if (turn == pieces::Color::WHITE)
-	{
-		if (move.movingPiece == pieces::wK)
-		{
-			wKingSq = move.fromSquare;
-			unmakeWhiteRookMoveIfCastling(move);
-		}
-	}
-	else
-	{
-		if (move.movingPiece == pieces::bK)
-		{
-			bKingSq = move.fromSquare;
-			unmakeBlackRookMoveIfCastling(move);
-		}
-	}
-}
-
 bool BoardState::isValid() const
 {
 	return isPieceCountValid(*this) && isEnPassantSqValid(*this) &&
