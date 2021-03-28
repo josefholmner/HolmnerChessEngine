@@ -30,13 +30,10 @@ private:
 
 	// Includes moves that causes moving side to in check after the move, i.e. pseudo-legal.
 	std::vector<Move> getPseudoLegalMoves(BoardState& board) const;
-	std::vector<Move> getPseudoLegalCaptureAndPromotionMoves(BoardState& board) const;
 
 	// Convenient tester-functions that checks that the pseudo-legal move generation is correct.
 	// Only to be used in testing situations, e.g. in debug builds.
 	bool dbgTestPseudoLegalMoveGeneration(BoardState& board,
-		const std::vector<Move>& pseudoLegalMoves, bool wasInCheckPreMove) const;
-	bool dbgTestPseudoLegalCaptAndPromotMoveGeneration(BoardState& board,
 		const std::vector<Move>& pseudoLegalMoves, bool wasInCheckPreMove) const;
 
 	

@@ -1272,21 +1272,6 @@ std::vector<Move> Engine::getPseudoLegalMoves(BoardState& board) const
 	}
 }
 
-std::vector<Move> Engine::getPseudoLegalCaptureAndPromotionMoves(BoardState& board) const
-{
-	using namespace moveGenerationHelpers;
-	if (board.getTurn() == pieces::Color::WHITE)
-	{
-		return getLegalWhiteMoves(board, fastSqLookup, TypeFilter::CaptAndPromot,
-			LegalityFilter::PseudoLegal);
-	}
-	else
-	{
-		return getLegalBlackMoves(board, fastSqLookup, TypeFilter::CaptAndPromot,
-			LegalityFilter::PseudoLegal);
-	}
-}
-
 bool Engine::dbgTestPseudoLegalMoveGeneration(BoardState& board,
 	const std::vector<Move>& pseudoLegalMoves, bool wasInCheckPreMove) const
 {
@@ -1301,22 +1286,6 @@ bool Engine::dbgTestPseudoLegalMoveGeneration(BoardState& board,
 	}
 
 	return numLegal == getLegalMoves(board).size();
-}
-
-bool Engine::dbgTestPseudoLegalCaptAndPromotMoveGeneration(BoardState& board,
-	const std::vector<Move>& pseudoLegalMoves, bool wasInCheckPreMove) const
-{
-	int32_t numLegal = 0;
-	for (const auto& pseudoLegalMove : pseudoLegalMoves)
-	{
-		if (!moveGenerationHelpers::doesMoveCauseMovingSideCheck(
-			board, fastSqLookup, pseudoLegalMove, wasInCheckPreMove))
-		{
-			numLegal++;
-		}
-	}
-
-	return numLegal == getCaptureAndPromotionMoves(board).size();
 }
 
 int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchInfo& info) const
@@ -1404,18 +1373,10 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 		alpha = staticEval;
 	}
 
-	auto& moves = getPseudoLegalCaptureAndPromotionMoves(board);
-	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
-	assert(dbgTestPseudoLegalCaptAndPromotMoveGeneration(board, moves, inCheckPreMove));
+	auto& moves = getCaptureAndPromotionMoves(board);
 	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 	for (const Move& move : moves)
 	{
-		if (doesMoveCauseMovingSideCheck(board, fastSqLookup, move, inCheckPreMove))
-		{
-			// Filter out non-legal moves (thouse causing moveing side checks).
-			continue;
-		}
-
 		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
 		board.makeMove(move);
 		info.nodesVisited++;
