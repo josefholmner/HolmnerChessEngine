@@ -1374,7 +1374,7 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 	}
 
 	auto& moves = getCaptureAndPromotionMoves(board);
-	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
+	setStaticEvalAndSortMoves(board, moves);
 	for (const Move& move : moves)
 	{
 		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
