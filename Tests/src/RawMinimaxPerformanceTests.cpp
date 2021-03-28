@@ -49,7 +49,7 @@ void RawMinimaxPerformanceTests::Run()
 	hceEngine::EngineAPI engine;
 
 	static const int32_t startPosDepth = TestsUtilities::isReleaseBuild() ? 5 : 4;
-	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 5 : 4;
+	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 5 : 3;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
 
