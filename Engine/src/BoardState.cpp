@@ -368,7 +368,9 @@ namespace
 
 BoardState::BoardState(bool reserveTranspositionTable)
 {
+#ifdef NDEBUG
 	transpositionTable.reserve(transpositionTableMaxLength);
+#endif
 }
 
 bool BoardState::initFromFEN(const std::string& FEN)
