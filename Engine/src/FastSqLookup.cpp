@@ -12,7 +12,7 @@ namespace
 		Square jump;
 	};
 
-	void sweepSearch(const SweepSearchParams& params, Square sq, int32_t distance,
+	void sweepSearch(const SweepSearchParams& params, Square sq, Square distance,
 		std::vector<Square>& outSqs)
 	{
 		const Rank rank = ranks::toRank(sq);

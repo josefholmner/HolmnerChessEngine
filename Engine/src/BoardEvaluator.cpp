@@ -7,41 +7,41 @@
 
 namespace scoringConstants
 {
-	static constexpr int32_t rankScoreMin = 0;
-	static constexpr int32_t fileScoreMin = 0;
+	static constexpr Score rankScoreMin = 0;
+	static constexpr Score fileScoreMin = 0;
 
 	// How much more a square on a rank or file 1 rank or file closer to the board center is worth.
-	static constexpr int32_t rankScoreJump = 2;
-	static constexpr int32_t fileScoreJump = 2;
+	static constexpr Score rankScoreJump = 2;
+	static constexpr Score fileScoreJump = 2;
 
-	static constexpr int32_t pBaseVal = 20;
-	static constexpr int32_t nBaseVal = pBaseVal * 3;
-	static constexpr int32_t bBaseVal = pBaseVal * 3;
-	static constexpr int32_t rBaseVal = pBaseVal * 5;
-	static constexpr int32_t qBaseVal = pBaseVal * 9;
+	static constexpr Score pBaseVal = 20;
+	static constexpr Score nBaseVal = pBaseVal * 3;
+	static constexpr Score bBaseVal = pBaseVal * 3;
+	static constexpr Score rBaseVal = pBaseVal * 5;
+	static constexpr Score qBaseVal = pBaseVal * 9;
 
-	static constexpr int32_t kingToTheSideVal = 18;
-	static constexpr int32_t pawnProtectingKing1RankAwayVal = 18;
-	static constexpr int32_t pawnProtectingKing2RanksAwayVal = 8;
+	static constexpr Score kingToTheSideVal = 18;
+	static constexpr Score pawnProtectingKing1RankAwayVal = 18;
+	static constexpr Score pawnProtectingKing2RanksAwayVal = 8;
 
 	// The minimum number of opponent major pieces that has to be on the board for the king to
 	// be rewarded to be "hidden" to the side of the board behind pawns.
-	static constexpr int32_t minNumOpponentMajorPieceRewardKingSafety = 2;
+	static constexpr Score minNumOpponentMajorPieceRewardKingSafety = 2;
 
-	static constexpr int32_t pawnAtCenterAdditionalVal = 3;
-	static constexpr int32_t pawnAtEdgeOfCenterAdditionalVal = 1;
+	static constexpr Score pawnAtCenterAdditionalVal = 3;
+	static constexpr Score pawnAtEdgeOfCenterAdditionalVal = 1;
 
-	static constexpr int32_t doublePawnsPunishmentVal = 10;
-	static constexpr int32_t pawnIslandPunishmentVal = 10;
+	static constexpr Score doublePawnsPunishmentVal = 10;
+	static constexpr Score pawnIslandPunishmentVal = 10;
 
-	static constexpr int32_t rookOpenFileVal = 10;
+	static constexpr Score rookOpenFileVal = 10;
 
-	//static constexpr int32_t bishopCoverValPerSquare = 1;
+	//static constexpr Score bishopCoverValPerSquare = 1;
 }
 
 namespace
 {
-	int32_t getRankScoreRewardCenter(Rank rank)
+	Score getRankScoreRewardCenter(Rank rank)
 	{
 		using namespace scoringConstants;
 		switch (rank)
@@ -64,19 +64,19 @@ namespace
 		}
 	}
 
-	int32_t getRankScoreRewardTowardsRankMax(Rank rank)
+	Score getRankScoreRewardTowardsRankMax(Rank rank)
 	{
 		using namespace scoringConstants;
 		return rankScoreMin + rank * rankScoreJump;
 	}
 
-	int32_t getRankScoreRewardTowardsRankMin(Rank rank)
+	Score getRankScoreRewardTowardsRankMin(Rank rank)
 	{
 		using namespace scoringConstants;
 		return rankScoreMin + (ranks::rank8 - rank) * rankScoreJump;
 	}
 
-	int32_t getFileScore(File file)
+	Score getFileScore(File file)
 	{
 		using namespace scoringConstants;
 		switch (file)
@@ -111,10 +111,10 @@ namespace
 		}
 	}
 
-	int32_t getNumNonPawnSquaresInSweep(const BoardState& board, const std::vector<Square>& direction,
+	int8_t getNumNonPawnSquaresInSweep(const BoardState& board, const std::vector<Square>& direction,
 		Square sq)
 	{
-		int32_t num = 0;
+		int8_t num = 0;
 		for (const Square s : direction)
 		{
 			if (!isPawn(board.getPiece(s)))
@@ -130,7 +130,7 @@ namespace
 		return num;
 	}
 
-	int32_t getWhiteBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
+	Score getWhiteBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
 		return getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
@@ -139,7 +139,7 @@ namespace
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 	}
 
-	int32_t getBlackBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
+	Score getBlackBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
 		return -getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) -
@@ -166,28 +166,28 @@ namespace
 		return info;
 	}
 
-	int32_t getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, int32_t val)
+	Score getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, Score val)
 	{
-		int32_t count = 0;
+		Score score = 0;
 		if (filesOccupied[files::fileA] && !filesOccupied[files::fileB])
 		{
-			count += val;
+			score += val;
 		}
 
 		if (!filesOccupied[files::fileG] && filesOccupied[files::fileH])
 		{
-			count += val;
+			score += val;
 		}
 
 		for (File f = files::fileC; f < files::num; f++)
 		{
 			if (!filesOccupied[(size_t)f - 2] && filesOccupied[(size_t)f - 1] && !filesOccupied[f])
 			{
-				count += val;
+				score += val;
 			}
 		}
 
-		return count;
+		return score;
 	}
 
 	bool isNonPawnNonKing(Piece piece)
@@ -210,17 +210,17 @@ BoardEvaluator::BoardEvaluator()
 	init();
 }
 
-int32_t BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const
+Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const
 {
-	int32_t score = 0;
-	int32_t numWhiteMajorPieces = 0;
-	int32_t numBlackMajorPieces = 0;
+	Score score = 0;
+	int8_t numWhiteMajorPieces = 0;
+	int8_t numBlackMajorPieces = 0;
 
 	// Theoretical max number of rooks is 10.
 	static std::array<Square, 10> wRooks;
 	static std::array<Square, 10> bRooks;
-	int32_t wRookCnt = 0;
-	int32_t bRookCnt = 0;
+	int8_t wRookCnt = 0;
+	int8_t bRookCnt = 0;
 
 	std::array<bool, files::num> filesOccupiedBybP = { false };
 	std::array<bool, files::num> filesOccupiedBywP = { false };
@@ -310,7 +310,7 @@ int32_t BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastS
 	score += getBlackKingScore(board, numWhiteMajorPieces);
 
 	// Give score for rook on open file.
-	for (int32_t i = 0; i < wRookCnt; i++)
+	for (int8_t i = 0; i < wRookCnt; i++)
 	{
 		if (!filesOccupiedBywP[files::toFile(wRooks[i])])
 		{
@@ -318,7 +318,7 @@ int32_t BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastS
 		}
 	}
 
-	for (int32_t i = 0; i < bRookCnt; i++)
+	for (int8_t i = 0; i < bRookCnt; i++)
 	{
 		if (!filesOccupiedBybP[files::toFile(bRooks[i])])
 		{
@@ -335,12 +335,12 @@ int32_t BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastS
 	return board.getTurn() == pieces::Color::WHITE ? score : -score;
 }
 
-int32_t BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const Move& move,
+Score BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	assert(canUseGetStaticEvaluationDelta(move));
 
-	const int32_t delta = getPieceMoveDeltaScore(board, move, preMoveInfo, lookup);
+	const Score delta = getPieceMoveDeltaScore(board, move, preMoveInfo, lookup);
 	return board.getTurn() == pieces::Color::WHITE ? delta : -delta;
 }
 
@@ -368,10 +368,10 @@ void BoardEvaluator::init()
 
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
-		const int32_t rankBonusRewardCenter = getRankScoreRewardCenter(ranks::toRank(sq));
-		const int32_t rankBonusRewardRankMax = getRankScoreRewardTowardsRankMax(ranks::toRank(sq));
-		const int32_t rankBonusRewardRankMin = getRankScoreRewardTowardsRankMin(ranks::toRank(sq));
-		const int32_t fileBonus = getFileScore(files::toFile(sq));
+		const Score rankBonusRewardCenter = getRankScoreRewardCenter(ranks::toRank(sq));
+		const Score rankBonusRewardRankMax = getRankScoreRewardTowardsRankMax(ranks::toRank(sq));
+		const Score rankBonusRewardRankMin = getRankScoreRewardTowardsRankMin(ranks::toRank(sq));
+		const Score fileBonus = getFileScore(files::toFile(sq));
 
 		wKingEndgameStaticScores[sq] = rankBonusRewardCenter + fileBonus;
 		bKingEndgameStaticScores[sq] = -rankBonusRewardCenter - fileBonus;
@@ -404,7 +404,7 @@ void BoardEvaluator::init()
 	}
 }
 
-int32_t BoardEvaluator::getWhiteKingScore(const BoardState& board, int32_t numBlackMajorPieces) const
+Score BoardEvaluator::getWhiteKingScore(const BoardState& board, int8_t numBlackMajorPieces) const
 {
 	using namespace scoringConstants;
 
@@ -414,7 +414,7 @@ int32_t BoardEvaluator::getWhiteKingScore(const BoardState& board, int32_t numBl
 	}
 
 	// Non-endgame: reward king protection.
-	int32_t score = 0;
+	Score score = 0;
 	switch (board.getWhiteKingSquare())
 	{
 	case squares::a1:
@@ -449,7 +449,7 @@ int32_t BoardEvaluator::getWhiteKingScore(const BoardState& board, int32_t numBl
 	return score;
 }
 
-int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWhiteMajorPieces) const
+Score BoardEvaluator::getBlackKingScore(const BoardState& board, int8_t numWhiteMajorPieces) const
 {
 	using namespace scoringConstants;
 
@@ -459,7 +459,7 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 	}
 
 	// Non-endgame: reward king protection.
-	int32_t score = 0;
+	Score score = 0;
 	switch (board.getBlackKingSquare())
 	{
 	case squares::a8:
@@ -494,7 +494,7 @@ int32_t BoardEvaluator::getBlackKingScore(const BoardState& board, int32_t numWh
 	return score;
 }
 
-int32_t BoardEvaluator::getPieceMoveDeltaScore(const BoardState& board, const Move& move,
+Score BoardEvaluator::getPieceMoveDeltaScore(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
 	assert(canUseGetStaticEvaluationDelta(move));
@@ -523,28 +523,28 @@ int32_t BoardEvaluator::getPieceMoveDeltaScore(const BoardState& board, const Mo
 	}
 }
 
-int32_t BoardEvaluator::getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
+Score BoardEvaluator::getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
 	const FastSqLookup& lookup) const
 {
-	int32_t score = wBishopStaticScores[move.toSquare] - wBishopStaticScores[move.fromSquare];
+	Score score = wBishopStaticScores[move.toSquare] - wBishopStaticScores[move.fromSquare];
 	score += getWhiteBishopSquareCoverScore(board, lookup, move.toSquare);
 	score -= getWhiteBishopSquareCoverScore(board, lookup, move.fromSquare);
 	return score;
 }
 
-int32_t BoardEvaluator::getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
+Score BoardEvaluator::getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
 	const FastSqLookup& lookup) const
 {
-	int32_t score = bBishopStaticScores[move.toSquare] - bBishopStaticScores[move.fromSquare];
+	Score score = bBishopStaticScores[move.toSquare] - bBishopStaticScores[move.fromSquare];
 	score += getBlackBishopSquareCoverScore(board, lookup, move.toSquare);
 	score -= getBlackBishopSquareCoverScore(board, lookup, move.fromSquare);
 	return score;
 }
 
-int32_t BoardEvaluator::getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
+Score BoardEvaluator::getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
-	int32_t score = wRookStaticScores[move.toSquare] - wRookStaticScores[move.fromSquare];
+	Score score = wRookStaticScores[move.toSquare] - wRookStaticScores[move.fromSquare];
 
 	// Handle change in open file score.
 	const File newFile = files::toFile(move.toSquare);
@@ -562,10 +562,10 @@ int32_t BoardEvaluator::getWhiteRookMoveDeltaScore(const BoardState& board, cons
 	return score;
 }
 
-int32_t BoardEvaluator::getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
+Score BoardEvaluator::getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
 	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
 {
-	int32_t score = bRookStaticScores[move.toSquare] - bRookStaticScores[move.fromSquare];
+	Score score = bRookStaticScores[move.toSquare] - bRookStaticScores[move.fromSquare];
 
 	// Handle change in open file score.
 	const File newFile = files::toFile(move.toSquare);

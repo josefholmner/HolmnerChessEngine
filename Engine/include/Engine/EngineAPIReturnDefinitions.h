@@ -27,9 +27,9 @@ namespace hceEngine
 
 	struct EngineInfo
 	{
-		size_t nodesVisited;
-		size_t depthsCompletelyCovered;
-		size_t maxDepthVisited;
+		size_t nodesVisited = 0;
+		size_t depthsCompletelyCovered = 0;
+		size_t maxDepthVisited = 0;
 	};
 
 	struct ChessMove

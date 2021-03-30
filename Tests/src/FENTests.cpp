@@ -148,7 +148,7 @@ namespace testHelpers
 			FEN = splitStr[0];
 			FEN.erase(FEN.find_last_not_of(' ') + 1);
 
-			for (size_t i = 1; i < splitStr.size(); i++)
+			for (uint8_t i = 1; i < splitStr.size(); i++)
 			{
 				const auto splitDepth = CommonUtilities::splitString(splitStr[i], ' ');
 				(void)sscanf(splitDepth[1].c_str(), "%zu", &numMoves[i]);
@@ -158,7 +158,7 @@ namespace testHelpers
 		std::string FEN;
 
 		// Key is depth, value is number of moves.
-		std::unordered_map<size_t, size_t> numMoves;
+		std::unordered_map<uint8_t, size_t> numMoves;
 	};
 }
 
@@ -170,7 +170,7 @@ void FENTests::Run()
 	hceCommon::Stopwatch stopWatch;
 	stopWatch.start();
 
-	static const int32_t maxDepth = TestsUtilities::isReleaseBuild() ? 5 : 3;
+	static const uint8_t maxDepth = TestsUtilities::isReleaseBuild() ? 5 : 3;
 	for (size_t depth = 1; depth <= maxDepth; depth++)
 	{
 		for (size_t i = 0; i < testHelpers::FENTestsStrVector.size(); i++)

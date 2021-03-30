@@ -2,11 +2,14 @@
 
 #include <cstdint>
 
+typedef uint8_t Depth;
+typedef int16_t Score;
+
 namespace searchHelpers
 {
-	// Used because std::numeric_limits<int32_t>::min()/max() is not symmetrical.
-	static constexpr int32_t plusInf = 10000000;
-	static constexpr int32_t minusInf = -plusInf;
+	// Used because std::numeric_limits<int16_t>::min()/max() is not symmetrical.
+	static constexpr Score plusInf = 10000;
+	static constexpr Score minusInf = -plusInf;
 
 	struct SearchInfo
 	{

@@ -254,8 +254,8 @@ namespace
 
 	bool isPieceCountValid(const BoardState& board)
 	{
-		int32_t wPs = 0, wNs = 0, wBs = 0, wRs = 0, wQs = 0, wKs = 0;
-		int32_t bPs = 0, bNs = 0, bBs = 0, bRs = 0, bQs = 0, bKs = 0;
+		int8_t wPs = 0, wNs = 0, wBs = 0, wRs = 0, wQs = 0, wKs = 0;
+		int8_t bPs = 0, bNs = 0, bBs = 0, bRs = 0, bQs = 0, bKs = 0;
 		for (const auto piece : board.getPieces())
 		{
 			switch (piece)
@@ -429,8 +429,8 @@ void BoardState::printBoard() const
 	{
 		for (File file = files::fileA; file <= files::fileH; file++)
 		{
-			const int32_t index = file + rank * files::num;
-			std::cout << "[" << pieces::pieceToStr(pieces[index]) << "] ";
+			const Square sq = file + rank * files::num;
+			std::cout << "[" << pieces::pieceToStr(pieces[sq]) << "] ";
 		}
 
 		std::cout << std::endl;

@@ -21,7 +21,7 @@ namespace
 			+ "\n");
 	}
 
-	void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, uint8_t depth)
 	{
 		// Test mid-game position (slow) minmax analysation performance.
 		hceCommon::Stopwatch stopwatch;
@@ -32,7 +32,7 @@ namespace
 		printResut("Mid-game position", res, midgameTime);
 	}
 
-	void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, uint8_t depth)
 	{
 		// Test starting position (slow) minmax analysation performance.
 		hceCommon::Stopwatch stopwatch;
@@ -49,8 +49,8 @@ void RawMinimaxPerformanceTests::Run()
 	TestsUtilities::log("***** RAW MINIMAX PERFORMANCE TESTS START *****");
 	hceEngine::EngineAPI engine;
 
-	static const int32_t startPosDepth = TestsUtilities::isReleaseBuild() ? 5 : 4;
-	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 5 : 3;
+	static const uint8_t startPosDepth = TestsUtilities::isReleaseBuild() ? 5 : 4;
+	static const uint8_t midgameDepth = TestsUtilities::isReleaseBuild() ? 5 : 3;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
 

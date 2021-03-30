@@ -4,6 +4,7 @@
 #include "PrivateInclude/BoardState.h"
 #include "PrivateInclude/FastSqLookup.h"
 #include "PrivateInclude/Move.h"
+#include "SearchHelpers.h"
 
 #include <cstdint>
 #include <array>
@@ -18,7 +19,7 @@ class BoardEvaluator
 public:
 	BoardEvaluator();
 
-	int32_t getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const;
+	Score getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const;
 	
 	struct PreMoveInfo
 	{
@@ -40,7 +41,7 @@ public:
 	// -OPTION 2-
 	// eval = preMoveEval + getStaticEvaluationDelta()
 	//
-	int32_t getStaticEvaluationDelta(const BoardState& board, const Move& move,
+	Score getStaticEvaluationDelta(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
 	bool canUseGetStaticEvaluationDelta(const Move& move) const;
 
@@ -49,37 +50,37 @@ public:
 private:
 	void init();
 
-	int32_t getWhiteKingScore(const BoardState& board, int32_t numBlackMajorPieces) const;
-	int32_t getBlackKingScore(const BoardState& board, int32_t numWhiteMajorPieces) const;
+	Score getWhiteKingScore(const BoardState& board, int8_t numBlackMajorPieces) const;
+	Score getBlackKingScore(const BoardState& board, int8_t numWhiteMajorPieces) const;
 
-	int32_t getPieceMoveDeltaScore(const BoardState& board, const Move& move,
+	Score getPieceMoveDeltaScore(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
 	
-	int32_t getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
+	Score getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
-	int32_t getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
+	Score getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
 		const FastSqLookup& lookup) const;
 
-	int32_t getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
+	Score getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
-	int32_t getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
+	Score getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
 		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
 
-	std::array<int32_t, squares::num> wQueenStaticScores;
-	std::array<int32_t, squares::num> bQueenStaticScores;
+	std::array<Score, squares::num> wQueenStaticScores;
+	std::array<Score, squares::num> bQueenStaticScores;
 
-	std::array<int32_t, squares::num> wRookStaticScores;
-	std::array<int32_t, squares::num> bRookStaticScores;
+	std::array<Score, squares::num> wRookStaticScores;
+	std::array<Score, squares::num> bRookStaticScores;
 
-	std::array<int32_t, squares::num> wBishopStaticScores;
-	std::array<int32_t, squares::num> bBishopStaticScores;
+	std::array<Score, squares::num> wBishopStaticScores;
+	std::array<Score, squares::num> bBishopStaticScores;
 
-	std::array<int32_t, squares::num> wKnightStaticScores;
-	std::array<int32_t, squares::num> bKnightStaticScores;
+	std::array<Score, squares::num> wKnightStaticScores;
+	std::array<Score, squares::num> bKnightStaticScores;
 
-	std::array<int32_t, squares::num> wPawnStaticScores;
-	std::array<int32_t, squares::num> bPawnStaticScores;
+	std::array<Score, squares::num> wPawnStaticScores;
+	std::array<Score, squares::num> bPawnStaticScores;
 
-	std::array<int32_t, squares::num> wKingEndgameStaticScores;
-	std::array<int32_t, squares::num> bKingEndgameStaticScores;
+	std::array<Score, squares::num> wKingEndgameStaticScores;
+	std::array<Score, squares::num> bKingEndgameStaticScores;
 };

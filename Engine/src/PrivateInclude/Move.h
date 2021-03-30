@@ -61,5 +61,5 @@ public:
 	bool prohibitsBQcastling = false; // Black queen side.
 
 	// The static evaluation of the board when this move has been made.
-	int32_t staticEval = 0;
+	Score staticEval = 0;
 };

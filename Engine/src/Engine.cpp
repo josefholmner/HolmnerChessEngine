@@ -1076,7 +1076,7 @@ std::vector<Move> Engine::getLegalMoves(BoardState& board) const
 
 namespace moveCountHelpers
 {
-	size_t countMovesRecursive(const Engine& engine, BoardState& board, int32_t depth)
+	size_t countMovesRecursive(const Engine& engine, BoardState& board, Depth depth)
 	{
 		if (depth == 1)
 		{
@@ -1108,7 +1108,7 @@ namespace moveCountHelpers
 	}
 }
 
-std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, int32_t depth) const
+std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, Depth depth) const
 {
 	if (depth <= 0)
 	{
@@ -1134,7 +1134,7 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 		return hceEngine::StaticEvaluationResult::Invalid;
 	}
 
-	const int32_t score = boardEvaluator.getStaticEvaluation(board, fastSqLookup);
+	const Score score = boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 	if (board.getTurn() == pieces::Color::WHITE)
 	{
 		if (score < 0) { return hceEngine::StaticEvaluationResult::BlackBetter; }
@@ -1149,7 +1149,7 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 	return hceEngine::StaticEvaluationResult::Equal;
 }
 
-hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t depth) const
+hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth) const
 {
 	hceEngine::SearchResult searchResult;
 
@@ -1171,9 +1171,9 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 
 	searchHelpers::SearchInfo info;
 	Move bestMove;
-	int32_t alpha = searchHelpers::minusInf;
-	static constexpr int32_t beta = searchHelpers::plusInf;
-	int32_t bestScore = searchHelpers::minusInf;
+	Score alpha = searchHelpers::minusInf;
+	static constexpr Score beta = searchHelpers::plusInf;
+	Score bestScore = searchHelpers::minusInf;
 
 	auto& moves = getLegalMoves(board);
 	setStaticEvalAndSortMoves(board, moves);
@@ -1181,7 +1181,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 	{
 		board.makeMove(m);
 		info.nodesVisited++;
-		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, m.staticEval, info);
+		const Score score = -alphaBeta(board, -beta, -alpha, depth - 1, m.staticEval, info);
 		if (score > bestScore)
 		{
 			bestScore = score;
@@ -1203,7 +1203,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, int32_t dept
 	return searchResult;
 }
 
-hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32_t depth) const
+hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth depth) const
 {
 	hceEngine::SearchResult searchResult;
 
@@ -1224,12 +1224,12 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, int32
 
 	searchHelpers::SearchInfo info;
 	Move bestMove;
-	int32_t bestScore = searchHelpers::minusInf;
+	Score bestScore = searchHelpers::minusInf;
 	for (const Move& m : getLegalMoves(board))
 	{
 		board.makeMove(m);
 		info.nodesVisited++;
-		const int32_t score = -negaMax(board, depth - 1, info);
+		const Score score = -negaMax(board, depth - 1, info);
 		if (score > bestScore)
 		{
 			bestScore = score;
@@ -1288,19 +1288,19 @@ bool Engine::dbgTestPseudoLegalMoveGeneration(BoardState& board,
 	return numLegal == getLegalMoves(board).size();
 }
 
-int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchInfo& info) const
+Score Engine::negaMax(BoardState& board, Depth depth, searchHelpers::SearchInfo& info) const
 {
 	if (depth <= 0)
 	{
 		return boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 	}
 
-	int32_t bestScore = searchHelpers::minusInf;
+	Score bestScore = searchHelpers::minusInf;
 	for (const Move& move : getLegalMoves(board))
 	{
 		board.makeMove(move);
 		info.nodesVisited++;
-		const int32_t score = -negaMax(board, depth - 1, info);
+		const Score score = -negaMax(board, depth - 1, info);
 		board.unmakeMove(move);
 		if (score > bestScore)
 		{
@@ -1311,8 +1311,8 @@ int32_t Engine::negaMax(BoardState& board, int32_t depth, searchHelpers::SearchI
 	return bestScore;
 }
 
-int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_t depth,
-	int32_t staticEval, searchHelpers::SearchInfo& info) const
+Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
+	Score staticEval, searchHelpers::SearchInfo& info) const
 {
 	using namespace moveGenerationHelpers;
 	if (depth <= 0)
@@ -1334,7 +1334,7 @@ int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_
 
 		board.makeMove(move);
 		info.nodesVisited++;
-		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, move.staticEval, info);
+		const Score score = -alphaBeta(board, -beta, -alpha, depth - 1, move.staticEval, info);
 		board.unmakeMove(move);
 		if (score >= beta)
 		{
@@ -1351,8 +1351,8 @@ int32_t Engine::alphaBeta(BoardState& board, int32_t alpha, int32_t beta, int32_
 	return alpha;
 }
 
-int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t beta,
-	int32_t currDepth, int32_t staticEval, searchHelpers::SearchInfo& info) const
+Score Engine::alphaBetaQuiescence(BoardState& board, Score alpha, Score beta,
+	Depth currDepth, Score staticEval, searchHelpers::SearchInfo& info) const
 {
 	using namespace moveGenerationHelpers;
 	if (currDepth > info.quiescenceMaxDepth)
@@ -1380,7 +1380,7 @@ int32_t Engine::alphaBetaQuiescence(BoardState& board, int32_t alpha, int32_t be
 		assert(move.capturedPiece != pieces::none || move.pawnPromotionPiece != pieces::none);
 		board.makeMove(move);
 		info.nodesVisited++;
-		const int32_t score = -alphaBetaQuiescence(board, -beta, -alpha, currDepth + 1,
+		const Score score = -alphaBetaQuiescence(board, -beta, -alpha, currDepth + 1,
 			move.staticEval, info);
 		board.unmakeMove(move);
 		if (score >= beta)
@@ -1412,7 +1412,7 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	std::sort(moves.begin(), moves.end());
 }
 
-void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves, int32_t staticEval) const
+void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves, Score staticEval) const
 {
 	if (moves.size() == 0)
 	{

@@ -23,7 +23,7 @@ namespace
 			+ "\n");
 	}
 
-	void testEndGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	void testEndGameAnalysisPerformance(const hceEngine::EngineAPI& engine, uint8_t depth)
 	{
 		// Test end-game position (fast) alpha-beta with quiescence search performance.
 		hceCommon::Stopwatch stopwatch;
@@ -34,7 +34,7 @@ namespace
 		printResut("End-game position", res, endgameTime);
 	}
 
-	void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	void testMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, uint8_t depth)
 	{
 		// Test mid-game position (fast) alpha-beta with quiescence search performance.
 		hceCommon::Stopwatch stopwatch;
@@ -45,7 +45,7 @@ namespace
 		printResut("Mid-game position", res, midgameTime);
 	}
 
-	void testLateMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	void testLateMidGameAnalysisPerformance(const hceEngine::EngineAPI& engine, uint8_t depth)
 	{
 		// Test late mid-game position (fast) alpha-beta with quiescence search performance.
 		hceCommon::Stopwatch stopwatch;
@@ -56,7 +56,7 @@ namespace
 		printResut("Late mid-game position", res, lateMidgameTime);
 	}
 
-	void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
+	void testStartPosAnalysisPerformance(const hceEngine::EngineAPI& engine, uint8_t depth)
 	{
 		// Test starting position (fast) alpha-beta with quiescence search performance.
 		hceCommon::Stopwatch stopwatch;
@@ -73,10 +73,10 @@ void GetBestMovePerformanceTests::Run()
 	TestsUtilities::log("***** GET BEST MOVE PERFORMANCE TESTS START *****");
 	hceEngine::EngineAPI engine;
 
-	static const int32_t startPosDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
-	static const int32_t midgameDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
-	static const int32_t lateMidgameDepth = TestsUtilities::isReleaseBuild() ? 9 : 5;
-	static const int32_t endgameDepth = TestsUtilities::isReleaseBuild() ? 10 : 6;
+	static const uint8_t startPosDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
+	static const uint8_t midgameDepth = TestsUtilities::isReleaseBuild() ? 8 : 5;
+	static const uint8_t lateMidgameDepth = TestsUtilities::isReleaseBuild() ? 9 : 5;
+	static const uint8_t endgameDepth = TestsUtilities::isReleaseBuild() ? 10 : 6;
 	testStartPosAnalysisPerformance(engine, startPosDepth);
 	testMidGameAnalysisPerformance(engine, midgameDepth);
 	testLateMidGameAnalysisPerformance(engine, lateMidgameDepth);

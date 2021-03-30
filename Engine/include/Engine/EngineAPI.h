@@ -21,21 +21,21 @@ namespace hceEngine
         * For large depths, this function may take a long time to return since the number of moves
         * grows exponentially with the depth.
         */
-        std::optional<size_t> getNumLegalMoves(const std::string& FEN, int32_t depth) const;
+        std::optional<size_t> getNumLegalMoves(const std::string& FEN, uint8_t depth) const;
 
         /**
         * Uses alpha-beta pruning and quiescence search to find the best move.
         * This is the recommended function to call if maximum performance is wanted given a
         * predetermined depth.
         */
-        SearchResult getBestMove(const std::string& FEN, int32_t depth) const;
+        SearchResult getBestMove(const std::string& FEN, uint8_t depth) const;
 
         /**
         * Uses the simplest (and slow) minimax algorithm to find the best move given a FEN.
         * Does not utilize any quiescence search and is therefore likely to suffer from the
         * horizon effect. For maximum performace, use the e.g. getBestMove() function instead.
         */
-        SearchResult getBestMoveMiniMax(const std::string& FEN, int32_t depth) const;
+        SearchResult getBestMoveMiniMax(const std::string& FEN, uint8_t depth) const;
 
         /**
         * Uses the engines internal static board evaluation function to determine the better side.

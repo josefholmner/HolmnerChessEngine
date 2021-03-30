@@ -93,7 +93,7 @@ private:
 	void makeNonSpecializedMove(const Move& move);
 	void unmakeNonSpecializedMove(const Move& move);
 
-	std::array<Piece, squares::num> pieces;
+	std::array<Piece, squares::num> pieces = {pieces::none};
 	std::unordered_map<char, bool> casleAvailability;
 	pieces::Color turn;
 	Square enPassantSquare = squares::none;
