@@ -19,7 +19,8 @@ namespace
 			std::to_string(milliseconds) + "ms.\nNumber of nodes visited: " +
 			std::to_string(nodes) +
 			+" which is: " + std::to_string((nodes / std::max(milliseconds, 1)) * 1000) + " nodes "
-			+ "visited per second.\n");
+			+ "visited per second. Best move score: " + std::to_string(result.bestMove.positionEvaluation)
+			+ "\n");
 	}
 
 	void testEndGameAnalysisPerformance(const hceEngine::EngineAPI& engine, int32_t depth)
