@@ -1160,7 +1160,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		return searchResult;
 	}
 
-	BoardState board;
+	BoardState board(true);
 	if (!board.initFromFEN(FEN))
 	{
 		EngineUtilities::logE("getBestMove failed, invalid FEN.");
@@ -1170,10 +1170,10 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 	}
 
 	searchHelpers::SearchInfo info;
+	Score bestScore = searchHelpers::minusInf;
 	Move bestMove;
 	Score alpha = searchHelpers::minusInf;
 	static constexpr Score beta = searchHelpers::plusInf;
-	Score bestScore = searchHelpers::minusInf;
 
 	auto& moves = getLegalMoves(board);
 	setStaticEvalAndSortMoves(board, moves);
@@ -1181,7 +1181,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 	{
 		board.makeMove(m);
 		info.nodesVisited++;
-		const Score score = -alphaBeta(board, -beta, -alpha, depth - 1, m.staticEval, info);
+		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, m.staticEval, info);
 		if (score > bestScore)
 		{
 			bestScore = score;
@@ -1197,7 +1197,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 	}
 
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
-	searchResult.engineInfo.maxDepthVisited = (size_t)depth + (size_t)info.quiescenceMaxDepth;
+	searchResult.engineInfo.maxDepthVisited = (size_t)depth + info.quiescenceMaxDepth;
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
 	searchResult.bestMove.positionEvaluation = bestScore;
 	return searchResult;
@@ -1311,15 +1311,41 @@ Score Engine::negaMax(BoardState& board, Depth depth, searchHelpers::SearchInfo&
 	return bestScore;
 }
 
-Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
-	Score staticEval, searchHelpers::SearchInfo& info) const
+Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth, Score staticEval, searchHelpers::SearchInfo& info) const
 {
+	using namespace searchHelpers;
 	using namespace moveGenerationHelpers;
+
+	const Score alphaOrig = alpha;
+	if (const tp::Element* elem = board.findTranspositionElement())
+	{
+		if (elem->depth >= depth)
+		{
+			switch (elem->type)
+			{
+				case tp::exact:
+					return elem->score;
+				case tp::lower:
+					alpha = std::max(alpha, elem->score);
+					break;
+				case tp::upper:
+					beta = std::min(beta, elem->score);
+					break;
+			}
+
+			if (alpha >= beta)
+			{
+				return elem->score;
+			}
+		}
+	}
+
 	if (depth <= 0)
 	{
 		return alphaBetaQuiescence(board, alpha, beta, 0, staticEval, info);
 	}
 
+	Score bestScore = minusInf;
 	auto& moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
 	assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove));
@@ -1336,19 +1362,21 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 		info.nodesVisited++;
 		const Score score = -alphaBeta(board, -beta, -alpha, depth - 1, move.staticEval, info);
 		board.unmakeMove(move);
-		if (score >= beta)
+		bestScore = std::max(score, bestScore);
+		alpha = std::max(alpha, score);
+		if (alpha >= beta)
 		{
-			// Prune.
-			return beta;
-		}
-
-		if (score > alpha)
-		{
-			alpha = score;
+			break;
 		}
 	}
 
-	return alpha;
+	int8_t type;
+	if (bestScore <= alphaOrig) type = tp::upper;
+	else if (bestScore >= beta) type = tp::lower;
+	else type = tp::exact;
+
+	board.addTranspositionElement(tp::Element{bestScore, depth, type});
+	return bestScore;
 }
 
 Score Engine::alphaBetaQuiescence(BoardState& board, Score alpha, Score beta,

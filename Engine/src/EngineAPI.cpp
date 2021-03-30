@@ -26,6 +26,7 @@ std::optional<size_t> EngineAPI::getNumLegalMoves(
 
 SearchResult hceEngine::EngineAPI::getBestMove(const std::string& FEN, uint8_t depth) const
 {
+    assert(engine != nullptr);
     return engine->getBestMove(FEN, depth);
 }
 

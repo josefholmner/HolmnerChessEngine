@@ -621,6 +621,27 @@ Hash64 BoardState::generateHash() const
 	return hash;
 }
 
+void BoardState::addTranspositionElement(const searchHelpers::tp::Element& elem)
+{
+	if (transpositionTable.size() >= transpositionTableMaxLength)
+	{
+		return;
+	}
+
+	transpositionTable[hash] = elem;
+}
+
+const searchHelpers::tp::Element* BoardState::findTranspositionElement() const
+{
+	const auto it = transpositionTable.find(hash);
+	if (it == transpositionTable.end())
+	{
+		return nullptr;
+	}
+
+	return &it->second;
+}
+
 void BoardState::makePawnMove(const Move& move)
 {
 	using namespace hashValues;

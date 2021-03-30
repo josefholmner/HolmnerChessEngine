@@ -23,6 +23,7 @@ namespace searchHelpers
 		static constexpr int8_t upper = 1;
 		static constexpr int8_t lower = -1;
 		static constexpr int8_t exact = 0;
+
 		struct Element
 		{
 			Score score;

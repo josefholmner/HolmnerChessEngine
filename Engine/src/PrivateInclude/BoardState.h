@@ -26,6 +26,11 @@ public:
 	bool isValid() const;
 
 	Hash64 generateHash() const;
+	void addTranspositionElement(const searchHelpers::tp::Element& elem);
+	size_t getTranspositionTableSize() const { return transpositionTable.size(); }
+
+	// Returns nullptr if the current hash is not in the transpositionTable.
+	const searchHelpers::tp::Element* findTranspositionElement() const;
 
 	pieces::Color getTurn() const
 	{
