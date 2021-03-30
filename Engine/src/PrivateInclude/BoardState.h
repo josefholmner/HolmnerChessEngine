@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PiecesAndSquares.h"
+#include "HashValues.h"
 
 #include <string>
 #include <array>
@@ -12,6 +13,9 @@ struct Move;
 class BoardState
 {
 public:
+	BoardState() = default;
+	BoardState(bool reserveTranspositionTable);
+
 	bool initFromFEN(const std::string& FEN);
 
 	void printBoard() const;
@@ -20,6 +24,8 @@ public:
 	void unmakeMove(const Move& move);
 
 	bool isValid() const;
+
+	Hash64 generateHash() const;
 
 	pieces::Color getTurn() const
 	{
@@ -89,9 +95,8 @@ private:
 	void unmakeWhiteRookMoveIfCastling(const Move& move);
 	void unmakeBlackRookMoveIfCastling(const Move& move);
 
-	// For any piece that is not a pawn, king or rook.
 	void makeNonSpecializedMove(const Move& move);
-	void unmakeNonSpecializedMove(const Move& move);
+	void unmakeNonSpecializedMove(const Move& move, bool updateHash = true);
 
 	std::array<Piece, squares::num> pieces = {pieces::none};
 	std::unordered_map<char, bool> casleAvailability;
@@ -99,4 +104,6 @@ private:
 	Square enPassantSquare = squares::none;
 	Square wKingSq = squares::none;
 	Square bKingSq = squares::none;
+	Hash64 hash;
+	std::unordered_map<Hash64, searchHelpers::tp::Element> transpositionTable;
 };

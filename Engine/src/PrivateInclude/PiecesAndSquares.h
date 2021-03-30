@@ -6,6 +6,8 @@
 typedef int8_t Piece;
 namespace pieces
 {
+	static constexpr Piece num = 12;
+
 	static constexpr Piece none = -1;
 	static constexpr Piece wK = 0;
 	static constexpr Piece wQ = 1;

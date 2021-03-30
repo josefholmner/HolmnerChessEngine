@@ -10,6 +10,8 @@
 
 namespace
 {
+	static constexpr Hash64 transpositionTableMaxLength = 5000000;
+
 	std::optional<Square> fromString(const std::string& str)
 	{
 		if (str == "-")
@@ -357,6 +359,16 @@ namespace
 		return EngineUtilities::isNonNoneSquare(wKsq) && EngineUtilities::isNonNoneSquare(bKsq) &&
 			board.getPiece(wKsq) == pieces::wK && board.getPiece(bKsq) == pieces::bK;
 	}
+
+	int16_t getHashIndex(Square sq, Piece piece)
+	{
+		return sq * pieces::num + piece;
+	}
+}
+
+BoardState::BoardState(bool reserveTranspositionTable)
+{
+	transpositionTable.reserve(transpositionTableMaxLength);
 }
 
 bool BoardState::initFromFEN(const std::string& FEN)
@@ -420,6 +432,9 @@ bool BoardState::initFromFEN(const std::string& FEN)
 		return false;
 	}
 
+	// Update the hash according to this board state.
+	hash = generateHash();
+
 	return true;
 }
 
@@ -440,15 +455,45 @@ void BoardState::printBoard() const
 void BoardState::makeMove(const Move& move)
 {
 	using namespace pieces;
+	using namespace hashValues;
 
 	// Handle castling availability.
-	if (move.prohibitsWKcastling){ casleAvailability['K'] = false; }
-	if (move.prohibitsWQcastling){ casleAvailability['Q'] = false; }
-	if (move.prohibitsBKcastling){ casleAvailability['k'] = false; }
-	if (move.prohibitsBQcastling){ casleAvailability['q'] = false; }
+	if (move.prohibitsWKcastling)
+	{
+		assert(casleAvailability['K']);
+		casleAvailability['K'] = false;
+		hash ^= values[castlingIndexStart];
+	}
+	if (move.prohibitsWQcastling)
+	{
+		assert(casleAvailability['Q']);
+		casleAvailability['Q'] = false;
+		hash ^= values[castlingIndexStart + 1];
+	}
+	if (move.prohibitsBKcastling)
+	{
+		assert(casleAvailability['k']);
+		casleAvailability['k'] = false;
+		hash ^= values[castlingIndexStart + 2];
+	}
+	if (move.prohibitsBQcastling)
+	{
+		assert(casleAvailability['q']);
+		casleAvailability['q'] = false;
+		hash ^= values[castlingIndexStart + 3];
+	}
 
 	// Must be set for all moves since any move will remove previous en passant square.
 	enPassantSquare = move.enPassantCreatedSquare;
+	if (move.previousEnPassantSquare != squares::none)
+	{
+		hash ^= values[(size_t)enPassantSqIndexStart + move.previousEnPassantSquare];
+	}
+
+	if (move.enPassantCreatedSquare != squares::none)
+	{
+		hash ^= values[(size_t)enPassantSqIndexStart + move.enPassantCreatedSquare];
+	}
 
 	switch (move.movingPiece)
 	{
@@ -465,21 +510,53 @@ void BoardState::makeMove(const Move& move)
 			break;
 	}
 
-	//Finally, switch side to play.
+	// Finally, switch side to play.
 	turn = turn == Color::WHITE ? Color::BLACK : Color::WHITE;
+	hash ^= values[whiteToPlayIndex];
+	assert(hash == generateHash());
 }
 
 void BoardState::unmakeMove(const Move& move)
 {
 	using namespace pieces;
+	using namespace hashValues;
 
-	// Handle castling availability.
-	if (move.prohibitsWKcastling) { casleAvailability['K'] = true; }
-	if (move.prohibitsWQcastling) { casleAvailability['Q'] = true; }
-	if (move.prohibitsBKcastling) { casleAvailability['k'] = true; }
-	if (move.prohibitsBQcastling) { casleAvailability['q'] = true; }
+	if (move.prohibitsWKcastling)
+	{
+		assert(!casleAvailability['K']);
+		casleAvailability['K'] = true;
+		hash ^= values[castlingIndexStart];
+	}
+	if (move.prohibitsWQcastling)
+	{
+		assert(!casleAvailability['Q']);
+		casleAvailability['Q'] = true;
+		hash ^= values[castlingIndexStart + 1];
+	}
+	if (move.prohibitsBKcastling)
+	{
+		assert(!casleAvailability['k']);
+		casleAvailability['k'] = true;
+		hash ^= values[castlingIndexStart + 2];
+	}
+	if (move.prohibitsBQcastling)
+	{
+		assert(!casleAvailability['q']);
+		casleAvailability['q'] = true;
+		hash ^= values[castlingIndexStart + 3];
+	}
 
+	// Must be set for all moves since any move will remove previous en passant square.
 	enPassantSquare = move.previousEnPassantSquare;
+	if (move.enPassantCreatedSquare != squares::none)
+	{
+		hash ^= values[(size_t)enPassantSqIndexStart + move.enPassantCreatedSquare];
+	}
+
+	if (move.previousEnPassantSquare != squares::none)
+	{
+		hash ^= values[(size_t)enPassantSqIndexStart + move.previousEnPassantSquare];
+	}
 
 	switch (move.movingPiece)
 	{
@@ -498,6 +575,8 @@ void BoardState::unmakeMove(const Move& move)
 
 	//Finally, switch side to play.
 	turn = turn == Color::WHITE ? Color::BLACK : Color::WHITE;
+	hash ^= values[whiteToPlayIndex];
+	assert(hash == generateHash());
 }
 
 bool BoardState::isValid() const
@@ -506,17 +585,58 @@ bool BoardState::isValid() const
 		isCastlinAvailabilityValid(*this) && isKingSquaresValid(*this);
 }
 
+Hash64 BoardState::generateHash() const
+{
+	using namespace hashValues;
+	Hash64 hash = 0;
+
+	// Hash pieces on the board.
+	for (Square sq = 0; sq < squares::num; sq++)
+	{
+		assert(EngineUtilities::isValidSquare(sq));
+		if (pieces[sq] != pieces::none)
+		{
+			hash ^= values[getHashIndex(sq, pieces[sq])];
+		}
+	}
+
+	// Hash white to play.
+	if (turn == pieces::Color::WHITE)
+	{
+		hash ^= values[whiteToPlayIndex];
+	}
+
+	// Hash castling possible.
+	if (casleAvailability.find('K')->second) hash ^= values[castlingIndexStart];
+	if (casleAvailability.find('Q')->second) hash ^= values[castlingIndexStart + 1];
+	if (casleAvailability.find('k')->second) hash ^= values[castlingIndexStart + 2];
+	if (casleAvailability.find('q')->second) hash ^= values[castlingIndexStart + 3];
+
+	// Hash en passant square.
+	if (enPassantSquare != squares::none)
+	{
+		hash ^= values[(size_t)enPassantSqIndexStart + enPassantSquare];
+	}
+
+	return hash;
+}
+
 void BoardState::makePawnMove(const Move& move)
 {
+	using namespace hashValues;
+
 	if (move.pawnPromotionPiece != pieces::none)
 	{
 		pieces[move.fromSquare] = pieces::none;
+		hash ^= values[getHashIndex(move.fromSquare, move.movingPiece)];
 		if (move.capturedPiece != pieces::none)
 		{
 			pieces[move.capturedSquare] = pieces::none;
+			hash ^= values[getHashIndex(move.capturedSquare, move.capturedPiece)];
 		}
 
 		pieces[move.toSquare] = move.pawnPromotionPiece;
+		hash ^= values[getHashIndex(move.toSquare, move.pawnPromotionPiece)];
 	}
 	else
 	{
@@ -526,7 +646,24 @@ void BoardState::makePawnMove(const Move& move)
 
 void BoardState::unmakePawnMove(const Move& move)
 {
-	unmakeNonSpecializedMove(move);
+	using namespace hashValues;
+
+	// In case of pawn promotion, the hashing must be handled specifically.
+	if (move.pawnPromotionPiece != pieces::none)
+	{
+		hash ^= values[getHashIndex(move.toSquare, move.pawnPromotionPiece)];
+		if (move.capturedPiece != pieces::none)
+		{
+			hash ^= values[getHashIndex(move.capturedSquare, move.capturedPiece)];
+		}
+		hash ^= values[getHashIndex(move.fromSquare, move.movingPiece)];
+
+		unmakeNonSpecializedMove(move, false);
+	}
+	else
+	{
+		unmakeNonSpecializedMove(move);
+	}
 }
 
 void BoardState::makeKingMove(const Move& move)
@@ -564,6 +701,9 @@ void BoardState::unmakeKingMove(const Move& move)
 
 void BoardState::makeWhiteRookMoveIfCastling(const Move& move)
 {
+	using namespace hashValues;
+	assert(move.movingPiece == pieces::wK);
+
 	// Perform casteling (rook only).
 	if (move.fromSquare == squares::e1)
 	{
@@ -572,18 +712,25 @@ void BoardState::makeWhiteRookMoveIfCastling(const Move& move)
 			assert(pieces[squares::h1] == pieces::wR);
 			pieces[squares::h1] = pieces::none;
 			pieces[squares::f1] = pieces::wR;
+			hash ^= values[getHashIndex(squares::h1, pieces::wR)];
+			hash ^= values[getHashIndex(squares::f1, pieces::wR)];
 		}
 		else if (move.toSquare == squares::c1)
 		{
 			assert(pieces[squares::a1] == pieces::wR);
 			pieces[squares::a1] = pieces::none;
 			pieces[squares::d1] = pieces::wR;
+			hash ^= values[getHashIndex(squares::a1, pieces::wR)];
+			hash ^= values[getHashIndex(squares::d1, pieces::wR)];
 		}
 	}
 }
 
 void BoardState::makeBlackRookMoveIfCastling(const Move& move)
 {
+	using namespace hashValues;
+	assert(move.movingPiece == pieces::bK);
+
 	// Perform casteling (rook only).
 	if (move.fromSquare == squares::e8)
 	{
@@ -592,18 +739,25 @@ void BoardState::makeBlackRookMoveIfCastling(const Move& move)
 			assert(pieces[squares::h8] == pieces::bR);
 			pieces[squares::h8] = pieces::none;
 			pieces[squares::f8] = pieces::bR;
+			hash ^= values[getHashIndex(squares::h8, pieces::bR)];
+			hash ^= values[getHashIndex(squares::f8, pieces::bR)];
 		}
 		else if (move.toSquare == squares::c8)
 		{
 			assert(pieces[squares::a8] == pieces::bR);
 			pieces[squares::a8] = pieces::none;
 			pieces[squares::d8] = pieces::bR;
+			hash ^= values[getHashIndex(squares::a8, pieces::bR)];
+			hash ^= values[getHashIndex(squares::d8, pieces::bR)];
 		}
 	}
 }
 
 void BoardState::unmakeWhiteRookMoveIfCastling(const Move& move)
 {
+	using namespace hashValues;
+	assert(move.movingPiece == pieces::wK);
+
 	// Unmake casteling (rook only).
 	if (move.fromSquare == squares::e1)
 	{
@@ -612,18 +766,25 @@ void BoardState::unmakeWhiteRookMoveIfCastling(const Move& move)
 			assert(pieces[squares::h1] == pieces::none);
 			pieces[squares::h1] = pieces::wR;
 			pieces[squares::f1] = pieces::none;
+			hash ^= values[getHashIndex(squares::h1, pieces::wR)];
+			hash ^= values[getHashIndex(squares::f1, pieces::wR)];
 		}
 		else if (move.toSquare == squares::c1)
 		{
 			assert(pieces[squares::a1] == pieces::none);
 			pieces[squares::a1] = pieces::wR;
 			pieces[squares::d1] = pieces::none;
+			hash ^= values[getHashIndex(squares::a1, pieces::wR)];
+			hash ^= values[getHashIndex(squares::d1, pieces::wR)];
 		}
 	}
 }
 
 void BoardState::unmakeBlackRookMoveIfCastling(const Move& move)
 {
+	using namespace hashValues;
+	assert(move.movingPiece == pieces::bK);
+
 	// Unmake casteling (rook only).
 	if (move.fromSquare == squares::e8)
 	{
@@ -632,34 +793,55 @@ void BoardState::unmakeBlackRookMoveIfCastling(const Move& move)
 			assert(pieces[squares::h8] == pieces::none);
 			pieces[squares::h8] = pieces::bR;
 			pieces[squares::f8] = pieces::none;
+			hash ^= values[getHashIndex(squares::h8, pieces::bR)];
+			hash ^= values[getHashIndex(squares::f8, pieces::bR)];
 		}
 		else if (move.toSquare == squares::c8)
 		{
 			assert(pieces[squares::a8] == pieces::none);
 			pieces[squares::a8] = pieces::bR;
 			pieces[squares::d8] = pieces::none;
+			hash ^= values[getHashIndex(squares::a8, pieces::bR)];
+			hash ^= values[getHashIndex(squares::d8, pieces::bR)];
 		}
 	}
 }
 
 void BoardState::makeNonSpecializedMove(const Move& move)
 {
+	using namespace hashValues;
+
 	pieces[move.fromSquare] = pieces::none;
+	hash ^= values[getHashIndex(move.fromSquare, move.movingPiece)];
 	if (move.capturedPiece != pieces::none)
 	{
 		pieces[move.capturedSquare] = pieces::none;
+		hash ^= values[getHashIndex(move.capturedSquare, move.capturedPiece)];
 	}
 
 	pieces[move.toSquare] = move.movingPiece;
+	hash ^= values[getHashIndex(move.toSquare, move.movingPiece)];
 }
 
-void BoardState::unmakeNonSpecializedMove(const Move& move)
+void BoardState::unmakeNonSpecializedMove(const Move& move, bool updateHash)
 {
+	using namespace hashValues;
+
 	pieces[move.toSquare] = pieces::none;
 	if (move.capturedPiece != pieces::none)
 	{
 		pieces[move.capturedSquare] = move.capturedPiece;
 	}
 	pieces[move.fromSquare] = move.movingPiece;
+
+	if (updateHash)
+	{
+		hash ^= values[getHashIndex(move.toSquare, move.movingPiece)];
+		if (move.capturedPiece != pieces::none)
+		{
+			hash ^= values[getHashIndex(move.capturedSquare, move.capturedPiece)];
+		}
+		hash ^= values[getHashIndex(move.fromSquare, move.movingPiece)];
+	}
 }
 
