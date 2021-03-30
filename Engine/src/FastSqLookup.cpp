@@ -37,8 +37,8 @@ namespace
 
 	std::vector<Square> getKnightReachableSquares(Square sq)
 	{
-		auto rankInsideBounds = [](Rank rank) {return (rank >= 0 && rank <= 7); };
-		auto fileInsideBounds = [](File file) {return (file >= 0 && file <= 7); };
+		auto rankInsideBounds = [](Rank rank) {return (rank >= ranks::rank1 && rank <= ranks::rank8); };
+		auto fileInsideBounds = [](File file) {return (file >= files::fileA && file <= files::fileH); };
 
 		const Rank rank = ranks::toRank(sq);
 		const File file = files::toFile(sq);

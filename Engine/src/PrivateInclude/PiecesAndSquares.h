@@ -3,10 +3,7 @@
 #include <cstdint>
 #include <string>
 
-// TODO replace all instances of 0, 7 or similar with constants, e.g.
-// rank::max or similar thought the code base.
-
-typedef int32_t Piece;
+typedef int8_t Piece;
 namespace pieces
 {
 	static constexpr Piece none = -1;
@@ -33,7 +30,7 @@ namespace pieces
 	};
 }
 
-typedef int32_t Square;
+typedef int8_t Square;
 namespace squares
 {
 	static constexpr Square num = 64;
@@ -112,7 +109,7 @@ namespace squares
 	static constexpr Square h8 = 63;
 }
 
-typedef int32_t Rank;
+typedef int8_t Rank;
 namespace ranks
 {
 	static constexpr Rank num = 8;
@@ -129,19 +126,19 @@ namespace ranks
 	Rank toRank(Square sq);
 }
 
-typedef int32_t File;
+typedef int8_t File;
 namespace files
 {
 	static constexpr File num = 8;
 
-	static constexpr File file1 = 0;
-	static constexpr File file2 = 1;
-	static constexpr File file3 = 2;
-	static constexpr File file4 = 3;
-	static constexpr File file5 = 4;
-	static constexpr File file6 = 5;
-	static constexpr File file7 = 6;
-	static constexpr File file8 = 7;
+	static constexpr File fileA = 0;
+	static constexpr File fileB = 1;
+	static constexpr File fileC = 2;
+	static constexpr File fileD = 3;
+	static constexpr File fileE = 4;
+	static constexpr File fileF = 5;
+	static constexpr File fileG = 6;
+	static constexpr File fileH = 7;
 
 	File toFile(Square sq);
 }

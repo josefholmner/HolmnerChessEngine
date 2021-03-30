@@ -26,13 +26,13 @@ namespace
 		Rank rank = static_cast<Rank>(str[1] - '1');
 		File file = static_cast<File>(str[0] - 'a');
 
-		if (rank < 0 || rank > 7 || file < 0 || file > 7)
+		if (rank < ranks::rank1 || rank > ranks::rank8 || file < files::fileA || file > files::fileH)
 		{
 			EngineUtilities::logE("Invalid square in FEN: " + str);
 			return {};
 		}
 
-		return file + 8 * rank;
+		return file + files::num * rank;
 	}
 
 	std::optional<Square> addPiece(char c, Square cursor, std::array<Piece, squares::num>& pieces)
@@ -103,7 +103,7 @@ namespace
 
 		std::array<Piece, squares::num> pieces;
 		Square cursor = squares::a1;
-		for (Rank rank = 7; rank >= 0; rank--)
+		for (Rank rank = ranks::rank8; rank >= ranks::rank1; rank--)
 		{
 			for (const char& c : ranks[rank])
 			{
@@ -425,11 +425,11 @@ bool BoardState::initFromFEN(const std::string& FEN)
 
 void BoardState::printBoard() const
 {
-	for (Rank rank = 7; rank >= 0; rank--)
+	for (Rank rank = ranks::rank8; rank >= ranks::rank1; rank--)
 	{
-		for (File file = 0; file < 8; file++)
+		for (File file = files::fileA; file <= files::fileH; file++)
 		{
-			const int32_t index = file + rank * 8;
+			const int32_t index = file + rank * files::num;
 			std::cout << "[" << pieces::pieceToStr(pieces[index]) << "] ";
 		}
 

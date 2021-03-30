@@ -607,8 +607,8 @@ namespace moveGenerationHelpers
 		Square fromSquare, Square toSquare, std::vector<Move>& moves,
 		const Lookup& lookup)
 	{
-		assert(ranks::toRank(fromSquare) == 6);
-		assert(ranks::toRank(toSquare) == 7);
+		assert(ranks::toRank(fromSquare) == ranks::rank7);
+		assert(ranks::toRank(toSquare) == ranks::rank8);
 
 		for (const auto promotion : {pieces::wQ, pieces::wR, pieces::wB, pieces::wN })
 		{
@@ -621,8 +621,8 @@ namespace moveGenerationHelpers
 	void addBlackPawnAdvanceWithPromotions(BoardState& board, Square fromSquare,
 		Square toSquare, std::vector<Move>& moves, const Lookup& lookup)
 	{
-		assert(ranks::toRank(fromSquare) == 1);
-		assert(ranks::toRank(toSquare) == 0);
+		assert(ranks::toRank(fromSquare) == ranks::rank2);
+		assert(ranks::toRank(toSquare) == ranks::rank1);
 
 		for (const auto promotion : { pieces::bQ, pieces::bR, pieces::bB, pieces::bN })
 		{
@@ -635,8 +635,8 @@ namespace moveGenerationHelpers
 	void addWhitePawnCaptureWithPromotions(BoardState& board, Square fromSquare,
 		Square toSquare, std::vector<Move>& moves, const Lookup& lookup)
 	{
-		assert(ranks::toRank(fromSquare) == 6);
-		assert(ranks::toRank(toSquare) == 7);
+		assert(ranks::toRank(fromSquare) == ranks::rank7);
+		assert(ranks::toRank(toSquare) == ranks::rank8);
 		assert(EngineUtilities::isBlack(board.getPiece(toSquare)));
 
 		for (const auto promotion : { pieces::wQ, pieces::wR, pieces::wB, pieces::wN })
@@ -650,8 +650,8 @@ namespace moveGenerationHelpers
 	void addBlackPawnCaptureWithPromotions(BoardState& board, Square fromSquare,
 		Square toSquare, std::vector<Move>& moves, const Lookup& lookup)
 	{
-		assert(ranks::toRank(fromSquare) == 1);
-		assert(ranks::toRank(toSquare) == 0);
+		assert(ranks::toRank(fromSquare) == ranks::rank2);
+		assert(ranks::toRank(toSquare) == ranks::rank1);
 		assert(EngineUtilities::isWhite(board.getPiece(toSquare)));
 
 		for (const auto promotion : { pieces::bQ, pieces::bR, pieces::bB, pieces::bN })

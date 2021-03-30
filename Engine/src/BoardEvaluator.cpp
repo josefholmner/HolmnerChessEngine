@@ -46,21 +46,21 @@ namespace
 		using namespace scoringConstants;
 		switch (rank)
 		{
-		case 0:
-		case 7:
-			return rankScoreMin;
-		case 1:
-		case 6:
-			return rankScoreMin + 1 * rankScoreJump;
-		case 2:
-		case 5:
-			return rankScoreMin + 2 * rankScoreJump;
-		case 3:
-		case 4:
-			return rankScoreMin + 3 * rankScoreJump;
-		default:
-			EngineUtilities::logE("BoardEvaluator: invalid rank passed to getRankScore().");
-			return 0;
+			case ranks::rank1:
+			case ranks::rank8:
+				return rankScoreMin;
+			case ranks::rank2:
+			case ranks::rank7:
+				return rankScoreMin + 1 * rankScoreJump;
+			case ranks::rank3:
+			case ranks::rank6:
+				return rankScoreMin + 2 * rankScoreJump;
+			case ranks::rank4:
+			case ranks::rank5:
+				return rankScoreMin + 3 * rankScoreJump;
+			default:
+				EngineUtilities::logE("BoardEvaluator: invalid rank passed to getRankScore().");
+				return 0;
 		}
 	}
 
@@ -73,7 +73,7 @@ namespace
 	int32_t getRankScoreRewardTowardsRankMin(Rank rank)
 	{
 		using namespace scoringConstants;
-		return rankScoreMin + (7 - rank) * rankScoreJump;
+		return rankScoreMin + (ranks::rank8 - rank) * rankScoreJump;
 	}
 
 	int32_t getFileScore(File file)
@@ -81,21 +81,21 @@ namespace
 		using namespace scoringConstants;
 		switch (file)
 		{
-		case 0:
-		case 7:
-			return fileScoreMin;
-		case 1:
-		case 6:
-			return fileScoreMin + 1 * fileScoreJump;
-		case 2:
-		case 5:
-			return fileScoreMin + 2 * fileScoreJump;
-		case 3:
-		case 4:
-			return fileScoreMin + 3 * fileScoreJump;
-		default:
-			EngineUtilities::logE("BoardEvaluator: invalid file passed to getFileScore().");
-			return 0;
+			case files::fileA:
+			case files::fileH:
+				return fileScoreMin;
+			case files::fileB:
+			case files::fileG:
+				return fileScoreMin + 1 * fileScoreJump;
+			case files::fileC:
+			case files::fileF:
+				return fileScoreMin + 2 * fileScoreJump;
+			case files::fileD:
+			case files::fileE:
+				return fileScoreMin + 3 * fileScoreJump;
+			default:
+				EngineUtilities::logE("BoardEvaluator: invalid file passed to getFileScore().");
+				return 0;
 		}
 	}
 
@@ -169,17 +169,17 @@ namespace
 	int32_t getPawnIslandsVal(const std::array<bool, files::num>& filesOccupied, int32_t val)
 	{
 		int32_t count = 0;
-		if (filesOccupied[files::file1] && !filesOccupied[files::file2])
+		if (filesOccupied[files::fileA] && !filesOccupied[files::fileB])
 		{
 			count += val;
 		}
 
-		if (!filesOccupied[files::file7] && filesOccupied[files::file8])
+		if (!filesOccupied[files::fileG] && filesOccupied[files::fileH])
 		{
 			count += val;
 		}
 
-		for (File f = files::file3; f < files::num; f++)
+		for (File f = files::fileC; f < files::num; f++)
 		{
 			if (!filesOccupied[(size_t)f - 2] && filesOccupied[(size_t)f - 1] && !filesOccupied[f])
 			{
