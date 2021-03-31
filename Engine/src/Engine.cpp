@@ -1162,7 +1162,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		Score alpha = searchHelpers::minusInf;
 		static constexpr Score beta = searchHelpers::plusInf;
 		bestScore = searchHelpers::minusInf;
-		auto& moves = getLegalMoves(board);
+		auto moves = getLegalMoves(board);
 		setStaticEvalAndSortMoves(board, moves);
 		for (const Move& m : moves)
 		{
@@ -1338,7 +1338,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 
 	Score bestScore = minusInf;
 	tp::MinimalMoveInfo bestMove;
-	auto& moves = getPseudoLegalMoves(board);
+	auto moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
 	// assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove)); /*Uncomment for testing*/
 	if (elem != nullptr && elem->bestMove.from != squares::none)
@@ -1408,7 +1408,7 @@ Score Engine::alphaBetaQuiescence(BoardState& board, Score alpha, Score beta,
 		alpha = staticEval;
 	}
 
-	auto& moves = getCaptureAndPromotionMoves(board);
+	auto moves = getCaptureAndPromotionMoves(board);
 	setStaticEvalAndSortMoves(board, moves);
 	for (const Move& move : moves)
 	{
