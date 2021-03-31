@@ -24,11 +24,18 @@ namespace searchHelpers
 		static constexpr int8_t lower = -1;
 		static constexpr int8_t exact = 0;
 
+		struct MinimalMoveInfo
+		{
+			Square from = squares::none;
+			Square to = squares::none;
+		};
+
 		struct Element
 		{
 			Score score;
 			Depth depth;
 			int8_t type;
+			MinimalMoveInfo bestMove;
 		};
 	}
 }

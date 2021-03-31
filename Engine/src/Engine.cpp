@@ -1154,30 +1154,36 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 	}
 
 	searchHelpers::SearchInfo info;
-	Score bestScore = searchHelpers::minusInf;
 	Move bestMove;
-	Score alpha = searchHelpers::minusInf;
-	static constexpr Score beta = searchHelpers::plusInf;
-
-	auto& moves = getLegalMoves(board);
-	setStaticEvalAndSortMoves(board, moves);
-	for (const Move& m : moves)
+	Score bestScore;
+	Depth currentDepth = 1;
+	while (currentDepth <= depth)
 	{
-		board.makeMove(m);
-		info.nodesVisited++;
-		const int32_t score = -alphaBeta(board, -beta, -alpha, depth - 1, m.staticEval, info);
-		if (score > bestScore)
+		Score alpha = searchHelpers::minusInf;
+		static constexpr Score beta = searchHelpers::plusInf;
+		bestScore = searchHelpers::minusInf;
+		auto& moves = getLegalMoves(board);
+		setStaticEvalAndSortMoves(board, moves);
+		for (const Move& m : moves)
 		{
-			bestScore = score;
-			bestMove = m;
+			board.makeMove(m);
+			info.nodesVisited++;
+			const int32_t score = -alphaBeta(board, -beta, -alpha, currentDepth-1, m.staticEval, info);
+			if (score > bestScore)
+			{
+				bestScore = score;
+				bestMove = m;
+			}
+
+			if (score > alpha)
+			{
+				alpha = score;
+			}
+
+			board.unmakeMove(m);
 		}
 
-		if (score > alpha)
-		{
-			alpha = score;
-		}
-
-		board.unmakeMove(m);
+		currentDepth++;
 	}
 
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
@@ -1301,7 +1307,8 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	using namespace moveGenerationHelpers;
 
 	const Score alphaOrig = alpha;
-	if (const tp::Element* elem = board.findTranspositionElement())
+	const tp::Element* elem = board.findTranspositionElement();
+	if (elem != nullptr)
 	{
 		if (elem->depth >= depth)
 		{
@@ -1330,10 +1337,20 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	}
 
 	Score bestScore = minusInf;
+	tp::MinimalMoveInfo bestMove;
 	auto& moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
 	// assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove)); /*Uncomment for testing*/
-	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
+	if (elem != nullptr && elem->bestMove.from != squares::none)
+	{
+		assert(elem->bestMove.to != squares::none);
+		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval, &elem->bestMove);
+	}
+	else
+	{
+		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval, nullptr);
+	}
+	
 	for (const Move& move : moves)
 	{
 		if (doesMoveCauseMovingSideCheck(board, fastSqLookup, move, inCheckPreMove))
@@ -1346,7 +1363,13 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 		info.nodesVisited++;
 		const Score score = -alphaBeta(board, -beta, -alpha, depth - 1, move.staticEval, info);
 		board.unmakeMove(move);
-		bestScore = std::max(score, bestScore);
+		if (score > bestScore)
+		{
+			bestScore = score;
+			bestMove.from = move.fromSquare;
+			bestMove.to = move.toSquare;
+		}
+
 		alpha = std::max(alpha, score);
 		if (alpha >= beta)
 		{
@@ -1359,7 +1382,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	else if (bestScore >= beta) type = tp::lower;
 	else type = tp::exact;
 
-	board.addTranspositionElement(tp::Element{bestScore, depth, type});
+	board.addTranspositionElement(tp::Element{bestScore, depth, type, bestMove});
 	return bestScore;
 }
 
@@ -1424,7 +1447,12 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	std::sort(moves.begin(), moves.end());
 }
 
-void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves, Score staticEval) const
+// If bestMove is not nullptr, it will override the default ordering and put the corresponding
+// move at the beginning of the moves vector. This is done because bestMove is likely a better
+// guess of move strength since it was likely calculated with a deeper depth than the 1 depth
+// eval that is done here.
+void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
+	Score staticEval, const searchHelpers::tp::MinimalMoveInfo* bestMove) const
 {
 	if (moves.size() == 0)
 	{
@@ -1455,4 +1483,17 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 	}
 	assert(board.isValid());
 	std::sort(moves.begin(), moves.end());
+
+	if (bestMove != nullptr)
+	{
+		// Finally, we override the default sort and put the known bestMove at the beginning.
+		for (int32_t i = 0; i < moves.size(); i++)
+		{
+			if (bestMove->from == moves[i].fromSquare && bestMove->to == moves[i].toSquare)
+			{
+				std::iter_swap(moves.begin(), moves.begin() + i);
+				break;
+			}
+		}
+	}
 }

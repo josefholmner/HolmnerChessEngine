@@ -50,7 +50,7 @@ private:
 	// Tries to use the fast evaluation delta scheme offered by the BoardEvaluator. A valid pre-move
 	// static evaluation score must be provided to use this function!
 	void setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
-		Score staticEval) const;
+		Score staticEval, const searchHelpers::tp::MinimalMoveInfo* bestMove) const;
 
 	FastSqLookup fastSqLookup;
 	BoardEvaluator boardEvaluator;
