@@ -1332,7 +1332,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	Score bestScore = minusInf;
 	auto& moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
-	assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove));
+	// assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove)); /*Uncomment for testing*/
 	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 	for (const Move& move : moves)
 	{
