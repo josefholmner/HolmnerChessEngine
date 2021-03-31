@@ -1344,11 +1344,11 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	if (elem != nullptr && elem->bestMove.from != squares::none)
 	{
 		assert(elem->bestMove.to != squares::none);
-		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval, &elem->bestMove);
+		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval, elem->bestMove);
 	}
 	else
 	{
-		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval, nullptr);
+		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 	}
 	
 	for (const Move& move : moves)
@@ -1447,12 +1447,8 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	std::sort(moves.begin(), moves.end());
 }
 
-// If bestMove is not nullptr, it will override the default ordering and put the corresponding
-// move at the beginning of the moves vector. This is done because bestMove is likely a better
-// guess of move strength since it was likely calculated with a deeper depth than the 1 depth
-// eval that is done here.
 void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
-	Score staticEval, const searchHelpers::tp::MinimalMoveInfo* bestMove) const
+	Score staticEval) const
 {
 	if (moves.size() == 0)
 	{
@@ -1483,17 +1479,30 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 	}
 	assert(board.isValid());
 	std::sort(moves.begin(), moves.end());
+}
 
-	if (bestMove != nullptr)
+// If bestMove is not nullptr, it will override the default ordering and put the corresponding
+// move at the beginning of the moves vector. This is done because bestMove is likely a better
+// guess of move strength since it was likely calculated with a deeper depth than the 1 depth
+// eval that is done here.
+void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
+	Score staticEval, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
+{
+	if (moves.size() == 0)
 	{
-		// Finally, we override the default sort and put the known bestMove at the beginning.
-		for (int32_t i = 0; i < moves.size(); i++)
+		return;
+	}
+
+	// Do the regular sorting.
+	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
+
+	// Finally, we override the default sort and put the known bestMove at the beginning.
+	for (int32_t i = 0; i < moves.size(); i++)
+	{
+		if (bestMove.from == moves[i].fromSquare && bestMove.to == moves[i].toSquare)
 		{
-			if (bestMove->from == moves[i].fromSquare && bestMove->to == moves[i].toSquare)
-			{
-				std::iter_swap(moves.begin(), moves.begin() + i);
-				break;
-			}
+			std::iter_swap(moves.begin(), moves.begin() + i);
+			break;
 		}
 	}
 }
