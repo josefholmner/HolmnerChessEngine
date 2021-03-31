@@ -274,13 +274,7 @@ namespace moveGenerationHelpers
 		}
 
 		moves.push_back(move);
-
-#ifndef NDEBUG
-		assert(boardPreMove.getPieces() == board.getPieces());
-		assert(boardPreMove.getCastleAvailability() == board.getCastleAvailability());
-		assert(boardPreMove.getEnPassantSquare() == board.getEnPassantSquare());
-		assert(boardPreMove.getTurn() == board.getTurn());
-#endif
+		assert(board == boardPreMove);
 	}
 
 	// Ensures that the moving side is not in check prior to adding the move.
@@ -307,13 +301,7 @@ namespace moveGenerationHelpers
 		}
 
 		moves.push_back(move);
-
-#ifndef NDEBUG
-		assert(boardPreMove.getPieces() == board.getPieces());
-		assert(boardPreMove.getCastleAvailability() == board.getCastleAvailability());
-		assert(boardPreMove.getEnPassantSquare() == board.getEnPassantSquare());
-		assert(boardPreMove.getTurn() == board.getTurn());
-#endif
+		assert(board == boardPreMove);
 	}
 
 	bool rookCaptureProhibitsWQcastling(const BoardState& board, Square captureSquare)
@@ -1091,7 +1079,6 @@ namespace moveCountHelpers
 			const BoardState boardPreMove = board;
 #endif
 
-			assert(board.isValid());
 			board.makeMove(move);
 			assert(board.isValid());
 			num += countMovesRecursive(engine, board, depth - 1);
@@ -1099,10 +1086,7 @@ namespace moveCountHelpers
 			board.unmakeMove(move);
 			assert(board.isValid());
 
-			assert(boardPreMove.getPieces() == board.getPieces());
-			assert(boardPreMove.getCastleAvailability() == board.getCastleAvailability());
-			assert(boardPreMove.getEnPassantSquare() == board.getEnPassantSquare());
-			assert(boardPreMove.getTurn() == board.getTurn());
+			assert(board == boardPreMove);
 		}
 		return num;
 	}

@@ -373,6 +373,18 @@ BoardState::BoardState(bool reserveTranspositionTable)
 #endif
 }
 
+bool BoardState::operator==(const BoardState& other) const
+{
+#ifndef NDEBUG
+	// Debug build.
+	return (pieces == other.getPieces() && casleAvailability == other.getCastleAvailability() &&
+		enPassantSquare == other.getEnPassantSquare() && turn == other.getTurn() &&
+		hash == other.getHash());
+#else
+	return hash == other.getHash();
+#endif
+}
+
 bool BoardState::initFromFEN(const std::string& FEN)
 {
 	const std::vector<std::string> splitFEN = CommonUtilities::splitString(FEN, ' ');

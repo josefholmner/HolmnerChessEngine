@@ -16,6 +16,8 @@ public:
 	BoardState() = default;
 	BoardState(bool reserveTranspositionTable);
 
+	bool operator==(const BoardState& other) const;
+
 	bool initFromFEN(const std::string& FEN);
 
 	void printBoard() const;
@@ -26,6 +28,7 @@ public:
 	bool isValid() const;
 
 	Hash64 generateHash() const;
+	Hash64 getHash() const { return hash; }
 	void addTranspositionElement(const searchHelpers::tp::Element& elem);
 	size_t getTranspositionTableSize() const { return transpositionTable.size(); }
 
