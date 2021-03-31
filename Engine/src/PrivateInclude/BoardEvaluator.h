@@ -1,9 +1,9 @@
 #pragma once
 
 #include "PiecesAndSquares.h"
-#include "PrivateInclude/BoardState.h"
-#include "PrivateInclude/FastSqLookup.h"
-#include "PrivateInclude/Move.h"
+#include "BoardState.h"
+#include "FastSqLookup.h"
+#include "Move.h"
 #include "SearchHelpers.h"
 
 #include <cstdint>
