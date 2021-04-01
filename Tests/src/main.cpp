@@ -4,7 +4,6 @@
 #include "GetBestMovePerformanceTests.h"
 #include "RawMinimaxPerformanceTests.h"
 #include "FENTests.h"
-#include "AlphaBetaMiniMaxEquivalencyTests.h"
 
 void printReleaseOrDebugBuild()
 {
@@ -24,7 +23,6 @@ void runAllTests()
     GetBestMovePerformanceTests::Run();
     RawMinimaxPerformanceTests::Run();
     FENTests::Run();
-    AlphaBetaMiniMaxEquivalencyTests::Run();
 
     TestsUtilities::log("---------------");
     TestsUtilities::log("All tests done.");

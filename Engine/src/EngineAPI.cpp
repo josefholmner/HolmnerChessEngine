@@ -41,9 +41,3 @@ StaticEvaluationResult EngineAPI::evaluateStatic(const std::string& FEN) const
     assert(engine != nullptr);
     return engine->evaluateStatic(FEN);
 }
-
-SearchResult hceEngine::EngineAPI::getBestMoveNoQuiescence(const std::string& FEN, uint8_t depth) const
-{
-    assert(engine != nullptr);
-    return engine->getBestMove(FEN, depth, false);
-}
