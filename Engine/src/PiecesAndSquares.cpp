@@ -44,7 +44,24 @@ Rank ranks::toRank(Square sq)
 	return sq / 8;
 }
 
+char ranks::rankToChar(Rank rank)
+{
+	return '1' + rank;
+}
+
 File files::toFile(Square sq)
 {
 	return sq % 8;
+}
+
+char files::fileToChar(File file)
+{
+	return 'A' + file;
+}
+
+std::string squares::squareToStr(Square sq)
+{
+	const char fileChar = files::fileToChar(files::toFile(sq));
+	const char rankChar = ranks::rankToChar(ranks::toRank(sq));
+	return  std::string(fileChar, rankChar);
 }

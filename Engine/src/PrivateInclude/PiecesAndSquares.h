@@ -109,6 +109,8 @@ namespace squares
 	static constexpr Square f8 = 61;
 	static constexpr Square g8 = 62;
 	static constexpr Square h8 = 63;
+
+	std::string squareToStr(Square sq);
 }
 
 typedef int8_t Rank;
@@ -126,6 +128,8 @@ namespace ranks
 	static constexpr Rank rank8 = 7;
 
 	Rank toRank(Square sq);
+
+	char rankToChar(Rank rank);
 }
 
 typedef int8_t File;
@@ -143,4 +147,6 @@ namespace files
 	static constexpr File fileH = 7;
 
 	File toFile(Square sq);
+
+	char fileToChar(File file);
 }
