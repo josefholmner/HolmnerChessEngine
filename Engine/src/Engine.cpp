@@ -1133,7 +1133,8 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 	return hceEngine::StaticEvaluationResult::Equal;
 }
 
-hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth) const
+hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
+	bool doQuiescence) const
 {
 	hceEngine::SearchResult searchResult;
 
@@ -1177,7 +1178,8 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		{
 			board.makeMove(m);
 			info.nodesVisited++;
-			const int32_t score = -alphaBeta(board, -beta, -alpha, currentDepth-1, m.staticEval, info);
+			const int32_t score = -alphaBeta(
+				board, -beta, -alpha, currentDepth-1, doQuiescence, m.staticEval, info);
 			if (score > bestScore)
 			{
 				bestScore = score;
@@ -1312,7 +1314,8 @@ Score Engine::negaMax(BoardState& board, Depth depth, searchHelpers::SearchInfo&
 	return bestScore;
 }
 
-Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth, Score staticEval, searchHelpers::SearchInfo& info) const
+Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
+	bool doQuiescence, Score staticEval, searchHelpers::SearchInfo& info) const
 {
 	using namespace searchHelpers;
 	using namespace moveGenerationHelpers;
@@ -1344,7 +1347,9 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 
 	if (depth <= 0)
 	{
-		return alphaBetaQuiescence(board, alpha, beta, 0, staticEval, info);
+		return doQuiescence ?
+			alphaBetaQuiescence(board, alpha, beta, 0, staticEval, info) :
+			boardEvaluator.getStaticEvaluation(board, fastSqLookup);
 	}
 
 	Score bestScore = minusInf;
@@ -1372,7 +1377,8 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 
 		board.makeMove(move);
 		info.nodesVisited++;
-		const Score score = -alphaBeta(board, -beta, -alpha, depth - 1, move.staticEval, info);
+		const Score score = -alphaBeta(
+			board, -beta, -alpha, depth - 1, doQuiescence, move.staticEval, info);
 		board.unmakeMove(move);
 		if (score > bestScore)
 		{

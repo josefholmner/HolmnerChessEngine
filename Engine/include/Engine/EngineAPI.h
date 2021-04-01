@@ -50,6 +50,16 @@ namespace hceEngine
         */
         StaticEvaluationResult evaluateStatic(const std::string& FEN) const;
 
+        /**
+        * Mostly for internal use. Does the same thing as getBestMove() but skips the quiescence
+        * search at each leaf node. This will be faster than the getBestMove() function but will
+        * likely suffer from serious strategical errors during play. I.e. the regular getBestMove()
+        * function will perform better than this function in a real game, even though this function
+        * may reach a deeper search depth given a specific amount of time. It is guaranteed to give
+        * the same result as getBestMoveMiniMax() but is faster.
+        */
+        SearchResult getBestMoveNoQuiescence(const std::string& FEN, uint8_t depth) const;
+
     private:
         std::unique_ptr<Engine> engine;
     };

@@ -21,7 +21,8 @@ public:
 
 	hceEngine::StaticEvaluationResult evaluateStatic(const std::string& FEN) const;
 
-	hceEngine::SearchResult getBestMove(const std::string& FEN, Depth depth) const;
+	hceEngine::SearchResult getBestMove(const std::string& FEN, Depth depth,
+		bool doQuiescence = true) const;
 
 	hceEngine::SearchResult getBestMoveMiniMax(const std::string& FEN, Depth depth) const;
 
@@ -39,7 +40,7 @@ private:
 	
 	Score negaMax(BoardState& board, Depth depth, searchHelpers::SearchInfo& info) const;
 	
-	Score alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
+	Score alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth, bool doQuiescence,
 		Score staticEval, searchHelpers::SearchInfo& info) const;
 	
 	Score alphaBetaQuiescence(BoardState& board, Score alpha, Score beta, Depth currDepth,
