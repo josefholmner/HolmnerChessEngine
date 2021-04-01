@@ -63,5 +63,5 @@ std::string squares::squareToStr(Square sq)
 {
 	const char fileChar = files::fileToChar(files::toFile(sq));
 	const char rankChar = ranks::rankToChar(ranks::toRank(sq));
-	return  std::string(fileChar, rankChar);
+	return  std::string({ fileChar, rankChar });
 }
