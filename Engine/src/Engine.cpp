@@ -1199,6 +1199,8 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
 		currentDepth++;
 	}
 
+	searchResult.bestMove.fromSquare = squares::squareToStr(bestMove.fromSquare);
+	searchResult.bestMove.toSquare = squares::squareToStr(bestMove.toSquare);
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
 	searchResult.engineInfo.maxDepthVisited = (size_t)depth + info.quiescenceMaxDepth;
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
@@ -1242,6 +1244,8 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 		board.unmakeMove(m);
 	}
 
+	searchResult.bestMove.fromSquare = squares::squareToStr(bestMove.fromSquare);
+	searchResult.bestMove.toSquare = squares::squareToStr(bestMove.toSquare);
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
 	searchResult.engineInfo.maxDepthVisited = depth; // No quiescence search.
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
