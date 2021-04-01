@@ -1155,15 +1155,24 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 
 	searchHelpers::SearchInfo info;
 	Move bestMove;
+	searchHelpers::tp::MinimalMoveInfo bestMoveLastDepth;
 	Score bestScore;
+	auto moves = getLegalMoves(board);
 	Depth currentDepth = 1;
 	while (currentDepth <= depth)
 	{
 		Score alpha = searchHelpers::minusInf;
 		static constexpr Score beta = searchHelpers::plusInf;
 		bestScore = searchHelpers::minusInf;
-		auto moves = getLegalMoves(board);
-		setStaticEvalAndSortMoves(board, moves);
+		if (bestMoveLastDepth.isSet())
+		{
+			setStaticEvalAndSortMoves(board, moves, bestMoveLastDepth);
+		}
+		else
+		{
+			setStaticEvalAndSortMoves(board, moves);
+		}
+		
 		for (const Move& m : moves)
 		{
 			board.makeMove(m);
@@ -1173,6 +1182,8 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 			{
 				bestScore = score;
 				bestMove = m;
+				bestMoveLastDepth.from = m.fromSquare;
+				bestMoveLastDepth.to = m.toSquare;
 			}
 
 			if (score > alpha)
@@ -1341,7 +1352,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	auto moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
 	// assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove)); /*Uncomment for testing*/
-	if (elem != nullptr && elem->bestMove.from != squares::none)
+	if (elem != nullptr && elem->bestMove.isSet())
 	{
 		assert(elem->bestMove.to != squares::none);
 		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval, elem->bestMove);
@@ -1447,6 +1458,33 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	std::sort(moves.begin(), moves.end());
 }
 
+void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
+{
+	if (moves.size() <= 0)
+	{
+		return;
+	}
+
+	setStaticEvalAndSortMoves(board, moves);
+
+	// Finally, we override the default sort and put the known bestMove at the beginning.
+	setKnownBestMoveFirst(moves, bestMove);
+}
+
+void Engine::setKnownBestMoveFirst(std::vector<Move>& moves, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
+{
+	assert(bestMove.isSet());
+
+	for (int32_t i = 0; i < moves.size(); i++)
+	{
+		if (bestMove.from == moves[i].fromSquare && bestMove.to == moves[i].toSquare)
+		{
+			std::iter_swap(moves.begin(), moves.begin() + i);
+			return;
+		}
+	}
+}
+
 void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
 	Score staticEval) const
 {
@@ -1481,10 +1519,6 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 	std::sort(moves.begin(), moves.end());
 }
 
-// If bestMove is not nullptr, it will override the default ordering and put the corresponding
-// move at the beginning of the moves vector. This is done because bestMove is likely a better
-// guess of move strength since it was likely calculated with a deeper depth than the 1 depth
-// eval that is done here.
 void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
 	Score staticEval, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
 {
@@ -1497,12 +1531,5 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 	setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 
 	// Finally, we override the default sort and put the known bestMove at the beginning.
-	for (int32_t i = 0; i < moves.size(); i++)
-	{
-		if (bestMove.from == moves[i].fromSquare && bestMove.to == moves[i].toSquare)
-		{
-			std::iter_swap(moves.begin(), moves.begin() + i);
-			break;
-		}
-	}
+	setKnownBestMoveFirst(moves, bestMove);
 }

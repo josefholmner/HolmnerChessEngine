@@ -28,6 +28,7 @@ namespace searchHelpers
 		{
 			Square from = squares::none;
 			Square to = squares::none;
+			bool isSet() const { return from != squares::none; }
 		};
 
 		struct Element

@@ -46,6 +46,11 @@ private:
 		Score staticEval, searchHelpers::SearchInfo& info) const;
 	
 	void setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves) const;
+	void setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves,
+		const searchHelpers::tp::MinimalMoveInfo& bestMove) const;
+
+	void setKnownBestMoveFirst(std::vector<Move>& moves,
+		const searchHelpers::tp::MinimalMoveInfo& bestMove) const;
 	
 	// Tries to use the fast evaluation delta scheme offered by the BoardEvaluator. A valid pre-move
 	// static evaluation score must be provided to use this function!
