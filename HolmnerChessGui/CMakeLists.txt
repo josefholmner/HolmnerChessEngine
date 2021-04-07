@@ -2,12 +2,14 @@ FILE(GLOB_RECURSE HEADERS "include/*.h")
 FILE(GLOB_RECURSE THIRDPARTYWRAPPERHEADERS "include/ThirdPartyWrappers/*.h")
 FILE(GLOB SOURCES "src/*.cpp")
 FILE(GLOB THIRDPARTYWRAPPERSOURCES "src/ThirdPartyWrappers/*.cpp")
+FILE(GLOB IMAGES "src/Images/*.cpp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_executable(HolmnerChessGui ${HEADERS} ${THIRDPARTYWRAPPERHEADERS} ${SOURCES} ${THIRDPARTYWRAPPERSOURCES})
+add_executable(HolmnerChessGui ${HEADERS} ${THIRDPARTYWRAPPERHEADERS} ${SOURCES} ${THIRDPARTYWRAPPERSOURCES} ${IMAGES})
 
 source_group("ThirdPartyWrappers" FILES ${THIRDPARTYWRAPPERHEADERS})
 source_group("ThirdPartyWrappers" FILES ${THIRDPARTYWRAPPERSOURCES})
+source_group("Images" FILES ${IMAGES})
 
 # Engine lib
 include_directories(${HolmnerChessEngine_SOURCE_DIR}/Engine/include)

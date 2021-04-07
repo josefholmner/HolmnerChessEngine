@@ -1,9 +1,9 @@
 #include "GameInstance.h"
 
+
 int main()
 {
     GameInstance game;
-    game.startNew();
-
+    game.run();
     return 0;
 }

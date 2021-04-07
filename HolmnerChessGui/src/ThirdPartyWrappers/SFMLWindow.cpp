@@ -1,35 +1,45 @@
 #include "ThirdPartyWrappers/SFMLWindow.h"
 
+#include "GuiUtilities.h"
 
-void SFMLWindow::open(uint32_t width, uint32_t height)
+#include "ThirdPartyWrappers/SFMLDrawable.h"
+
+#include <cassert>
+
+void SFMLWindow::open(const Vec2<uint32_t>& size)
 {
-	renderWindow.create(sf::VideoMode(width, height), "Holmner Chess Engine");
+	window.create(sf::VideoMode(size.x(), size.y()), "Holmner Chess Engine");
+}
+
+void SFMLWindow::close()
+{
+	window.close();
 }
 
 bool SFMLWindow::isOpen()
 {
-	if (!renderWindow.isOpen())
+	return window.isOpen();
+}
+
+void SFMLWindow::draw(const Drawable& drawable)
+{
+	const SFMLDrawable* sfmlDrawable = dynamic_cast<const SFMLDrawable*>(&drawable);
+	if (sfmlDrawable == nullptr)
 	{
-		return false;
+		GuiUtilities::logE("Non SFML Drawable passed to SFMLWindow::draw(). Dynamic cast failed.");
+		return;
 	}
 
-	sf::Event event;
-	if (renderWindow.pollEvent(event))
-	{
-		if (event.type == sf::Event::Closed)
-		{
-			renderWindow.close();
-			return false;
-		}
-	}
+	
+	window.draw(sfmlDrawable->getSprite());
+}
 
-	renderWindow.clear();
+void SFMLWindow::clear()
+{
+	window.clear();
+}
 
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Green);
-	renderWindow.draw(shape);
-
-	renderWindow.display();
-
-	return true;
+void SFMLWindow::display()
+{
+	window.display();
 }
