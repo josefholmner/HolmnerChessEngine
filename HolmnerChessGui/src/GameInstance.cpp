@@ -2,6 +2,7 @@
 
 #include "GuiUtilities.h"
 #include "ThirdPartyWrappersFactory.h"
+#include "StatesAndEvents.h"
 #include "MenuHandler.h"
 
 #include <cassert>
@@ -9,38 +10,16 @@
 
 void GameInstance::run()
 {
-	using namespace gameState;
-
 	init();
 	assert(window != nullptr && window->isOpen());
 
 	MenuHandler menu;
-
-	// Main game loop.
-	GameState state = GameState::Menu;
-	while (window->isOpen())
+	const auto menuResult = menu.run(*window);
+	if (!menuResult)
 	{
-		switch (state)
-		{
-			case GameState::Menu:
-				state = menu.run(*window);
-				break;
-			case GameState::PlaySilly:
-				break;
-			case GameState::PlayEasy:
-				break;
-			case GameState::PlayMedium:
-				break;
-			case GameState::PlayHard:
-				break;
-			case GameState::Quit:
-				window->close();
-				return;
-			default:
-				GuiUtilities::logE("Unknown game state in GameInstance::run().");
-				state = GameState::Quit;
-				break;
-		}
+		// Quit.
+		window->close();
+		return;
 	}
 }
 

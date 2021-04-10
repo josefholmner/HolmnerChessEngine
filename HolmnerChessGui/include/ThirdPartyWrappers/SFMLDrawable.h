@@ -13,7 +13,10 @@ class SFMLDrawable : public Drawable
 public:
 	SFMLDrawable(const ImageData& image);
 
-	void setPosition(const Vec2<uint32_t>& pos) override;
+	void setRelativePosition(const Vec2<float>& relPos, const Vec2<uint32_t>& windowSize) override;
+
+	void setScale(const Vec2<float>& scale) override;
+	Vec2<float> getScale() const override;
 
 	const sf::Sprite& getSprite() const { return sprite; }
 

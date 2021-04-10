@@ -15,6 +15,19 @@ SFMLDrawable::SFMLDrawable(const ImageData& image)
 	sprite.setTexture(texture);
 }
 
-void SFMLDrawable::setPosition(const Vec2<uint32_t>& pos)
+void SFMLDrawable::setRelativePosition(const Vec2<float>& relPos, const Vec2<uint32_t>& windowSize)
 {
+	sprite.setPosition(relPos.x() * (float)windowSize.x(),
+		relPos.y() * (float)windowSize.y());
+}
+
+void SFMLDrawable::setScale(const Vec2<float>& scale)
+{
+	sprite.setScale(scale.x(), scale.y());
+}
+
+Vec2<float> SFMLDrawable::getScale() const
+{
+	const auto scale = sprite.getScale();
+	return Vec2<float>(scale.x, scale.y);
 }
