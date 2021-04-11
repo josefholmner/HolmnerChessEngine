@@ -72,7 +72,7 @@ statesAndEvents::Event SFMLWindow::pollEvent()
 			event.mouseY = sfmlEvent.mouseButton.y;
 			return event;
 		case sf::Event::Resized:
-			onResize(sfmlEvent.size.width, sfmlEvent.size.height);
+			//onResize(sfmlEvent.size.width, sfmlEvent.size.height);
 			event.type = statesAndEvents::EventType::None;
 			return event;
 		default:
