@@ -8,7 +8,14 @@
 
 void SFMLWindow::open(const Vec2<uint32_t>& size)
 {
-	window.create(sf::VideoMode(size.x(), size.y()), "Holmner Chess Engine");
+	static uint32_t widthSafetyMargin = 200;
+	static uint32_t heightSafetyMargin = 200;
+	const auto mode = sf::VideoMode::getDesktopMode();
+
+	window.create(sf::VideoMode(size.x(), size.y()),
+		"Holmner Chess Engine");
+
+	window.setSize(sf::Vector2u(mode.width - widthSafetyMargin, mode.height - heightSafetyMargin));
 	window.setPosition(sf::Vector2i(0, 0));
 }
 
