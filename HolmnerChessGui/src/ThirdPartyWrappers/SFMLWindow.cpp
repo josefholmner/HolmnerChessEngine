@@ -10,6 +10,10 @@ void SFMLWindow::open(const Vec2<uint32_t>& size)
 {
 	window.create(sf::VideoMode(size.x(), size.y()), "Holmner Chess Engine");
 	window.setPosition(sf::Vector2i(0, 0));
+
+	// In case the window is down-sized on creation due to low resoluton screen.
+	const auto actualSize = window.getSize();
+	onResize(actualSize.x, actualSize.y);
 }
 
 void SFMLWindow::close()
