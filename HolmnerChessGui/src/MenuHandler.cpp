@@ -32,12 +32,12 @@ void MenuHandler::init(const Window& window)
 	background = ThirdPartyWrappersFactory::createDrawable(Resources::getMenuBackgroundImg());
 	background->setScale(Vec2<float>(1.f / 1.5f, 1.f / 1.5f));
 
-	auto createButton = [](const ImageData& data, const Vec2<float>& scale, const Vec2<float>& relPos,
+	auto createButton = [](const ImageData& data, const Vec2<float>& scale, const Vec2<float>& normPos,
 		const Window& window)
 	{
 		auto button = ThirdPartyWrappersFactory::createClickable(data);
 		button->getDrawable().setScale(scale);
-		button->getDrawable().setRelativePosition(relPos, window);
+		button->getDrawable().setNormalizedPosition(normPos, window);
 		return button;
 	};
 

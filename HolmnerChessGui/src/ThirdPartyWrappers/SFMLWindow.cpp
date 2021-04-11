@@ -6,39 +6,17 @@
 
 #include <cassert>
 
-void SFMLWindow::open()
+void SFMLWindow::open(const Vec2<uint32_t>& size)
 {
-	//static constexpr uint32_t widthSafetyMargin = 200;
-	//static constexpr uint32_t heightSafetyMargin = 200;
-	//const auto mode = sf::VideoMode::getDesktopMode();
-	//uint32_t finalWidth = mode.width - widthSafetyMargin;
-	//uint32_t finalHeight = mode.height - heightSafetyMargin;
+	// Create the window at a lower resolution, then upscale to the final size.
+	// This is done due to some scaling issues on low resolution screens.
+	const uint32_t safeWidth = 800;
+	const uint32_t safeHeight = 600;
+	window.create(sf::VideoMode(safeWidth, safeHeight), "Holmner Chess Engine");
+	window.setPosition(sf::Vector2i(0, 0));
 
-	//// Maintain default aspect ratio.
-	//if ((float)finalWidth / (float)finalHeight > Window::defaultWidthHeightRatio)
-	//{
-	//	finalWidth = (uint32_t)((float)finalHeight * Window::defaultWidthHeightRatio);
-	//}
-	//else
-	//{
-	//	finalHeight = (uint32_t)((float)finalWidth / Window::defaultWidthHeightRatio);
-	//}
-
-	//// Create the window with the default size, then resize the window to the final size.
-	//// This is done to ensure that everything is scaled correctly.
-	//window.create(sf::VideoMode(Window::defaultWidth, Window::defaultHeight),
-	//	"Holmner Chess Engine", sf::Style::Close);
-
-	//// Update the size of the window to the final size and call onResize which performs letterbox
-	//// scaling.
-	//window.setSize(sf::Vector2u(finalWidth, finalHeight));
-	//onResize(finalWidth, finalHeight);
-	//window.setPosition(sf::Vector2i(0, 0));
-
-	window.create(sf::VideoMode(720, 450),
-			"Holmner Chess Engine");
-	window.setSize(sf::Vector2u(1440, 900));
-	window.setView(sf::View(sf::FloatRect(0.f, 0.f, 1440, 900)));
+	window.setSize(sf::Vector2u(size.x(), size.y()));
+	window.setView(sf::View(sf::FloatRect(0.f, 0.f, size.x(), size.y())));
 }
 
 void SFMLWindow::close()

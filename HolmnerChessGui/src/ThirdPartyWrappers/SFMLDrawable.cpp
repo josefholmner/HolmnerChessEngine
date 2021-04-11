@@ -18,7 +18,7 @@ SFMLDrawable::SFMLDrawable(const ImageData& image)
 	sprite.setTexture(texture);
 }
 
-void SFMLDrawable::setRelativePosition(const Vec2<float>& relPos, const Window& window)
+void SFMLDrawable::setNormalizedPosition(const Vec2<float>& normPos, const Window& window)
 {
 	const SFMLWindow* sfmlWindow = dynamic_cast<const SFMLWindow*>(&window);
 	if (sfmlWindow == nullptr)
@@ -36,7 +36,7 @@ void SFMLDrawable::setRelativePosition(const Vec2<float>& relPos, const Window& 
 	const float viewWidth = renderWindow.getView().getViewport().width * windowSize.x();
 	const float viewHeight = renderWindow.getView().getViewport().height * windowSize.y();
 
-	const Vec2<float> pixel(relPos.x() * viewWidth + viewLeft, relPos.y() * viewHeight + viewTop);
+	const Vec2<float> pixel(normPos.x() * viewWidth + viewLeft, normPos.y() * viewHeight + viewTop);
 	const auto coordinate = 
 		renderWindow.mapPixelToCoords(sf::Vector2i((int32_t)pixel.x(), (int32_t)pixel.y()));
 
