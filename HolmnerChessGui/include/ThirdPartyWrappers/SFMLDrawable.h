@@ -13,7 +13,7 @@ class SFMLDrawable : public Drawable
 public:
 	SFMLDrawable(const ImageData& image);
 
-	void setRelativePosition(const Vec2<float>& relPos, const Vec2<uint32_t>& windowSize) override;
+	void setRelativePosition(const Vec2<float>& relPos, const Window& window) override;
 
 	void setScale(const Vec2<float>& scale) override;
 	Vec2<float> getScale() const override;

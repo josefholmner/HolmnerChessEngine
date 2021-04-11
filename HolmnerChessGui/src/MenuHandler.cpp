@@ -33,11 +33,11 @@ void MenuHandler::init(const Window& window)
 	background->setScale(Vec2<float>(1.f / 1.5f, 1.f / 1.5f));
 
 	auto createButton = [](const ImageData& data, const Vec2<float>& scale, const Vec2<float>& relPos,
-		const Vec2<uint32_t>& windowSize)
+		const Window& window)
 	{
 		auto button = ThirdPartyWrappersFactory::createClickable(data);
 		button->getDrawable().setScale(scale);
-		button->getDrawable().setRelativePosition(relPos, windowSize);
+		button->getDrawable().setRelativePosition(relPos, window);
 		return button;
 	};
 
@@ -48,22 +48,22 @@ void MenuHandler::init(const Window& window)
 	static const Vec2<float> sideButtonScale(1.f / 1.5f, 1.f / 1.5f);
 
 	buttonHard = createButton(Resources::getMenuButtonHardImg(), difficultyButtonScale,
-		Vec2<float>(buttonRelOffsX, topButtonRelOffsY), window.getSize());
+		Vec2<float>(buttonRelOffsX, topButtonRelOffsY), window);
 
 	buttonMedium = createButton(Resources::getMenuButtonMediumImg(), difficultyButtonScale,
-		Vec2<float>(buttonRelOffsX, topButtonRelOffsY + 1 * buttonToButtonOffsY), window.getSize());
+		Vec2<float>(buttonRelOffsX, topButtonRelOffsY + 1 * buttonToButtonOffsY), window);
 
 	buttonEasy = createButton(Resources::getMenuButtonEasyImg(), difficultyButtonScale,
-		Vec2<float>(buttonRelOffsX, topButtonRelOffsY + 2 * buttonToButtonOffsY), window.getSize());
+		Vec2<float>(buttonRelOffsX, topButtonRelOffsY + 2 * buttonToButtonOffsY), window);
 
 	buttonSilly = createButton(Resources::getMenuButtonSillyImg(), difficultyButtonScale,
-		Vec2<float>(buttonRelOffsX, topButtonRelOffsY + 3 * buttonToButtonOffsY), window.getSize());
+		Vec2<float>(buttonRelOffsX, topButtonRelOffsY + 3 * buttonToButtonOffsY), window);
 
 	buttonSideWhite = createButton(Resources::getMenuButtonSideWhiteImg(), sideButtonScale,
-		Vec2<float>(0.f, 0.f), window.getSize());
+		Vec2<float>(0.f, 0.f), window);
 
 	buttonSideBlack = createButton(Resources::getMenuButtonSideBlackImg(), sideButtonScale,
-		Vec2<float>(0.5f, 0.f), window.getSize());
+		Vec2<float>(0.5f, 0.f), window);
 }
 
 void MenuHandler::drawDefaultMenu(Window& window)
