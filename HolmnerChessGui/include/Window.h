@@ -11,8 +11,9 @@ class Window
 public:
 	static constexpr uint32_t defaultWidth = 1440;
 	static constexpr uint32_t defaultHeight = 900;
+	static constexpr float defaultWidthHeightRatio = 1.6f;
 
-	virtual void open(const Vec2<uint32_t>& size = { defaultWidth, defaultHeight }) = 0;
+	virtual void open() = 0;
 	virtual void close() = 0;
 	virtual bool isOpen() const = 0;
 

@@ -6,19 +6,39 @@
 
 #include <cassert>
 
-void SFMLWindow::open(const Vec2<uint32_t>& size)
+void SFMLWindow::open()
 {
-	static constexpr uint32_t widthSafetyMargin = 200;
-	static constexpr uint32_t heightSafetyMargin = 200;
-	const auto mode = sf::VideoMode::getDesktopMode();
+	//static constexpr uint32_t widthSafetyMargin = 200;
+	//static constexpr uint32_t heightSafetyMargin = 200;
+	//const auto mode = sf::VideoMode::getDesktopMode();
+	//uint32_t finalWidth = mode.width - widthSafetyMargin;
+	//uint32_t finalHeight = mode.height - heightSafetyMargin;
 
+	//// Maintain default aspect ratio.
+	//if ((float)finalWidth / (float)finalHeight > Window::defaultWidthHeightRatio)
+	//{
+	//	finalWidth = (uint32_t)((float)finalHeight * Window::defaultWidthHeightRatio);
+	//}
+	//else
+	//{
+	//	finalHeight = (uint32_t)((float)finalWidth / Window::defaultWidthHeightRatio);
+	//}
 
-	window.create(sf::VideoMode(size.x(), size.y()),
-		"Holmner Chess Engine", sf::Style::Close);
+	//// Create the window with the default size, then resize the window to the final size.
+	//// This is done to ensure that everything is scaled correctly.
+	//window.create(sf::VideoMode(Window::defaultWidth, Window::defaultHeight),
+	//	"Holmner Chess Engine", sf::Style::Close);
 
-	window.setSize(sf::Vector2u(mode.width - widthSafetyMargin, mode.height - heightSafetyMargin));
-	onResize(mode.width - widthSafetyMargin, mode.height - heightSafetyMargin);
-	window.setPosition(sf::Vector2i(0, 0));
+	//// Update the size of the window to the final size and call onResize which performs letterbox
+	//// scaling.
+	//window.setSize(sf::Vector2u(finalWidth, finalHeight));
+	//onResize(finalWidth, finalHeight);
+	//window.setPosition(sf::Vector2i(0, 0));
+
+	window.create(sf::VideoMode(720, 450),
+			"Holmner Chess Engine");
+	window.setSize(sf::Vector2u(1440, 900));
+	window.setView(sf::View(sf::FloatRect(0.f, 0.f, 1440, 900)));
 }
 
 void SFMLWindow::close()

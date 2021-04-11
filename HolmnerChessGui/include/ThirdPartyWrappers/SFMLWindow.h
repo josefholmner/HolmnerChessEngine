@@ -7,7 +7,7 @@
 class SFMLWindow : public Window
 {
 public:
-	void open(const Vec2<uint32_t>& size) override;
+	void open() override;
 	void close() override;
 	bool isOpen() const override;
 
