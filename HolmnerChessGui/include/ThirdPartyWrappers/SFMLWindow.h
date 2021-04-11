@@ -25,5 +25,7 @@ public:
 	}
 
 private:
+	void onResize(uint32_t newWidth, uint32_t newHeight);
+
 	sf::RenderWindow window;
 };

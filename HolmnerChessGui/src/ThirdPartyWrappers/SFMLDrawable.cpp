@@ -30,7 +30,13 @@ void SFMLDrawable::setRelativePosition(const Vec2<float>& relPos, const Window& 
 	const sf::RenderWindow& renderWindow = sfmlWindow->getRenderWindow();
 	const auto windowSize = window.getSize();
 
-	const Vec2<float> pixel(relPos.x() * (float)windowSize.x(), relPos.y() * (float)windowSize.y());
+	// The view size and position must be taken into account since the window is letterbox scaled.
+	const float viewLeft = renderWindow.getView().getViewport().left * windowSize.x();
+	const float viewTop = renderWindow.getView().getViewport().top * windowSize.y();
+	const float viewWidth = renderWindow.getView().getViewport().width * windowSize.x();
+	const float viewHeight = renderWindow.getView().getViewport().height * windowSize.y();
+
+	const Vec2<float> pixel(relPos.x() * viewWidth + viewLeft, relPos.y() * viewHeight + viewTop);
 	const auto coordinate = 
 		renderWindow.mapPixelToCoords(sf::Vector2i((int32_t)pixel.x(), (int32_t)pixel.y()));
 
