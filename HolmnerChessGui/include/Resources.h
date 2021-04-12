@@ -12,4 +12,5 @@ public:
 	static const ImageData getMenuButtonSillyImg();
 	static const ImageData getMenuButtonSideWhiteImg();
 	static const ImageData getMenuButtonSideBlackImg();
+	static const ImageData getBoardImg();
 };

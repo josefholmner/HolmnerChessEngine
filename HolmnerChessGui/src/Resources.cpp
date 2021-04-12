@@ -7,6 +7,7 @@
 #include "Images/MenuButtonSillyImg.cpp"
 #include "Images/MenuButtonSideWhiteImg.cpp"
 #include "Images/MenuButtonSideBlackImg.cpp"
+#include "Images/BoardImg.cpp"
 
 const ImageData Resources::getMenuBackgroundImg()
 {
@@ -41,4 +42,9 @@ const ImageData Resources::getMenuButtonSideWhiteImg()
 const ImageData Resources::getMenuButtonSideBlackImg()
 {
 	return ImageData(menuButtonSideBlackImg, sizeof(menuButtonSideBlackImg));
+}
+
+const ImageData Resources::getBoardImg()
+{
+	return ImageData(boardImg, sizeof(boardImg));
 }

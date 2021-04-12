@@ -7,10 +7,10 @@
 class GameInstance
 {
 public:
+	void init();
+
 	void run();
 
 private:
-	void init();
-
 	std::unique_ptr<Window> window;
 };

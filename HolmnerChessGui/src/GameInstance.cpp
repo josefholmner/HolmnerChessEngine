@@ -4,22 +4,36 @@
 #include "ThirdPartyWrappersFactory.h"
 #include "StatesAndEvents.h"
 #include "MenuHandler.h"
+#include "PlayHandler.h"
 
 #include <cassert>
 
 
 void GameInstance::run()
 {
-	init();
 	assert(window != nullptr && window->isOpen());
 
-	MenuHandler menu;
-	const auto menuResult = menu.run(*window);
+	MenuHandler menuHandler;
+	const auto menuResult = menuHandler.run(*window);
 	if (!menuResult)
 	{
 		// Quit.
 		window->close();
 		return;
+	}
+
+	PlayHandler playHandler;
+	const auto playResult = playHandler.run(*window, menuResult->difficulty, menuResult->side);
+	if (!playResult)
+	{
+		// Quit.
+		window->close();
+		return;
+	}
+
+	if (playResult->nextState == statesAndEvents::GameState::Menu)
+	{
+		run();
 	}
 }
 
