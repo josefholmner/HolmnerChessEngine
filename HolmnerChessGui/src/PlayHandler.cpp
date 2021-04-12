@@ -32,11 +32,9 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 
 void PlayHandler::init(const Window& window)
 {
-	static constexpr float boardPosX = 0.25f;
-	static constexpr float boardPosY = 0.05f;
-	static constexpr float boardScale = 0.5f;
-	board.setNormalizedPosition(Vec2<float>(boardPosX, boardPosY), window);
-	board.setScale(Vec2<float>(boardScale, boardScale));
+	static const Vec2<float> boardPos(0.25f, 0.05f);
+	static const Vec2<float> boardScale(0.5f, 0.5f);
+	board.init(boardPos, boardScale, window);
 }
 
 void PlayHandler::draw(Window& window)

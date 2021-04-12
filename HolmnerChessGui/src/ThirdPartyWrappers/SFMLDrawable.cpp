@@ -43,6 +43,39 @@ void SFMLDrawable::setNormalizedPosition(const Vec2<float>& normPos, const Windo
 	sprite.setPosition((float)coordinate.x, (float)coordinate.y);
 }
 
+Vec2<float> SFMLDrawable::getNormalizedPosition(const Window& window)
+{
+	const SFMLWindow* sfmlWindow = dynamic_cast<const SFMLWindow*>(&window);
+	if (sfmlWindow == nullptr)
+	{
+		GuiUtilities::logE("Non SFML Window passed to SFMLDrawable::setRelativePosition().");
+		return Vec2<float>();
+	}
+
+	const sf::RenderWindow& renderWindow = sfmlWindow->getRenderWindow();
+	const auto pixel = renderWindow.mapCoordsToPixel(sprite.getPosition());
+
+	// The view size and position must be taken into account since the window is letterbox scaled.
+	const auto windowSize = window.getSize();
+	const float viewLeft = renderWindow.getView().getViewport().left * windowSize.x();
+	const float viewTop = renderWindow.getView().getViewport().top * windowSize.y();
+	const float viewWidth = renderWindow.getView().getViewport().width * windowSize.x();
+	const float viewHeight = renderWindow.getView().getViewport().height * windowSize.y();
+
+	return Vec2<float>((pixel.x - viewLeft) / viewWidth, (pixel.y - viewTop) / viewHeight);
+}
+
+Vec2<float> SFMLDrawable::getNormalizedSize(const Window& window) const
+{
+	const sf::Vector2u unscaledTextureSize = texture.getSize();
+	const sf::Vector2f spriteScale = sprite.getScale();
+	const Vec2<float> textureSize = Vec2<float>((float)unscaledTextureSize.x * spriteScale.x,
+		(float)unscaledTextureSize.y * spriteScale.y);
+	const Vec2<uint32_t> windowSize = window.getSize();
+
+	return Vec2<float>(textureSize.x() / windowSize.x(), textureSize.y() / windowSize.y());
+}
+
 void SFMLDrawable::setScale(const Vec2<float>& scale)
 {
 	sprite.setScale(scale.x(), scale.y());

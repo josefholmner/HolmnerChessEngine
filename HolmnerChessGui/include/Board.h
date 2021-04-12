@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Vec2.h"
+#include "Squares.h"
+#include "Piece.h"
 
 #include <memory>
+#include <array>
 
 class Drawable;
 class Window;
@@ -13,12 +16,17 @@ class Board
 public:
 	Board(const ImageData& image);
 
-	// normPos goes from 0.0-1.0 to end up in the drawing section of the window.
-	void setNormalizedPosition(const Vec2<float>& normPos, const Window& window);
-	void setScale(const Vec2<float>& scale);
+	void init(const Vec2<float>& normPos, const Vec2<float>& scale, const Window& window);
 
 	void draw(Window& window);
 
 private:
+	void setPiecesStartPosition(const Window& window);
+
+	void placePieceAtSquare(Piece& piece, Square sq, const Window& window);
+
+	Vec2<float> getSquareNormalizedPosition(Square sq, const Window& window);
+
 	std::unique_ptr<Drawable> boardDrawable;
+	std::array<Piece, squares::num> pieces;
 };
