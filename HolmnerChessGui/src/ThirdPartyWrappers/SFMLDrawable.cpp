@@ -67,13 +67,22 @@ Vec2<float> SFMLDrawable::getNormalizedPosition(const Window& window)
 
 Vec2<float> SFMLDrawable::getNormalizedSize(const Window& window) const
 {
+	const SFMLWindow* sfmlWindow = dynamic_cast<const SFMLWindow*>(&window);
+	if (sfmlWindow == nullptr)
+	{
+		GuiUtilities::logE("Non SFML Window passed to SFMLDrawable::setRelativePosition().");
+		return Vec2<float>();
+	}
+
 	const sf::Vector2u unscaledTextureSize = texture.getSize();
 	const sf::Vector2f spriteScale = sprite.getScale();
-	const Vec2<float> textureSize = Vec2<float>((float)unscaledTextureSize.x * spriteScale.x,
+	const sf::Vector2f textureSize(
+		(float)unscaledTextureSize.x * spriteScale.x,
 		(float)unscaledTextureSize.y * spriteScale.y);
-	const Vec2<uint32_t> windowSize = window.getSize();
+	const sf::Vector2f viewSize = sfmlWindow->getRenderWindow().getView().getSize();
+	
 
-	return Vec2<float>(textureSize.x() / windowSize.x(), textureSize.y() / windowSize.y());
+	return Vec2<float>(textureSize.x / viewSize.x, textureSize.y / viewSize.y);
 }
 
 void SFMLDrawable::setScale(const Vec2<float>& scale)
