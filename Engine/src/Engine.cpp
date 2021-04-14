@@ -1047,6 +1047,71 @@ namespace moveGenerationHelpers
 
 		return moves;
 	}
+
+	bool isCastlingMove(const Move& move)
+	{
+		if (move.movingPiece != pieces::wK && move.movingPiece != pieces::bK)
+		{
+			return false;
+		}
+
+		if (files::toFile(move.fromSquare != files::fileE))
+		{
+			return false;
+		}
+
+		const File toFile = files::toFile(move.toSquare);
+		if (toFile != files::fileC && toFile != files::fileG)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	hceEngine::ChessMove moveToChessMove(const Move& move, Score staticEvaluation)
+	{
+		hceEngine::ChessMove cm;
+
+		// Normalize the score so that 1.0 represents the value of a single pawn.
+		cm.positionEvaluation = 
+			static_cast<float>(staticEvaluation) / BoardEvaluator::getPawnBaseValue();
+		cm.fromSquare = squares::squareToStr(move.fromSquare);
+		cm.toSquare = squares::squareToStr(move.toSquare);
+		cm.movingPiece = pieces::pieceToStr(move.movingPiece);
+		cm.capturedPiece = move.capturedPiece == pieces::none ?
+			"" : pieces::pieceToStr(move.capturedPiece);
+		cm.pawnPromotionPiece = move.pawnPromotionPiece == pieces::none ?
+			"" : pieces::pieceToStr(move.pawnPromotionPiece);
+
+		// Set the move type.
+		if (move.pawnPromotionPiece != pieces::none)
+		{
+			cm.type = move.capturedPiece == pieces::none ?
+				hceEngine::MoveType::PawnPromotionSilent : hceEngine::MoveType::PawnPromotionCapture;
+		}
+		else if (move.toSquare != move.capturedSquare)
+		{
+			cm.type = hceEngine::MoveType::EnPassantCapture;
+		}
+		else if (isCastlingMove(move))
+		{
+			cm.type = hceEngine::MoveType::Castling;
+		}
+		else if (move.capturedPiece != pieces::none)
+		{
+			cm.type = hceEngine::MoveType::Capture;
+		}
+		else
+		{
+			assert(move.capturedPiece == pieces::none);
+			assert(move.pawnPromotionPiece == pieces::none);
+			assert(move.capturedSquare == move.toSquare);
+			cm.type == hceEngine::MoveType::Silent;
+		}
+
+		return cm;
+	}
 }
 
 std::vector<Move> Engine::getLegalMoves(BoardState& board) const
@@ -1140,7 +1205,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 	if (depth <= 0)
 	{
 		EngineUtilities::logE("getBestMove failed, depth must be at least 1.");
-		searchResult.bestMove.type = hceEngine::MoveType::Invalid;
+		searchResult.move.type = hceEngine::MoveType::Invalid;
 		return searchResult;
 	}
 
@@ -1149,7 +1214,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 	{
 		EngineUtilities::logE("getBestMove failed, invalid FEN.");
 		hceEngine::SearchResult res;
-		searchResult.bestMove.type = hceEngine::MoveType::Invalid;
+		searchResult.move.type = hceEngine::MoveType::Invalid;
 		return searchResult;
 	}
 
@@ -1198,12 +1263,10 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		currentDepth++;
 	}
 
-	searchResult.bestMove.fromSquare = squares::squareToStr(bestMove.fromSquare);
-	searchResult.bestMove.toSquare = squares::squareToStr(bestMove.toSquare);
+	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, bestScore);
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
 	searchResult.engineInfo.maxDepthVisited = (size_t)depth + info.quiescenceMaxDepth;
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
-	searchResult.bestMove.positionEvaluation = bestScore;
 	return searchResult;
 }
 
@@ -1214,7 +1277,7 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 	if (depth <= 0)
 	{
 		EngineUtilities::logE("getBestMoveMiniMax failed, depth must be at least 1.");
-		searchResult.bestMove.type = hceEngine::MoveType::Invalid;
+		searchResult.move.type = hceEngine::MoveType::Invalid;
 		return searchResult;
 	}
 
@@ -1222,7 +1285,7 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 	if (!board.initFromFEN(FEN))
 	{
 		EngineUtilities::logE("getBestMoveMiniMax failed, invalid FEN.");
-		searchResult.bestMove.type = hceEngine::MoveType::Invalid;
+		searchResult.move.type = hceEngine::MoveType::Invalid;
 		return searchResult;
 	}
 
@@ -1243,12 +1306,10 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 		board.unmakeMove(m);
 	}
 
-	searchResult.bestMove.fromSquare = squares::squareToStr(bestMove.fromSquare);
-	searchResult.bestMove.toSquare = squares::squareToStr(bestMove.toSquare);
+	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, bestScore);
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
 	searchResult.engineInfo.maxDepthVisited = depth; // No quiescence search.
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
-	searchResult.bestMove.positionEvaluation = bestScore;
 	return searchResult;
 }
 

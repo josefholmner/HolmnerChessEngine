@@ -40,12 +40,12 @@ namespace hceEngine
 		std::string movingPiece;
 		std::string capturedPiece;
 		std::string pawnPromotionPiece;
-		int32_t positionEvaluation = 0;
+		float positionEvaluation = 0.f;
 	};
 
 	struct SearchResult
 	{
-		ChessMove bestMove;
+		ChessMove move;
 		EngineInfo engineInfo;
 	};
 }

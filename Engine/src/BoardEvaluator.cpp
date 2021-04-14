@@ -362,6 +362,11 @@ BoardEvaluator::PreMoveInfo BoardEvaluator::createPreMoveInfo(const BoardState& 
 	return createFromMovingSidePawn(board, movingSidePawn);
 }
 
+float BoardEvaluator::getPawnBaseValue()
+{
+	return static_cast<float>(scoringConstants::pBaseVal);
+}
+
 void BoardEvaluator::init()
 {
 	using namespace scoringConstants;

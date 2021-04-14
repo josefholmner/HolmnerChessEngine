@@ -47,6 +47,8 @@ public:
 
 	static PreMoveInfo createPreMoveInfo(const BoardState& board);
 
+	static float getPawnBaseValue();
+
 private:
 	void init();
 
