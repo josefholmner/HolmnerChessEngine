@@ -53,7 +53,8 @@ namespace hceEngine
 	enum class PlayState
 	{
 		Invalid,
-		Playing,
+		WhiteToMove,
+		BlackToMove,
 		WhiteWins,
 		BlackWins,
 		Draw

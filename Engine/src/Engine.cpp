@@ -1135,7 +1135,8 @@ hceEngine::LegalMovesCollection Engine::getLegalMoves(const std::string& FEN) co
 
 	if (moves.size() > 0)
 	{
-		legalMoves.state = hceEngine::PlayState::Playing;
+		legalMoves.state = board.getTurn() == pieces::Color::WHITE ?
+			hceEngine::PlayState::WhiteToMove : hceEngine::PlayState::BlackToMove;
 		return legalMoves;
 	}
 
