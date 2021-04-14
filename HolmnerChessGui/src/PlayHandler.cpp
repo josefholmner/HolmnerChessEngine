@@ -25,6 +25,14 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 			// Quit.
 			return {};
 		}
+		else if (event.type == EventType::MouseDown)
+		{
+			board.registerMouseDown(Vec2<int32_t>(event.mouseX, event.mouseY), window);
+		}
+		else if (event.type == EventType::MouseRelease)
+		{
+			board.registerMouseRelease(Vec2<int32_t>(event.mouseX, event.mouseY), window);
+		}
 	}
 
 	return {};
@@ -40,6 +48,6 @@ void PlayHandler::init(const Window& window)
 void PlayHandler::draw(Window& window)
 {
 	window.clear();
-	board.draw(window);
+	board.draw(window, window.getMousePos());
 	window.display();
 }

@@ -17,6 +17,10 @@ public:
 	void clear() override;
 	void display() override;
 
+	Vec2<float> pixelToNormalizedPosition(const Vec2<int32_t>& pixel) const override;
+
+	Vec2<int32_t> getMousePos() const override;
+
 	statesAndEvents::Event pollEvent() override;
 
 	const sf::RenderWindow& getRenderWindow() const

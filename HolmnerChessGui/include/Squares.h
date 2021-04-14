@@ -7,6 +7,7 @@ namespace squares
 {
 	static constexpr Square num = 64;
 
+	static constexpr Square none = -1;
 	static constexpr Square a1 = 0;
 	static constexpr Square b1 = 1;
 	static constexpr Square c1 = 2;

@@ -20,19 +20,10 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale, const Win
 	boardDrawable->setNormalizedPosition(normPos, window);
 	boardDrawable->setScale(scale);
 
-	setPiecesStartPosition(window);
-
-	// Set pieces scale.
-	for (Square sq = squares::a1; sq < squares::num; sq++)
-	{
-		if (!pieces[sq].isPieceNone())
-		{
-			pieces[sq].getDrawable().setScale(scale);
-		}
-	}
+	setUpPieces(window, scale);
 }
 
-void Board::draw(Window& window)
+void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 {
 	assert(boardDrawable != nullptr);
 
@@ -42,41 +33,65 @@ void Board::draw(Window& window)
 	// Draw pieces.
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
-		if (!pieces[sq].isPieceNone())
-		{
-			window.draw(pieces[sq].getDrawable());
-		}
+		pieces[sq].draw(window, mousePos);
 	}
 }
 
-void Board::setPiecesStartPosition(const Window& window)
+void Board::registerMouseDown(const Vec2<int32_t>& mousePos, const Window& window)
 {
-	pieces[squares::a1].init(Resources::getWhiteRookImg());
-	pieces[squares::b1].init(Resources::getWhiteKnightImg());
-	pieces[squares::c1].init(Resources::getWhiteBishopImg());
-	pieces[squares::d1].init(Resources::getWhiteQueenImg());
-	pieces[squares::e1].init(Resources::getWhiteKingImg());
-	pieces[squares::f1].init(Resources::getWhiteBishopImg());
-	pieces[squares::g1].init(Resources::getWhiteKnightImg());
-	pieces[squares::h1].init(Resources::getWhiteRookImg());
+	const auto normalizedPos = window.pixelToNormalizedPosition(mousePos);
+	const Square sq = getFromNormalizedPosition(normalizedPos, window);
+	if (sq == squares::none || pieces[sq].getType() == Piece::Type::None)
+	{
+		return;
+	}
+
+	dragStartSquare = sq;
+	pieces[sq].setIsMouseDragged(true);
+}
+
+void Board::registerMouseRelease(const Vec2<int32_t>& mousePos, const Window& window)
+{
+	if (dragStartSquare == squares::none)
+	{
+		return;
+	}
+
+	// Reset the dragged piece.
+	pieces[dragStartSquare].setIsMouseDragged(false);
+	const auto dragStartPos = getSquareNormalizedPosition(dragStartSquare, window);
+	pieces[dragStartSquare].setNormalizedPosition(dragStartPos, window);
+	dragStartSquare = squares::none;
+}
+
+void Board::setUpPieces(const Window& window, const Vec2<float>& scale)
+{
+	pieces[squares::a1].init(Piece::Type::WRook, scale);
+	pieces[squares::b1].init(Piece::Type::WKnight, scale);
+	pieces[squares::c1].init(Piece::Type::WBishop, scale);
+	pieces[squares::d1].init(Piece::Type::WQueen, scale);
+	pieces[squares::e1].init(Piece::Type::WKing, scale);
+	pieces[squares::f1].init(Piece::Type::WBishop, scale);
+	pieces[squares::g1].init(Piece::Type::WKnight, scale);
+	pieces[squares::h1].init(Piece::Type::WRook, scale);
 
 	for (Square s = squares::a2; s <= squares::h2; s++)
 	{
-		pieces[s].init(Resources::getWhitePawnImg());
+		pieces[s].init(Piece::Type::WPawn, scale);
 	}
 	
-	pieces[squares::a8].init(Resources::getBlackRookImg());
-	pieces[squares::b8].init(Resources::getBlackKnightImg());
-	pieces[squares::c8].init(Resources::getBlackBishopImg());
-	pieces[squares::d8].init(Resources::getBlackQueenImg());
-	pieces[squares::e8].init(Resources::getBlackKingImg());
-	pieces[squares::f8].init(Resources::getBlackBishopImg());
-	pieces[squares::g8].init(Resources::getBlackKnightImg());
-	pieces[squares::h8].init(Resources::getBlackRookImg());
+	pieces[squares::a8].init(Piece::Type::BRook, scale);
+	pieces[squares::b8].init(Piece::Type::BKnight, scale);
+	pieces[squares::c8].init(Piece::Type::BBishop, scale);
+	pieces[squares::d8].init(Piece::Type::BQueen, scale);
+	pieces[squares::e8].init(Piece::Type::BKing, scale);
+	pieces[squares::f8].init(Piece::Type::BBishop, scale);
+	pieces[squares::g8].init(Piece::Type::BKnight, scale);
+	pieces[squares::h8].init(Piece::Type::BRook, scale);
 
 	for (Square s = squares::a7; s <= squares::h7; s++)
 	{
-		pieces[s].init(Resources::getBlackPawnImg());
+		pieces[s].init(Piece::Type::BPawn, scale);
 	}
 
 	for (Square sq = squares::a1; sq < squares::num; sq++)
@@ -87,20 +102,46 @@ void Board::setPiecesStartPosition(const Window& window)
 
 void Board::placePieceAtSquare(Piece& piece, Square sq, const Window& window)
 {
-	if (piece.isPieceNone())
+	if (piece.getType() == Piece::Type::None)
 	{
 		return;
 	}
 	
 	const Vec2<float> squareNormalizedPos = getSquareNormalizedPosition(sq, window);
-	piece.getDrawable().setNormalizedPosition(squareNormalizedPos, window);
+	piece.setNormalizedPosition(squareNormalizedPos, window);
 }
 
-Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window)
+Square Board::getFromNormalizedPosition(const Vec2<float>& normPos, const Window& window) const
+{
+	const Vec2<float> topLeftCorner = boardDrawable->getNormalizedPosition(window);
+	if (normPos.x() <= topLeftCorner.x() || normPos.y() <= topLeftCorner.y())
+	{
+		// Position outside the board.
+		return squares::none;
+	}
+
+	const Vec2<float> boardNormalizedSize = boardDrawable->getNormalizedSize(window);
+	if (normPos.x() >= topLeftCorner.x() + boardNormalizedSize.x() ||
+		normPos.y() >= topLeftCorner.y() + boardNormalizedSize.y())
+	{
+		// Position outside the board.
+		return squares::none;
+	}
+
+	const Vec2<float> posOnBoard((normPos.x() - topLeftCorner.x()) / boardNormalizedSize.x(),
+		(normPos.y() - topLeftCorner.y()) / boardNormalizedSize.y());
+	const int32_t file = static_cast<int32_t>(posOnBoard.x() * 8);
+	const int32_t reversedRank = 7 - static_cast<int32_t>(posOnBoard.y() * 8);
+
+	return file + reversedRank * 8;
+}
+
+Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) const
 {
 	const Vec2<float> topLeftCorner = boardDrawable->getNormalizedPosition(window);
 	const Vec2<float> boardNormalizedSize = boardDrawable->getNormalizedSize(window);
-	const Vec2<float> squareNormalizedSize(boardNormalizedSize.x() / 8.f, boardNormalizedSize.y() / 8.f);
+	const Vec2<float> squareNormalizedSize(
+		boardNormalizedSize.x() / 8.f, boardNormalizedSize.y() / 8.f);
 
 	const int32_t reverseRank = 7 - (sq / 8);
 	const int32_t file = sq % 8;

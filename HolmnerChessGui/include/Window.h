@@ -22,5 +22,9 @@ public:
 	virtual void clear() = 0;
 	virtual void display() = 0;
 
+	virtual Vec2<float> pixelToNormalizedPosition(const Vec2<int32_t>& pixel) const = 0;
+
+	virtual Vec2<int32_t> getMousePos() const = 0;
+
 	virtual statesAndEvents::Event pollEvent() = 0;
 };

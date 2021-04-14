@@ -57,6 +57,24 @@ void SFMLWindow::display()
 	window.display();
 }
 
+Vec2<float> SFMLWindow::pixelToNormalizedPosition(const Vec2<int32_t>& pixel) const
+{
+	const sf::Vector2u windowSize = window.getSize();
+	const float viewLeft = window.getView().getViewport().left * windowSize.x;
+	const float viewTop = window.getView().getViewport().top * windowSize.y;
+	const float viewWidth = window.getView().getViewport().width * windowSize.x;
+	const float viewHeight = window.getView().getViewport().height * windowSize.y;
+
+	return Vec2<float>(((float)pixel.x() - viewLeft) / viewWidth,
+		((float)pixel.y() - viewTop) / viewHeight);
+}
+
+Vec2<int32_t> SFMLWindow::getMousePos() const
+{
+	const auto sfmlPos = sf::Mouse::getPosition(window);
+	return Vec2<int32_t>(sfmlPos.x, sfmlPos.y);
+}
+
 statesAndEvents::Event SFMLWindow::pollEvent()
 {
 	statesAndEvents::Event event;
@@ -71,6 +89,11 @@ statesAndEvents::Event SFMLWindow::pollEvent()
 			return event;
 		case sf::Event::MouseButtonPressed:
 			event.type = statesAndEvents::EventType::MouseDown;
+			event.mouseX = sfmlEvent.mouseButton.x;
+			event.mouseY = sfmlEvent.mouseButton.y;
+			return event;
+		case sf::Event::MouseButtonReleased:
+			event.type = statesAndEvents::EventType::MouseRelease;
 			event.mouseX = sfmlEvent.mouseButton.x;
 			event.mouseY = sfmlEvent.mouseButton.y;
 			return event;
