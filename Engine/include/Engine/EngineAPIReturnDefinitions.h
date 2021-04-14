@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace hceEngine
 {
@@ -47,5 +48,20 @@ namespace hceEngine
 	{
 		ChessMove move;
 		EngineInfo engineInfo;
+	};
+
+	enum class PlayState
+	{
+		Invalid,
+		Playing,
+		WhiteWins,
+		BlackWins,
+		Draw
+	};
+
+	struct LegalMovesCollection
+	{
+		std::vector<ChessMove> moves;
+		PlayState state = PlayState::Invalid;
 	};
 }

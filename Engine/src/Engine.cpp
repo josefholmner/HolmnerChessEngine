@@ -1114,6 +1114,46 @@ namespace moveGenerationHelpers
 	}
 }
 
+hceEngine::LegalMovesCollection Engine::getLegalMoves(const std::string& FEN) const
+{
+	using namespace moveGenerationHelpers;
+
+	hceEngine::LegalMovesCollection legalMoves;
+	BoardState board;
+	if (!board.initFromFEN(FEN))
+	{
+		EngineUtilities::logE("getLegalMoves failed, invalid FEN.");
+		legalMoves.state = hceEngine::PlayState::Invalid;
+		return legalMoves;
+	}
+
+	std::vector<Move> moves = getLegalMoves(board);
+	for (const auto& move : moves)
+	{
+		legalMoves.moves.push_back(moveToChessMove(move, 0));
+	}
+
+	if (moves.size() > 0)
+	{
+		legalMoves.state = hceEngine::PlayState::Playing;
+		return legalMoves;
+	}
+
+	// No legal moves exists.
+	if (board.getTurn() == pieces::Color::WHITE)
+	{
+		legalMoves.state = isWhiteInCheck(board, fastSqLookup) ?
+			hceEngine::PlayState::BlackWins : hceEngine::PlayState::Draw;
+	}
+	else
+	{
+		{
+			legalMoves.state = isBlackInCheck(board, fastSqLookup) ?
+				hceEngine::PlayState::WhiteWins : hceEngine::PlayState::Draw;
+		}
+	}
+}
+
 std::vector<Move> Engine::getLegalMoves(BoardState& board) const
 {
 	if (board.getTurn() == pieces::Color::WHITE)

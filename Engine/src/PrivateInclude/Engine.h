@@ -15,6 +15,8 @@ class Move;
 class Engine
 {
 public:
+	hceEngine::LegalMovesCollection getLegalMoves(const std::string& FEN) const;
+
 	std::vector<Move> getLegalMoves(BoardState& board) const;
 
 	std::optional<size_t> getNumLegalMoves(const std::string& FEN, Depth depth) const;
