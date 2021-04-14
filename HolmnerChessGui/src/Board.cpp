@@ -14,12 +14,14 @@ Board::Board(const ImageData& image)
 {
 }
 
-void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale, const Window& window)
+void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale,
+	statesAndEvents::PlayingSide side, const Window& window)
 {
 	assert(boardDrawable != nullptr);
 	boardDrawable->setNormalizedPosition(normPos, window);
 	boardDrawable->setScale(scale);
 
+	playerSide = side;
 	setUpPieces(window, scale);
 }
 
@@ -113,6 +115,8 @@ void Board::placePieceAtSquare(Piece& piece, Square sq, const Window& window)
 
 Square Board::getFromNormalizedPosition(const Vec2<float>& normPos, const Window& window) const
 {
+	using namespace statesAndEvents;
+
 	const Vec2<float> topLeftCorner = boardDrawable->getNormalizedPosition(window);
 	if (normPos.x() <= topLeftCorner.x() || normPos.y() <= topLeftCorner.y())
 	{
@@ -130,22 +134,29 @@ Square Board::getFromNormalizedPosition(const Vec2<float>& normPos, const Window
 
 	const Vec2<float> posOnBoard((normPos.x() - topLeftCorner.x()) / boardNormalizedSize.x(),
 		(normPos.y() - topLeftCorner.y()) / boardNormalizedSize.y());
-	const int32_t file = static_cast<int32_t>(posOnBoard.x() * 8);
-	const int32_t reversedRank = 7 - static_cast<int32_t>(posOnBoard.y() * 8);
 
-	return file + reversedRank * 8;
+	const int32_t file = playerSide == PlayingSide::White ?
+		(int32_t)(posOnBoard.x() * 8) : 7 - (int32_t)(posOnBoard.x() * 8);
+	const int32_t rank = playerSide == PlayingSide::White ?
+		7 - (int32_t)(posOnBoard.y() * 8) : (int32_t)(posOnBoard.y() * 8);
+
+	return file + rank * 8;
 }
 
 Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) const
 {
+	using namespace statesAndEvents;
+
 	const Vec2<float> topLeftCorner = boardDrawable->getNormalizedPosition(window);
 	const Vec2<float> boardNormalizedSize = boardDrawable->getNormalizedSize(window);
 	const Vec2<float> squareNormalizedSize(
 		boardNormalizedSize.x() / 8.f, boardNormalizedSize.y() / 8.f);
 
-	const int32_t reverseRank = 7 - (sq / 8);
-	const int32_t file = sq % 8;
+	const int32_t rank = playerSide == PlayingSide::White ?
+		7 - (sq / 8) : sq / 8;
+	const int32_t file = playerSide == PlayingSide::White ?
+		sq % 8 : 7 - (sq % 8);
 
 	return Vec2<float>(topLeftCorner.x() + squareNormalizedSize.x() * file,
-		topLeftCorner.y() + squareNormalizedSize.y() * reverseRank);
+		topLeftCorner.y() + squareNormalizedSize.y() * rank);
 }

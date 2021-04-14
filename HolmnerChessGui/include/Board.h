@@ -3,6 +3,7 @@
 #include "Vec2.h"
 #include "Squares.h"
 #include "Piece.h"
+#include "StatesAndEvents.h"
 
 #include <memory>
 #include <array>
@@ -19,7 +20,7 @@ public:
 	Board(const ImageData& image);
 
 	void init(const Vec2<float>& normPos, const Vec2<float>& scale,
-		 const Window& window);
+		statesAndEvents::PlayingSide side, const Window& window);
 
 	void draw(Window& window, const Vec2<int32_t>& mousePos);
 
@@ -35,6 +36,7 @@ private:
 	Square getFromNormalizedPosition(const Vec2<float>& normPos,
 		const Window& window) const;
 
+	statesAndEvents::PlayingSide playerSide;
 	std::unique_ptr<Drawable> boardDrawable;
 	std::array<Piece, squares::num> pieces;
 	Square dragStartSquare = squares::none;

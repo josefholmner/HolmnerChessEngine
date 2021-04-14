@@ -13,7 +13,7 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 {
 	using namespace statesAndEvents;
 
-	init(window);
+	init(window, side);
 
 	while (true)
 	{
@@ -38,11 +38,11 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 	return {};
 }
 
-void PlayHandler::init(const Window& window)
+void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 {
 	static const Vec2<float> boardPos(0.25f, 0.05f);
 	static const Vec2<float> boardScale(0.5f, 0.5f);
-	board.init(boardPos, boardScale, window);
+	board.init(boardPos, boardScale, side, window);
 }
 
 void PlayHandler::draw(Window& window)

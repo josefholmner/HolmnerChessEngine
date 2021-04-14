@@ -21,7 +21,7 @@ public:
 		statesAndEvents::PlayingSide side);
 
 private:
-	void init(const Window& window);
+	void init(const Window& window, statesAndEvents::PlayingSide side);
 	void draw(Window& window);
 
 	Board board;
