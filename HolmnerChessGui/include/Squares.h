@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 typedef int32_t Square;
 namespace squares
@@ -79,4 +80,7 @@ namespace squares
 	static constexpr Square f8 = 61;
 	static constexpr Square g8 = 62;
 	static constexpr Square h8 = 63;
+
+	std::string toString(Square sq);
+	Square fromString(const std::string& sq);
 }

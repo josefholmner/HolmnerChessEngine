@@ -21,7 +21,8 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale,
 	boardDrawable->setNormalizedPosition(normPos, window);
 	boardDrawable->setScale(scale);
 
-	playerSide = side;
+	userSide = side;
+	FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // Starting position.
 	setUpPieces(window, scale);
 }
 
@@ -33,10 +34,35 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 	window.draw(*boardDrawable);
 
 	// Draw pieces.
+	Piece* draggedPiece = nullptr;
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
+		if (pieces[sq].getIsMouseDragged())
+		{
+			draggedPiece = &pieces[sq];
+			continue; // Dragged piece is drawn last so that it's drawn on top of all other.
+		}
+
 		pieces[sq].draw(window, mousePos);
 	}
+
+	if (draggedPiece)
+	{
+		draggedPiece->draw(window, mousePos);
+	}
+}
+
+void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
+{
+	const Square fromSq = squares::fromString(move.fromSquare);
+	const Square toSq = squares::fromString(move.toSquare);
+
+	pieces[toSq].setType(pieces[fromSq].getType());
+	placePieceAtSquare(pieces[toSq], toSq, window);
+
+	pieces[fromSq].setType(Piece::Type::None);
+
+	// TODO: implement castling, pawn promotion, en passant captures.
 }
 
 void Board::registerMouseDown(const Vec2<int32_t>& mousePos, const Window& window)
@@ -52,18 +78,33 @@ void Board::registerMouseDown(const Vec2<int32_t>& mousePos, const Window& windo
 	pieces[sq].setIsMouseDragged(true);
 }
 
-void Board::registerMouseRelease(const Vec2<int32_t>& mousePos, const Window& window)
+std::optional<UserMove> Board::registerMouseRelease(const Vec2<int32_t>& mousePos, const Window& window)
 {
 	if (dragStartSquare == squares::none)
 	{
-		return;
+		return {};
 	}
+
+	const Square startSq = dragStartSquare;
 
 	// Reset the dragged piece.
 	pieces[dragStartSquare].setIsMouseDragged(false);
 	const auto dragStartPos = getSquareNormalizedPosition(dragStartSquare, window);
 	pieces[dragStartSquare].setNormalizedPosition(dragStartPos, window);
 	dragStartSquare = squares::none;
+
+	// Get the end square if any.
+	const auto normalizedPos = window.pixelToNormalizedPosition(mousePos);
+	const Square endSq = getFromNormalizedPosition(normalizedPos, window);
+	if (endSq == squares::none)
+	{
+		return {};
+	}
+
+	UserMove userMove;
+	userMove.fromSquare = squares::toString(startSq);
+	userMove.toSquare = squares::toString(endSq);
+	return userMove;
 }
 
 void Board::setUpPieces(const Window& window, const Vec2<float>& scale)
@@ -96,9 +137,14 @@ void Board::setUpPieces(const Window& window, const Vec2<float>& scale)
 		pieces[s].init(Piece::Type::BPawn, scale);
 	}
 
-	for (Square sq = squares::a1; sq < squares::num; sq++)
+	for (Square s = squares::a3; s <= squares::h6; s++)
 	{
-		placePieceAtSquare(pieces[sq], sq, window);
+		pieces[s].init(Piece::Type::None, scale);
+	}
+
+	for (Square s = squares::a1; s < squares::num; s++)
+	{
+		placePieceAtSquare(pieces[s], s, window);
 	}
 }
 
@@ -135,9 +181,9 @@ Square Board::getFromNormalizedPosition(const Vec2<float>& normPos, const Window
 	const Vec2<float> posOnBoard((normPos.x() - topLeftCorner.x()) / boardNormalizedSize.x(),
 		(normPos.y() - topLeftCorner.y()) / boardNormalizedSize.y());
 
-	const int32_t file = playerSide == PlayingSide::White ?
+	const int32_t file = userSide == PlayingSide::White ?
 		(int32_t)(posOnBoard.x() * 8) : 7 - (int32_t)(posOnBoard.x() * 8);
-	const int32_t rank = playerSide == PlayingSide::White ?
+	const int32_t rank = userSide == PlayingSide::White ?
 		7 - (int32_t)(posOnBoard.y() * 8) : (int32_t)(posOnBoard.y() * 8);
 
 	return file + rank * 8;
@@ -152,9 +198,9 @@ Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) 
 	const Vec2<float> squareNormalizedSize(
 		boardNormalizedSize.x() / 8.f, boardNormalizedSize.y() / 8.f);
 
-	const int32_t rank = playerSide == PlayingSide::White ?
+	const int32_t rank = userSide == PlayingSide::White ?
 		7 - (sq / 8) : sq / 8;
-	const int32_t file = playerSide == PlayingSide::White ?
+	const int32_t file = userSide == PlayingSide::White ?
 		sq % 8 : 7 - (sq % 8);
 
 	return Vec2<float>(topLeftCorner.x() + squareNormalizedSize.x() * file,

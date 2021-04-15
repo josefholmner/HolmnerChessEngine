@@ -3,6 +3,7 @@
 #include "Vec2.h"
 
 #include <memory>
+#include <string>
 #include <cstdint>
 
 class Drawable;
@@ -32,7 +33,7 @@ public:
 		BPawn
 	};
 
-	void init(Type type, const Vec2<float>& scale);
+	void init(Type type, const Vec2<float>& inScale);
 
 	void draw(Window& window, const Vec2<int32_t>& mousePos);
 
@@ -40,14 +41,19 @@ public:
 	void setType(Type inType);
 	Type getType() const { return type; }
 
+	Type stringToType(const std::string& str) const;
+
 	void setNormalizedPosition(const Vec2<float>& normPos, const Window& window);
 	Vec2<float> getNormalizedPosition(const Window& window) const;
 
 	void setIsMouseDragged(bool inIsMouseDragged);
 	bool getIsMouseDragged() { return isMouseDragged; }
 
+	Vec2<float> getScale() const;
+
 private:
 	Type type = Type::None;
 	bool isMouseDragged = false;
 	std::unique_ptr<Drawable> drawable;
+	Vec2<float> scale;
 };

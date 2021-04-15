@@ -8,31 +8,31 @@ std::string pieces::pieceToStr(Piece piece)
 	switch (piece)
 	{
 	case pieces::none:
-		return "  ";
+		return " ";
 	case pieces::wK:
-		return "wK";
+		return "K";
 	case pieces::wQ:
-		return "wQ";
+		return "Q";
 	case pieces::wR:
-		return "wR";
+		return "R";
 	case pieces::wB:
-		return "wB";
+		return "B";
 	case pieces::wN:
-		return "wN";
+		return "N";
 	case pieces::wP:
-		return "wP";
+		return "P";
 	case pieces::bK:
-		return "bK";
+		return "k";
 	case pieces::bQ:
-		return "bQ";
+		return "q";
 	case pieces::bR:
-		return "bR";
+		return "r";
 	case pieces::bB:
-		return "bB";
+		return "b";
 	case pieces::bN:
-		return "bN";
+		return "n";
 	case pieces::bP:
-		return "bP";
+		return "p";
 	default:
 		EngineUtilities::logE("Piece to string, unknown piece: " + std::to_string(piece));
 		return "";
@@ -56,7 +56,7 @@ File files::toFile(Square sq)
 
 char files::fileToChar(File file)
 {
-	return 'A' + file;
+	return 'a' + file;
 }
 
 std::string squares::squareToStr(Square sq)

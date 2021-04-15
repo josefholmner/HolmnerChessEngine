@@ -2,6 +2,7 @@
 
 #include "StatesAndEvents.h"
 #include "Board.h"
+#include "EngineWrapper.h"
 
 #include <optional>
 
@@ -22,7 +23,16 @@ public:
 
 private:
 	void init(const Window& window, statesAndEvents::PlayingSide side);
+
 	void draw(Window& window);
 
+	bool userMakeMove(const hceEngine::LegalMovesCollection& legalMoves, Window& window);
+	bool engineMakeMove(Window& window);
+
+	std::optional<PlayResult> showEndScreen(Window& window);
+
+	bool isUsersTurn(hceEngine::PlayState state);
+
 	Board board;
+	EngineWrapper engine;
 };

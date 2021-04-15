@@ -12,14 +12,10 @@
 #include <cassert>
 
 
-void Piece::init(Piece::Type type, const Vec2<float>& scale)
+void Piece::init(Piece::Type type, const Vec2<float>& inScale)
 {
+	scale = inScale;
 	setType(type);
-
-	if (drawable != nullptr)
-	{
-		drawable->setScale(scale);
-	}
 }
 
 void Piece::draw(Window& window, const Vec2<int32_t>& mousePos)
@@ -93,6 +89,51 @@ void Piece::setType(Type inType)
 		GuiUtilities::logE("Unknown piece type passed to Piece::init().");
 		return;
 	}
+
+	if (drawable)
+	{
+		drawable->setScale(scale);
+	}
+}
+
+Piece::Type Piece::stringToType(const std::string& str) const
+{
+	if (str.size() != 1)
+	{
+		GuiUtilities::logE("Unknown piece: " + str + " passed to Piece::stringToType.");
+		return Piece::Type::None;
+	}
+
+	switch (str[0])
+	{
+		case 'K':
+			return Piece::Type::WKing;
+		case 'Q':
+			return Piece::Type::WQueen;
+		case 'R':
+			return Piece::Type::WRook;
+		case 'B':
+			return Piece::Type::WBishop;
+		case 'N':
+			return Piece::Type::WKnight;
+		case 'P':
+			return Piece::Type::WPawn;
+		case 'k':
+			return Piece::Type::BKing;
+		case 'q':
+			return Piece::Type::BQueen;
+		case 'r':
+			return Piece::Type::BRook;
+		case 'b':
+			return Piece::Type::BBishop;
+		case 'n':
+			return Piece::Type::BKnight;
+		case 'p':
+			return Piece::Type::BPawn;
+		default:
+			GuiUtilities::logE("Unknown piece: " + str + " passed to Piece::stringToType.");
+			return Piece::Type::None;
+	}
 }
 
 void Piece::setNormalizedPosition(const Vec2<float>& normPos, const Window& window)
@@ -119,4 +160,14 @@ void Piece::setIsMouseDragged(bool inIsMouseDragged)
 {
 	assert(type != Type::None);
 	isMouseDragged = inIsMouseDragged;
+}
+
+Vec2<float> Piece::getScale() const
+{
+	if (drawable == nullptr)
+	{
+		return Vec2<float>();
+	}
+	
+	return drawable->getScale();
 }
