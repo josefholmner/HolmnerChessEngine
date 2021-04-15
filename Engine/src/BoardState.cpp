@@ -452,6 +452,77 @@ bool BoardState::initFromFEN(const std::string& FEN)
 	return true;
 }
 
+std::string BoardState::toFEN() const
+{
+	std::string FEN = "";
+
+	// Pieces.
+	for (Rank rank = ranks::rank8; rank >= ranks::rank1; rank--)
+	{
+		int emptyCount = 0;
+		for (File file = files::fileA; file <= files::fileH; file++)
+		{
+			const Square sq = file + rank * ranks::num;
+			if (pieces[sq] != pieces::none)
+			{
+				if (emptyCount > 0)
+				{
+					FEN += static_cast<char>('0' + emptyCount);
+					emptyCount = 0;
+				}
+
+				FEN += pieces::pieceToStr(pieces[sq]);
+			}
+			else if(file == files::fileH)
+			{
+				emptyCount++;
+				FEN += static_cast<char>('0' + emptyCount);
+			}
+			else
+			{
+				emptyCount++;
+			}
+		}
+
+		if (rank != ranks::rank1)
+		{
+			FEN += "/";
+		}
+	}
+
+	FEN += " ";
+
+	// Turn.
+	FEN += turn == pieces::Color::WHITE ? "w" : "b";
+	FEN += " ";
+
+	// Castling availability.
+	bool noCastling = true;
+	for (const auto entry : casleAvailability)
+	{
+		if (entry.second)
+		{
+			FEN += entry.first;
+			noCastling = false;
+		}
+	}
+
+	if (noCastling)
+	{
+		FEN += "-";
+	}
+
+	FEN += " ";
+
+	// En passant square.
+	FEN += enPassantSquare == squares::none ? "-" : squares::squareToStr(enPassantSquare);
+	FEN += " ";
+
+	// Halfmove and fullmove count (not implemented).
+	FEN += "0 1";
+	return FEN;
+}
+
 void BoardState::printBoard() const
 {
 	for (Rank rank = ranks::rank8; rank >= ranks::rank1; rank--)

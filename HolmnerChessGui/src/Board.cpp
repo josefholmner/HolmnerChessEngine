@@ -63,6 +63,8 @@ void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
 	pieces[fromSq].setType(Piece::Type::None);
 
 	// TODO: implement castling, pawn promotion, en passant captures.
+
+	FEN = move.postMoveFEN;
 }
 
 void Board::registerMouseDown(const Vec2<int32_t>& mousePos, const Window& window)

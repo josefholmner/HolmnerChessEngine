@@ -1069,7 +1069,7 @@ namespace moveGenerationHelpers
 		return true;
 	}
 
-	hceEngine::ChessMove moveToChessMove(const Move& move, Score staticEvaluation)
+	hceEngine::ChessMove moveToChessMove(const Move& move, BoardState& board, Score staticEvaluation)
 	{
 		hceEngine::ChessMove cm;
 
@@ -1083,6 +1083,11 @@ namespace moveGenerationHelpers
 			"" : pieces::pieceToStr(move.capturedPiece);
 		cm.pawnPromotionPiece = move.pawnPromotionPiece == pieces::none ?
 			"" : pieces::pieceToStr(move.pawnPromotionPiece);
+
+		// Set postMoveFEN.
+		board.makeMove(move);
+		cm.postMoveFEN = board.toFEN();
+		board.unmakeMove(move);
 
 		// Set the move type.
 		if (move.pawnPromotionPiece != pieces::none)
@@ -1130,7 +1135,7 @@ hceEngine::LegalMovesCollection Engine::getLegalMoves(const std::string& FEN) co
 	std::vector<Move> moves = getLegalMoves(board);
 	for (const auto& move : moves)
 	{
-		legalMoves.moves.push_back(moveToChessMove(move, 0));
+		legalMoves.moves.push_back(moveToChessMove(move, board, 0));
 	}
 
 	if (moves.size() > 0)
@@ -1304,7 +1309,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		currentDepth++;
 	}
 
-	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, bestScore);
+	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, board, bestScore);
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
 	searchResult.engineInfo.maxDepthVisited = (size_t)depth + info.quiescenceMaxDepth;
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
@@ -1347,7 +1352,7 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 		board.unmakeMove(m);
 	}
 
-	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, bestScore);
+	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, board, bestScore);
 	searchResult.engineInfo.depthsCompletelyCovered = depth;
 	searchResult.engineInfo.maxDepthVisited = depth; // No quiescence search.
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;

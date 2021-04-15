@@ -42,6 +42,7 @@ namespace hceEngine
 		std::string capturedPiece;
 		std::string pawnPromotionPiece;
 		float positionEvaluation = 0.f;
+		std::string postMoveFEN;
 	};
 
 	struct SearchResult

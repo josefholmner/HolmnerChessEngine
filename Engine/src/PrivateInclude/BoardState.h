@@ -19,6 +19,7 @@ public:
 	bool operator==(const BoardState& other) const;
 
 	bool initFromFEN(const std::string& FEN);
+	std::string toFEN() const;
 
 	void printBoard() const;
 
