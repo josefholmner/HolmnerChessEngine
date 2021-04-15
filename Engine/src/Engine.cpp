@@ -1095,7 +1095,7 @@ namespace moveGenerationHelpers
 			cm.type = move.capturedPiece == pieces::none ?
 				hceEngine::MoveType::PawnPromotionSilent : hceEngine::MoveType::PawnPromotionCapture;
 		}
-		else if (move.toSquare != move.capturedSquare)
+		else if (move.capturedPiece != pieces::none && move.toSquare != move.capturedSquare)
 		{
 			cm.type = hceEngine::MoveType::EnPassantCapture;
 		}
@@ -1111,10 +1111,12 @@ namespace moveGenerationHelpers
 		{
 			assert(move.capturedPiece == pieces::none);
 			assert(move.pawnPromotionPiece == pieces::none);
-			assert(move.capturedSquare == move.toSquare);
-			cm.type == hceEngine::MoveType::Silent;
+			assert(move.capturedSquare == squares::none || move.capturedSquare == move.toSquare);
+			cm.type = hceEngine::MoveType::Silent;
 		}
 
+		assert(cm.type != hceEngine::MoveType::Invalid);
+		assert(cm.type != hceEngine::MoveType::None);
 		return cm;
 	}
 }

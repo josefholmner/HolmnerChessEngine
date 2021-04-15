@@ -96,7 +96,7 @@ void Piece::setType(Type inType)
 	}
 }
 
-Piece::Type Piece::stringToType(const std::string& str) const
+Piece::Type Piece::stringToType(const std::string& str)
 {
 	if (str.size() != 1)
 	{

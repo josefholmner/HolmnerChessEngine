@@ -41,7 +41,7 @@ public:
 	void setType(Type inType);
 	Type getType() const { return type; }
 
-	Type stringToType(const std::string& str) const;
+	static Type stringToType(const std::string& str);
 
 	void setNormalizedPosition(const Vec2<float>& normPos, const Window& window);
 	Vec2<float> getNormalizedPosition(const Window& window) const;

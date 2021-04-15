@@ -50,6 +50,11 @@ private:
 	Square getFromNormalizedPosition(const Vec2<float>& normPos,
 		const Window& window) const;
 
+	void makeCastlingMove(const hceEngine::ChessMove& move, const Window& window);
+	void makePawnPromotionMove(const hceEngine::ChessMove& move, const Window& window);
+	void makeEnPassantCaptureMove(const hceEngine::ChessMove& move, const Window& window);
+	void makeRegularMove(const hceEngine::ChessMove& move, const Window& window);
+
 	statesAndEvents::PlayingSide userSide;
 	std::unique_ptr<Drawable> boardDrawable;
 	std::array<Piece, squares::num> pieces;

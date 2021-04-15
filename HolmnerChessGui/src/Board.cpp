@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "ImageData.h"
 #include "Resources.h"
+#include "GuiUtilities.h"
 
 #include "ThirdPartyWrappersFactory.h"
 
@@ -54,16 +55,28 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 
 void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
 {
-	const Square fromSq = squares::fromString(move.fromSquare);
-	const Square toSq = squares::fromString(move.toSquare);
+	switch (move.type)
+	{
+		case hceEngine::MoveType::Silent:
+		case hceEngine::MoveType::Capture:
+			makeRegularMove(move, window);
+			break;		
+		case hceEngine::MoveType::Castling:
+			makeCastlingMove(move, window);
+			break;
+		case hceEngine::MoveType::EnPassantCapture:
+			makeEnPassantCaptureMove(move, window);
+			break;
+		case hceEngine::MoveType::PawnPromotionCapture:
+		case hceEngine::MoveType::PawnPromotionSilent:
+			makePawnPromotionMove(move, window);
+			break;
+		default:
+			GuiUtilities::logE("Invalid move passed to Board::makeMove().");
+			return;
+	}
 
-	pieces[toSq].setType(pieces[fromSq].getType());
-	placePieceAtSquare(pieces[toSq], toSq, window);
-
-	pieces[fromSq].setType(Piece::Type::None);
-
-	// TODO: implement castling, pawn promotion, en passant captures.
-
+	// Lastly, update FEN.
 	FEN = move.postMoveFEN;
 }
 
@@ -189,6 +202,91 @@ Square Board::getFromNormalizedPosition(const Vec2<float>& normPos, const Window
 		7 - (int32_t)(posOnBoard.y() * 8) : (int32_t)(posOnBoard.y() * 8);
 
 	return file + rank * 8;
+}
+
+void Board::makeCastlingMove(const hceEngine::ChessMove& move, const Window& window)
+{
+	assert(move.movingPiece == "K" || move.movingPiece == "k");
+	using namespace squares;
+	const Square fromSq = squares::fromString(move.fromSquare);
+	const Square toSq = squares::fromString(move.toSquare);
+
+	// Move the king.
+	pieces[toSq].setType(Piece::stringToType(move.movingPiece));
+	placePieceAtSquare(pieces[toSq], toSq, window);
+	pieces[fromSq].setType(Piece::Type::None);
+
+	// Move the rook.
+	if (move.movingPiece == "K")
+	{
+		if (toSq == c1)
+		{
+			pieces[d1].setType(Piece::Type::WRook);
+			placePieceAtSquare(pieces[d1], d1, window);
+			pieces[a1].setType(Piece::Type::None);
+		}
+		else
+		{
+			assert(toSq == g1);
+			pieces[f1].setType(Piece::Type::WRook);
+			placePieceAtSquare(pieces[f1], f1, window);
+			pieces[h1].setType(Piece::Type::None);
+		}
+	}
+	else
+	{
+		assert(move.movingPiece == "k");
+		if (toSq == c8)
+		{
+			pieces[d8].setType(Piece::Type::BRook);
+			placePieceAtSquare(pieces[d8], d8, window);
+			pieces[a8].setType(Piece::Type::None);
+		}
+		else
+		{
+			assert(toSq == g8);
+			pieces[f8].setType(Piece::Type::BRook);
+			placePieceAtSquare(pieces[f8], f8, window);
+			pieces[h8].setType(Piece::Type::None);
+		}
+	}
+}
+
+void Board::makePawnPromotionMove(const hceEngine::ChessMove& move, const Window& window)
+{
+	assert(move.movingPiece == "P" || move.movingPiece == "p");
+	const Square fromSq = squares::fromString(move.fromSquare);
+	const Square toSq = squares::fromString(move.toSquare);
+
+	pieces[toSq].setType(Piece::stringToType(move.pawnPromotionPiece));
+	placePieceAtSquare(pieces[toSq], toSq, window);
+
+	pieces[fromSq].setType(Piece::Type::None);
+}
+
+void Board::makeEnPassantCaptureMove(const hceEngine::ChessMove& move, const Window& window)
+{
+	assert(move.movingPiece == "P" || move.movingPiece == "p");
+	const Square fromSq = squares::fromString(move.fromSquare);
+	const Square toSq = squares::fromString(move.toSquare);
+
+	pieces[toSq].setType(Piece::stringToType(move.movingPiece));
+	placePieceAtSquare(pieces[toSq], toSq, window);
+
+	pieces[fromSq].setType(Piece::Type::None);
+	const Square enemyOffs = move.movingPiece == "P" ? -8 : 8;
+	pieces[(size_t)toSq + enemyOffs].setType(Piece::Type::None);
+}
+
+void Board::makeRegularMove(const hceEngine::ChessMove& move, const Window& window)
+{
+	const Square fromSq = squares::fromString(move.fromSquare);
+	const Square toSq = squares::fromString(move.toSquare);
+
+	pieces[toSq].setType(Piece::stringToType(move.movingPiece));
+	placePieceAtSquare(pieces[toSq], toSq, window);
+
+	pieces[fromSq].setType(Piece::Type::None);
 }
 
 Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) const
