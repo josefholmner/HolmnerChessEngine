@@ -1076,7 +1076,7 @@ namespace moveGenerationHelpers
 
 		// Normalize the score so that 1.0 represents the value of a single pawn.
 		cm.positionEvaluation = 
-			static_cast<float>(staticEvaluation) / BoardEvaluator::getPawnBaseValue();
+			static_cast<float>(staticEvaluation) / (float)BoardEvaluator::getPawnBaseValue();
 		cm.fromSquare = squares::squareToStr(move.fromSquare);
 		cm.toSquare = squares::squareToStr(move.toSquare);
 		cm.movingPiece = pieces::pieceToStr(move.movingPiece);
@@ -1161,6 +1161,8 @@ hceEngine::LegalMovesCollection Engine::getLegalMoves(const std::string& FEN) co
 				hceEngine::PlayState::WhiteWins : hceEngine::PlayState::Draw;
 		}
 	}
+
+	return legalMoves;
 }
 
 std::vector<Move> Engine::getLegalMoves(BoardState& board) const
@@ -1321,10 +1323,23 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
 			board.unmakeMove(m);
 		}
 
+		if (bestScoreCurrDepth <= searchHelpers::minusInf && currentDepth > 1)
+		{
+			// Loosing move found. Since the opponent might miss the mate, just stop here, return the
+			// last depth result and hope for the best.
+			break;
+		}
+
 		bestMoveIDLastDepth = bestMoveIDCurrDepth;
 		bestMoveLastDepth = bestMoveCurrDepth;
 		bestScoreLastDepth = bestScoreCurrDepth;
 		currentDepth++;
+
+		if (bestScoreCurrDepth >= searchHelpers::plusInf)
+		{
+			// Winning move found.
+			break;
+		}
 	}
 
 	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMoveLastDepth, board, bestScoreLastDepth);
@@ -1368,6 +1383,20 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 		}
 
 		board.unmakeMove(m);
+	}
+
+	if (bestScore >= searchHelpers::plusInf && depth >= 2)
+	{
+		// Winning move found. Try to find the shortest move.
+		const auto shallowerRes = getBestMoveMiniMax(FEN, depth - 1);
+
+		// Undo the score normalization to go back to the correct Score.
+		const Score shallowerScore = 
+			(Score)(shallowerRes.move.positionEvaluation * (float)BoardEvaluator::getPawnBaseValue());
+		if (shallowerScore >= searchHelpers::plusInf)
+		{
+			return getBestMoveMiniMax(FEN, depth - 1);
+		}
 	}
 
 	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, board, bestScore);
