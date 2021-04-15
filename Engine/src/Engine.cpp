@@ -1055,7 +1055,7 @@ namespace moveGenerationHelpers
 			return false;
 		}
 
-		if (files::toFile(move.fromSquare != files::fileE))
+		if (files::toFile(move.fromSquare) != files::fileE)
 		{
 			return false;
 		}
