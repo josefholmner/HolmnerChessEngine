@@ -5,6 +5,7 @@
 #include <string>
 #include <optional>
 #include <memory>
+#include <limits>
 
 class Engine;
 
@@ -19,9 +20,10 @@ namespace hceEngine
         /**
         * Uses alpha-beta pruning and quiescence search to find the best move.
         * This is the recommended function to call if maximum performance is wanted given a
-        * predetermined depth.
+        * predetermined depth and/or timeout time.
         */
-        SearchResult getBestMove(const std::string& FEN, uint8_t depth) const;
+        SearchResult getBestMove(const std::string& FEN, uint8_t depth,
+            int32_t timeoutMilliSeconds = std::numeric_limits<int32_t>::max()) const;
 
         /**
         * Uses the simplest (and slow) minimax algorithm to find the best move given a FEN.

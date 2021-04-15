@@ -24,7 +24,8 @@ namespace searchHelpers
 		static constexpr int8_t lower = -1;
 		static constexpr int8_t exact = 0;
 
-		struct MinimalMoveInfo
+		// A light-weight struct representing a Move.
+		struct MoveID
 		{
 			Square from = squares::none;
 			Square to = squares::none;
@@ -36,7 +37,7 @@ namespace searchHelpers
 			Score score;
 			Depth depth;
 			int8_t type;
-			MinimalMoveInfo bestMove;
+			MoveID bestMove;
 		};
 	}
 }

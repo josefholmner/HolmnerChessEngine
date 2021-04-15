@@ -2,6 +2,7 @@
 
 #include "PrivateInclude/Move.h"
 #include "PrivateInclude/EngineUtilities.h"
+#include "Common/StopWatch.h"
 
 #include <cassert>
 #include <algorithm>
@@ -1246,7 +1247,8 @@ hceEngine::StaticEvaluationResult Engine::evaluateStatic(const std::string& FEN)
 	return hceEngine::StaticEvaluationResult::Equal;
 }
 
-hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth) const
+hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
+	int32_t timeoutMilliSeconds) const
 {
 	hceEngine::SearchResult searchResult;
 
@@ -1266,20 +1268,26 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		return searchResult;
 	}
 
+	hceCommon::Stopwatch stopWatch;
+	stopWatch.start();
 	searchHelpers::SearchInfo info;
-	Move bestMove;
-	searchHelpers::tp::MinimalMoveInfo bestMoveLastDepth;
-	Score bestScore;
+	Move bestMoveLastDepth;
+	searchHelpers::tp::MoveID bestMoveIDLastDepth;
+	Score bestScoreLastDepth;
 	auto moves = getLegalMoves(board);
 	Depth currentDepth = 1;
-	while (currentDepth <= depth)
+
+	// Only attempt next depth if we have at least half the time left.
+	while (currentDepth <= depth && stopWatch.getMilliseconds() < timeoutMilliSeconds / 2)
 	{
+		Move bestMoveCurrDepth;
+		searchHelpers::tp::MoveID bestMoveIDCurrDepth;
 		Score alpha = searchHelpers::minusInf;
 		static constexpr Score beta = searchHelpers::plusInf;
-		bestScore = searchHelpers::minusInf;
-		if (bestMoveLastDepth.isSet())
+		Score bestScoreCurrDepth = searchHelpers::minusInf;
+		if (bestMoveIDLastDepth.isSet())
 		{
-			setStaticEvalAndSortMoves(board, moves, bestMoveLastDepth);
+			setStaticEvalAndSortMoves(board, moves, bestMoveIDLastDepth);
 		}
 		else
 		{
@@ -1288,16 +1296,21 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 		
 		for (const Move& m : moves)
 		{
+			if (stopWatch.getMilliseconds() >= timeoutMilliSeconds)
+			{
+				break;
+			}
+
 			board.makeMove(m);
 			info.nodesVisited++;
 			const int32_t score = -alphaBeta(
 				board, -beta, -alpha, currentDepth-1, m.staticEval, info);
-			if (score > bestScore)
+			if (score > bestScoreCurrDepth)
 			{
-				bestScore = score;
-				bestMove = m;
-				bestMoveLastDepth.from = m.fromSquare;
-				bestMoveLastDepth.to = m.toSquare;
+				bestScoreCurrDepth = score;
+				bestMoveCurrDepth = m;
+				bestMoveIDCurrDepth.from = m.fromSquare;
+				bestMoveIDCurrDepth.to = m.toSquare;
 			}
 
 			if (score > alpha)
@@ -1308,12 +1321,15 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth)
 			board.unmakeMove(m);
 		}
 
+		bestMoveIDLastDepth = bestMoveIDCurrDepth;
+		bestMoveLastDepth = bestMoveCurrDepth;
+		bestScoreLastDepth = bestScoreCurrDepth;
 		currentDepth++;
 	}
 
-	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMove, board, bestScore);
-	searchResult.engineInfo.depthsCompletelyCovered = depth;
-	searchResult.engineInfo.maxDepthVisited = (size_t)depth + info.quiescenceMaxDepth;
+	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMoveLastDepth, board, bestScoreLastDepth);
+	searchResult.engineInfo.depthsCompletelyCovered = currentDepth - 1;
+	searchResult.engineInfo.maxDepthVisited = (size_t)(currentDepth - 1) + info.quiescenceMaxDepth;
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
 	return searchResult;
 }
@@ -1463,7 +1479,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	}
 
 	Score bestScore = minusInf;
-	tp::MinimalMoveInfo bestMove;
+	tp::MoveID bestMove;
 	auto moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
 	// assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove)); /*Uncomment for testing*/
@@ -1574,7 +1590,7 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	std::sort(moves.begin(), moves.end());
 }
 
-void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
+void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& moves, const searchHelpers::tp::MoveID& bestMove) const
 {
 	if (moves.size() <= 0)
 	{
@@ -1587,7 +1603,7 @@ void Engine::setStaticEvalAndSortMoves(BoardState& board, std::vector<Move>& mov
 	setKnownBestMoveFirst(moves, bestMove);
 }
 
-void Engine::setKnownBestMoveFirst(std::vector<Move>& moves, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
+void Engine::setKnownBestMoveFirst(std::vector<Move>& moves, const searchHelpers::tp::MoveID& bestMove) const
 {
 	assert(bestMove.isSet());
 
@@ -1636,7 +1652,7 @@ void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<
 }
 
 void Engine::setStaticEvalUsingDeltaAndSortMoves(BoardState& board, std::vector<Move>& moves,
-	Score staticEval, const searchHelpers::tp::MinimalMoveInfo& bestMove) const
+	Score staticEval, const searchHelpers::tp::MoveID& bestMove) const
 {
 	if (moves.size() == 0)
 	{
