@@ -9,7 +9,7 @@ typedef uint64_t Hash64;
 namespace searchHelpers
 {
 	// Used because std::numeric_limits<int16_t>::min()/max() is not symmetrical.
-	static constexpr Score plusInf = 10000;
+	static constexpr Score plusInf = 30000;
 	static constexpr Score minusInf = -plusInf;
 
 	struct SearchInfo

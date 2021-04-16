@@ -208,13 +208,13 @@ namespace
 			return false;
 		}
 
-		const std::string wPawnFurtherAdvanced = "7k/8/P7/7p/8/8/8/K7 w - - 0 1";
+		const std::string wPawnFurtherAdvanced = "7k/8/1P6/6p1/8/8/8/K7 w - - 0 1";
 		if (!test(engine, wPawnFurtherAdvanced, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
 		}
 
-		const std::string bPawnFurtherAdvanced = "7k/8/8/8/P7/7p/8/K7 w - - 0 1";
+		const std::string bPawnFurtherAdvanced = "7k/8/8/8/1P6/6p1/8/K7 w - - 0 1";
 		if (!test(engine, bPawnFurtherAdvanced, hceEngine::StaticEvaluationResult::BlackBetter))
 		{
 			return false;
@@ -232,13 +232,13 @@ namespace
 			return false;
 		}
 
-		const std::string bBlockedBisop = "rnbqk1nr/ppp1b2p/3pp1p1/5p2/5P2/3PP1P1/PPP3BP/RNBQK1NR w KQkq - 0 1";
+		const std::string bBlockedBisop = "rnbqk1nr/ppp1b2p/3pppp1/8/8/3PPPP1/PPPB3P/RNBQK1NR w KQkq - 0 1";
 		if (!test(engine, bBlockedBisop, hceEngine::StaticEvaluationResult::WhiteBetter))
 		{
 			return false;
 		}
 
-		const std::string wBlockedBisop = "rnbqk1nr/ppp3bp/3pp1p1/5p2/5P2/3PP1P1/PPPB3P/RNBQK1NR w KQkq - 0 1";
+		const std::string wBlockedBisop = "rnbqk1nr/pppb3p/3pppp1/8/8/3PPPP1/PPP1B2P/RNBQK1NR w KQkq - 0 1";
 		if (!test(engine, wBlockedBisop, hceEngine::StaticEvaluationResult::BlackBetter))
 		{
 			return false;

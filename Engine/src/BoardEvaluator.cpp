@@ -11,32 +11,31 @@ namespace scoringConstants
 	static constexpr Score fileScoreMin = 0;
 
 	// How much more a square on a rank or file 1 rank or file closer to the board center is worth.
-	static constexpr Score rankScoreJump = 2;
-	static constexpr Score fileScoreJump = 2;
+	static constexpr Score rankScoreJump = 6;
+	static constexpr Score fileScoreJump = 6;
 
-	static constexpr Score pBaseVal = 20;
-	static constexpr Score nBaseVal = pBaseVal * 3;
-	static constexpr Score bBaseVal = pBaseVal * 3;
-	static constexpr Score rBaseVal = pBaseVal * 5;
-	static constexpr Score qBaseVal = pBaseVal * 9;
+	static constexpr Score pBaseVal = 100;
+	static constexpr Score nBaseVal = 320;
+	static constexpr Score bBaseVal = 330;
+	static constexpr Score rBaseVal = 500;
+	static constexpr Score qBaseVal = 900;
+	static constexpr Score kBaseVal = 10000;
 
-	static constexpr Score kingToTheSideVal = 18;
-	static constexpr Score pawnProtectingKing1RankAwayVal = 18;
-	static constexpr Score pawnProtectingKing2RanksAwayVal = 8;
+	static constexpr Score kingToTheSideVal = 60;
+	static constexpr Score pawnProtectingKing1RankAwayVal = 30;
+	static constexpr Score pawnProtectingKing2RanksAwayVal = 20;
 
 	// The minimum number of opponent major pieces that has to be on the board for the king to
 	// be rewarded to be "hidden" to the side of the board behind pawns.
 	static constexpr Score minNumOpponentMajorPieceRewardKingSafety = 2;
 
-	static constexpr Score pawnAtCenterAdditionalVal = 3;
-	static constexpr Score pawnAtEdgeOfCenterAdditionalVal = 1;
 
-	static constexpr Score doublePawnsPunishmentVal = 10;
-	static constexpr Score pawnIslandPunishmentVal = 10;
+	static constexpr Score doublePawnsPunishmentVal = 25;
+	static constexpr Score pawnIslandPunishmentVal = 25;
 
-	static constexpr Score rookOpenFileVal = 10;
+	static constexpr Score rookOpenFileVal = 30;
 
-	//static constexpr Score bishopCoverValPerSquare = 1;
+	static constexpr Score bishopCoverValPerSquare = 3;
 }
 
 namespace
@@ -62,18 +61,6 @@ namespace
 				EngineUtilities::logE("BoardEvaluator: invalid rank passed to getRankScore().");
 				return 0;
 		}
-	}
-
-	Score getRankScoreRewardTowardsRankMax(Rank rank)
-	{
-		using namespace scoringConstants;
-		return rankScoreMin + rank * rankScoreJump;
-	}
-
-	Score getRankScoreRewardTowardsRankMin(Rank rank)
-	{
-		using namespace scoringConstants;
-		return rankScoreMin + (ranks::rank8 - rank) * rankScoreJump;
 	}
 
 	Score getFileScore(File file)
@@ -133,19 +120,23 @@ namespace
 	Score getWhiteBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
-		return getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
+		const Score numSqs =
+			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) +
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) +
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) +
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
+		return numSqs * scoringConstants::bishopCoverValPerSquare;
 	}
 
 	Score getBlackBishopSquareCoverScore(const BoardState& board, const FastSqLookup& lookup,
 		Square sq)
 	{
-		return -getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) -
+		const Score numSqs =
+			-getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA8()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH8()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
+		return numSqs * scoringConstants::bishopCoverValPerSquare;
 	}
 
 	BoardEvaluator::PreMoveInfo createFromMovingSidePawn(const BoardState& board, Piece movingSidePawn)
@@ -371,41 +362,48 @@ void BoardEvaluator::init()
 {
 	using namespace scoringConstants;
 
+	// Set pawn bonus scores (base value added later).
+	bPawnStaticScores =
+	{
+		-0,  -0,  -0,  -0,  -0,  -0,  -0,  -0,
+	    -70, -70, -70, -70, -70, -70, -70, -70,
+		-0,  -20, -40, -60, -60, -40, -20, -0,
+		-0,  -10, -20, -40, -40, -20, -10, -0,
+		-0,  -10, -20, -40, -40, -20, -10, -0,
+		-0,  -10, -20, -20, -20, -20, -10, -0,
+		-0,  -10, -10, -10, -10, -10, -10, -0,
+		-0,  -0,  -0,  -0,  -0,  -0,  -0,  -0
+	};
+
+	wPawnStaticScores =
+	{
+		0,  0,  0,  0,  0,  0,  0,  0,
+		0,  10, 10, 10, 10, 10, 10, 0,
+		0,  10, 20, 20, 20, 20, 10, 0,
+		0,  10, 20, 40, 40, 20, 10, 0,
+		0,  10, 20, 40, 40, 20, 10, 0,
+		0,  20, 40, 60, 60, 40, 20, 0,
+		70, 70, 70, 70, 70, 70, 70, 70,
+		0,  0,  0,  0,  0,  0,  0,  0
+	};
+
 	for (Square sq = squares::a1; sq < squares::num; sq++)
 	{
-		const Score rankBonusRewardCenter = getRankScoreRewardCenter(ranks::toRank(sq));
-		const Score rankBonusRewardRankMax = getRankScoreRewardTowardsRankMax(ranks::toRank(sq));
-		const Score rankBonusRewardRankMin = getRankScoreRewardTowardsRankMin(ranks::toRank(sq));
+		const Score rankBonus = getRankScoreRewardCenter(ranks::toRank(sq));
 		const Score fileBonus = getFileScore(files::toFile(sq));
 
-		wKingEndgameStaticScores[sq] = rankBonusRewardCenter + fileBonus;
-		bKingEndgameStaticScores[sq] = -rankBonusRewardCenter - fileBonus;
+		wKingEndgameStaticScores[sq] = kBaseVal + rankBonus + fileBonus;
+		bKingEndgameStaticScores[sq] = -kBaseVal -rankBonus - fileBonus;
 		wQueenStaticScores[sq] = qBaseVal;
 		bQueenStaticScores[sq] = -qBaseVal;
-		wRookStaticScores[sq] = rBaseVal;
-		bRookStaticScores[sq] = -rBaseVal;
-		wBishopStaticScores[sq] = bBaseVal;
-		bBishopStaticScores[sq] = -bBaseVal;
-		wKnightStaticScores[sq] = nBaseVal + rankBonusRewardCenter + fileBonus;
-		bKnightStaticScores[sq] = -nBaseVal - rankBonusRewardCenter - fileBonus;
-		wPawnStaticScores[sq] = pBaseVal + rankBonusRewardRankMax + fileBonus;
-		bPawnStaticScores[sq] = -pBaseVal - rankBonusRewardRankMin - fileBonus;
-	}
-
-	// Give extra scores for pawns at or around the center.
-	{
-		using namespace squares;
-		for (const Square sq : {d4, d5, e4, e5})
-		{
-			wPawnStaticScores[sq] += pawnAtCenterAdditionalVal;
-			bPawnStaticScores[sq] -= pawnAtCenterAdditionalVal;
-		}
-
-		for (const Square sq : {c3, c4, c5, c6, d3, d6, e3, e6, f3, f4, f5, f6})
-		{
-			wPawnStaticScores[sq] += pawnAtEdgeOfCenterAdditionalVal;
-			bPawnStaticScores[sq] -= pawnAtEdgeOfCenterAdditionalVal;
-		}
+		wRookStaticScores[sq] = rBaseVal + fileBonus;
+		bRookStaticScores[sq] = -rBaseVal - fileBonus;
+		wBishopStaticScores[sq] = bBaseVal + rankBonus + fileBonus;
+		bBishopStaticScores[sq] = -bBaseVal - rankBonus - fileBonus;
+		wKnightStaticScores[sq] = nBaseVal + rankBonus + fileBonus;
+		bKnightStaticScores[sq] = -nBaseVal - rankBonus - fileBonus;
+		wPawnStaticScores[sq] += pBaseVal;
+		bPawnStaticScores[sq] -= pBaseVal;
 	}
 }
 
@@ -415,6 +413,7 @@ Score BoardEvaluator::getWhiteKingScore(const BoardState& board, int8_t numBlack
 
 	if (numBlackMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
 	{
+		// The kBaseVal is baked into the array.
 		return wKingEndgameStaticScores[board.getWhiteKingSquare()];
 	}
 
@@ -451,7 +450,7 @@ Score BoardEvaluator::getWhiteKingScore(const BoardState& board, int8_t numBlack
 	}
 	}
 
-	return score;
+	return score + kBaseVal;
 }
 
 Score BoardEvaluator::getBlackKingScore(const BoardState& board, int8_t numWhiteMajorPieces) const
@@ -460,7 +459,8 @@ Score BoardEvaluator::getBlackKingScore(const BoardState& board, int8_t numWhite
 
 	if (numWhiteMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
 	{
-		return -wKingEndgameStaticScores[board.getBlackKingSquare()];
+		// The kBaseVal is baked into the array.
+		return bKingEndgameStaticScores[board.getBlackKingSquare()];
 	}
 
 	// Non-endgame: reward king protection.
@@ -496,7 +496,7 @@ Score BoardEvaluator::getBlackKingScore(const BoardState& board, int8_t numWhite
 	}
 	}
 
-	return score;
+	return score - kBaseVal;
 }
 
 Score BoardEvaluator::getPieceMoveDeltaScore(const BoardState& board, const Move& move,
