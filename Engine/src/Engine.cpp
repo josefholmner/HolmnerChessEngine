@@ -1456,7 +1456,14 @@ Score Engine::negaMax(BoardState& board, Depth depth, searchHelpers::SearchInfo&
 	}
 
 	Score bestScore = searchHelpers::minusInf;
-	for (const Move& move : getLegalMoves(board))
+	const auto moves = getLegalMoves(board);
+	if (moves.size() == 0 && !moveGenerationHelpers::isInCheck(board, fastSqLookup))
+	{
+		// Stalemate detected.
+		return 0;
+	}
+
+	for (const Move& move : moves)
 	{
 		board.makeMove(move);
 		info.nodesVisited++;
@@ -1522,6 +1529,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 		setStaticEvalUsingDeltaAndSortMoves(board, moves, staticEval);
 	}
 	
+	bool legalMoveExists = false; // moves.size() cannot be used since it is pseudo-legal moves.
 	for (const Move& move : moves)
 	{
 		if (doesMoveCauseMovingSideCheck(board, fastSqLookup, move, inCheckPreMove))
@@ -1530,6 +1538,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 			continue;
 		}
 
+		legalMoveExists = true;
 		board.makeMove(move);
 		info.nodesVisited++;
 		const Score score = -alphaBeta(
@@ -1547,6 +1556,12 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 		{
 			break;
 		}
+	}
+
+	if (!legalMoveExists && !moveGenerationHelpers::isInCheck(board, fastSqLookup))
+	{
+		// Stalemate detected.
+		return 0;
 	}
 
 	int8_t type;
