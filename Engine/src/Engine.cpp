@@ -1206,6 +1206,13 @@ namespace moveCountHelpers
 		}
 		return num;
 	}
+
+	struct BestMoveData
+	{
+		Move bestMove;
+		searchHelpers::tp::MoveID bestMoveID;
+		Score bestScore = searchHelpers::minusInf;
+	};
 }
 
 std::optional<size_t> Engine::getNumLegalMoves(const std::string& FEN, Depth depth) const
@@ -1265,31 +1272,26 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
 	if (!board.initFromFEN(FEN))
 	{
 		EngineUtilities::logE("getBestMove failed, invalid FEN.");
-		hceEngine::SearchResult res;
 		searchResult.move.type = hceEngine::MoveType::Invalid;
 		return searchResult;
 	}
 
 	hceCommon::Stopwatch stopWatch;
-	stopWatch.start();
 	searchHelpers::SearchInfo info;
-	Move bestMoveLastDepth;
-	searchHelpers::tp::MoveID bestMoveIDLastDepth;
-	Score bestScoreLastDepth;
-	auto moves = getLegalMoves(board);
+	moveCountHelpers::BestMoveData bestMoveDataLastDepth;
+	
+	stopWatch.start();
 	Depth currentDepth = 1;
-
-	// Only attempt next depth if we have at least half the time left.
-	while (currentDepth <= depth && stopWatch.getMilliseconds() < timeoutMilliSeconds / 2)
+	auto moves = getLegalMoves(board);
+	bool timeOut = false;
+	while (currentDepth <= depth && !timeOut)
 	{
-		Move bestMoveCurrDepth;
-		searchHelpers::tp::MoveID bestMoveIDCurrDepth;
+		moveCountHelpers::BestMoveData bestMoveDataCurrDepth;
 		Score alpha = searchHelpers::minusInf;
 		static constexpr Score beta = searchHelpers::plusInf;
-		Score bestScoreCurrDepth = searchHelpers::minusInf;
-		if (bestMoveIDLastDepth.isSet())
+		if (bestMoveDataLastDepth.bestMoveID.isSet())
 		{
-			setStaticEvalAndSortMoves(board, moves, bestMoveIDLastDepth);
+			setStaticEvalAndSortMoves(board, moves, bestMoveDataLastDepth.bestMoveID);
 		}
 		else
 		{
@@ -1300,6 +1302,7 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
 		{
 			if (stopWatch.getMilliseconds() >= timeoutMilliSeconds)
 			{
+				timeOut = true;
 				break;
 			}
 
@@ -1307,12 +1310,11 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
 			info.nodesVisited++;
 			const int32_t score = -alphaBeta(
 				board, -beta, -alpha, currentDepth-1, m.staticEval, info);
-			if (score > bestScoreCurrDepth)
+			if (score > bestMoveDataCurrDepth.bestScore)
 			{
-				bestScoreCurrDepth = score;
-				bestMoveCurrDepth = m;
-				bestMoveIDCurrDepth.from = m.fromSquare;
-				bestMoveIDCurrDepth.to = m.toSquare;
+				bestMoveDataCurrDepth.bestScore = score;
+				bestMoveDataCurrDepth.bestMove = m;
+				bestMoveDataCurrDepth.bestMoveID = m.toMoveID();
 			}
 
 			if (score > alpha)
@@ -1323,26 +1325,33 @@ hceEngine::SearchResult Engine::getBestMove(const std::string& FEN, Depth depth,
 			board.unmakeMove(m);
 		}
 
-		if (bestScoreCurrDepth <= searchHelpers::minusInf && currentDepth > 1)
+		if (timeOut)
+		{
+			break;
+		}
+
+		if (bestMoveDataCurrDepth.bestScore <= searchHelpers::minusInf && currentDepth > 1)
 		{
 			// Loosing move found. Since the opponent might miss the mate, just stop here, return the
 			// last depth result and hope for the best.
 			break;
 		}
 
-		bestMoveIDLastDepth = bestMoveIDCurrDepth;
-		bestMoveLastDepth = bestMoveCurrDepth;
-		bestScoreLastDepth = bestScoreCurrDepth;
+		bestMoveDataLastDepth = bestMoveDataCurrDepth;
 		currentDepth++;
 
-		if (bestScoreCurrDepth >= searchHelpers::plusInf)
+		if (bestMoveDataCurrDepth.bestScore >= searchHelpers::plusInf)
 		{
 			// Winning move found.
 			break;
 		}
+
+		// Only attempt next depth if we have at least half the time left.
+		timeOut = stopWatch.getMilliseconds() > (timeoutMilliSeconds / 2);
 	}
 
-	searchResult.move = moveGenerationHelpers::moveToChessMove(bestMoveLastDepth, board, bestScoreLastDepth);
+	searchResult.move = moveGenerationHelpers::moveToChessMove(
+		bestMoveDataLastDepth.bestMove, board, bestMoveDataLastDepth.bestScore);
 	searchResult.engineInfo.depthsCompletelyCovered = currentDepth - 1;
 	searchResult.engineInfo.maxDepthVisited = (size_t)(currentDepth - 1) + info.quiescenceMaxDepth;
 	searchResult.engineInfo.nodesVisited = info.nodesVisited;
@@ -1515,7 +1524,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	}
 
 	Score bestScore = minusInf;
-	tp::MoveID bestMove;
+	tp::MoveID bestMoveId;
 	auto moves = getPseudoLegalMoves(board);
 	const bool inCheckPreMove = moves.size() > 0 ? isInCheck(board, fastSqLookup) : false;
 	// assert(dbgTestPseudoLegalMoveGeneration(board, moves, inCheckPreMove)); /*Uncomment for testing*/
@@ -1547,8 +1556,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 		if (score > bestScore)
 		{
 			bestScore = score;
-			bestMove.from = move.fromSquare;
-			bestMove.to = move.toSquare;
+			bestMoveId = move.toMoveID();
 		}
 
 		alpha = std::max(alpha, score);
@@ -1569,7 +1577,7 @@ Score Engine::alphaBeta(BoardState& board, Score alpha, Score beta, Depth depth,
 	else if (bestScore >= beta) type = tp::lower;
 	else type = tp::exact;
 
-	board.addTranspositionElement(tp::Element{bestScore, depth, type, bestMove});
+	board.addTranspositionElement(tp::Element{bestScore, depth, type, bestMoveId});
 	return bestScore;
 }
 

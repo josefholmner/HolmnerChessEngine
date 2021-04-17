@@ -39,6 +39,11 @@ public:
 		assert(EngineUtilities::isNonNoneSquare(inCapturedSquare));
 	}
 
+	searchHelpers::tp::MoveID toMoveID() const
+	{
+		return searchHelpers::tp::MoveID{ fromSquare, toSquare };
+	}
+
 	bool operator < (const Move& other) const
 	{
 		return staticEval < other.staticEval;
