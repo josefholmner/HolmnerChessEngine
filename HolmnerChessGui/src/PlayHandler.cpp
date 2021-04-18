@@ -94,6 +94,7 @@ bool PlayHandler::userMakeMove(const hceEngine::LegalMovesCollection& legalMoves
 				if (const auto move = findMoveFromUserMove(*userMove, legalMoves))
 				{
 					board.makeMove(*move, window);
+					consolePrintUserMoveInfo(*move);
 					return true;
 				}
 			}
@@ -134,6 +135,7 @@ bool PlayHandler::engineMakeMove(Window& window, statesAndEvents::DifficultyLeve
 			{
 				// Engine search result is ready.
 				board.makeMove(searchResult->move, window);
+				consolePrintEngineMoveInfo(*searchResult);
 				return true;
 			}
 		}
@@ -159,6 +161,21 @@ bool PlayHandler::startEngineSearch(statesAndEvents::DifficultyLevel difficulty)
 		default:
 			return false;
 	}
+}
+
+void PlayHandler::consolePrintUserMoveInfo(const hceEngine::ChessMove& move) const
+{
+	GuiUtilities::log("User: " + move.fromSquare + move.toSquare);
+}
+
+void PlayHandler::consolePrintEngineMoveInfo(const hceEngine::SearchResult& searchResult) const
+{
+		const std::string moveStr = searchResult.move.fromSquare + searchResult.move.toSquare;
+		const std::string depth = std::to_string(searchResult.engineInfo.depthsCompletelyCovered);
+		const std::string maxDepth = std::to_string(searchResult.engineInfo.maxDepthVisited);
+		const std::string nodes = std::to_string(searchResult.engineInfo.nodesVisited);
+		GuiUtilities::log("Engine: " + moveStr + ", depth: " + depth + ", max depth: " + maxDepth +
+		", nodes visited: " + nodes);
 }
 
 std::optional<PlayResult> PlayHandler::showEndScreen(hceEngine::PlayState state, Window& window)

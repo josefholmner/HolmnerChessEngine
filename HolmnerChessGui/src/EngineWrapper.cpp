@@ -81,22 +81,22 @@ std::optional<hceEngine::SearchResult> EngineWrapper::getSearchResult()
 	return future.get();
 }
 
-hceEngine::SearchResult EngineWrapper::getBestMoveTimeout(const std::string& FEN, int32_t mills)
+hceEngine::SearchResult EngineWrapper::getBestMoveTimeout(const std::string& FEN, int32_t mills) const
 {
 	return engine.getBestMove(FEN, std::numeric_limits<uint8_t>::max(), mills);
 }
 
-hceEngine::SearchResult EngineWrapper::getBestMoveMiniMax(const std::string& FEN, uint8_t depth)
+hceEngine::SearchResult EngineWrapper::getBestMoveMiniMax(const std::string& FEN, uint8_t depth) const
 {
 	return engine.getBestMoveMiniMax(FEN, depth);
 }
 
-hceEngine::SearchResult EngineWrapper::getWorstMoveMiniMax(const std::string& FEN, uint8_t depth)
+hceEngine::SearchResult EngineWrapper::getWorstMoveMiniMax(const std::string& FEN, uint8_t depth) const
 {
 	return engine.getWorstMoveMiniMax(FEN, depth);
 }
 
-hceEngine::SearchResult EngineWrapper::getBestMoveDepth(const std::string& FEN, uint8_t depth)
+hceEngine::SearchResult EngineWrapper::getBestMoveDepth(const std::string& FEN, uint8_t depth) const
 {
 	return engine.getBestMove(FEN, depth);
 }

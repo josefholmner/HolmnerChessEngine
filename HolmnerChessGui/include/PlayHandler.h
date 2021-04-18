@@ -31,6 +31,9 @@ private:
 
 	bool startEngineSearch(statesAndEvents::DifficultyLevel difficulty);
 
+	void consolePrintUserMoveInfo(const hceEngine::ChessMove& move) const;
+	void consolePrintEngineMoveInfo(const hceEngine::SearchResult& searchResult) const;
+
 	std::optional<PlayResult> showEndScreen(hceEngine::PlayState state, Window& window);
 
 	bool isUsersTurn(hceEngine::PlayState state);

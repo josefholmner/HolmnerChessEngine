@@ -21,10 +21,10 @@ public:
 	std::optional<hceEngine::SearchResult> getSearchResult();	
 
 private:
-	hceEngine::SearchResult getBestMoveDepth(const std::string& FEN, uint8_t depth);
-	hceEngine::SearchResult getBestMoveTimeout(const std::string& FEN, int32_t mills);
-	hceEngine::SearchResult getBestMoveMiniMax(const std::string& FEN, uint8_t depth);
-	hceEngine::SearchResult getWorstMoveMiniMax(const std::string& FEN, uint8_t depth);
+	hceEngine::SearchResult getBestMoveDepth(const std::string& FEN, uint8_t depth) const;
+	hceEngine::SearchResult getBestMoveTimeout(const std::string& FEN, int32_t mills) const;
+	hceEngine::SearchResult getBestMoveMiniMax(const std::string& FEN, uint8_t depth) const;
+	hceEngine::SearchResult getWorstMoveMiniMax(const std::string& FEN, uint8_t depth) const;
 
 	hceEngine::EngineAPI engine;
 	std::future<hceEngine::SearchResult> future;
