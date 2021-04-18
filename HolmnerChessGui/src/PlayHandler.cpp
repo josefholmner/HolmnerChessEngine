@@ -2,6 +2,8 @@
 
 #include "Resources.h"
 #include "Window.h"
+#include "GuiUtilities.h"
+#include "Common/StopWatch.h"
 
 PlayHandler::PlayHandler()
 	: board(Resources::getBoardImg())
@@ -19,7 +21,7 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 		const auto legalMoves = engine.getLegalMoves(board.getFEN());
 		if (legalMoves.moves.size() == 0)
 		{
-			return showEndScreen(window);
+			return showEndScreen(legalMoves.state, window);
 		}
 
 		if (isUsersTurn(legalMoves.state))
@@ -28,7 +30,7 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 		}
 		else
 		{
-			isPlaying = engineMakeMove(window);
+			isPlaying = engineMakeMove(window, difficulty);
 		}
 	}
 
@@ -99,9 +101,21 @@ bool PlayHandler::userMakeMove(const hceEngine::LegalMovesCollection& legalMoves
 	}
 }
 
-bool PlayHandler::engineMakeMove(Window& window)
+bool PlayHandler::engineMakeMove(Window& window, statesAndEvents::DifficultyLevel difficulty)
 {
 	using namespace statesAndEvents;
+
+	// Start async engine search.
+	if (!startEngineSearch(difficulty))
+	{
+		GuiUtilities::logE("Unexpected error, unable to start engine search.");
+		return false;
+	}
+
+	static constexpr int32_t minThinkingTime = 2000;
+	hceCommon::Stopwatch stopWatch;
+	stopWatch.start();
+
 	while (true)
 	{
 		draw(window);
@@ -113,11 +127,40 @@ bool PlayHandler::engineMakeMove(Window& window)
 			return false;
 		}
 
-		// TODO: implement engine make move.
+		// Enforce minumum "thinking time" for the engine for more enjoyable play.
+		if (stopWatch.getMilliseconds() >= minThinkingTime && !engine.isProcessingRequest())
+		{
+			if (const auto searchResult = engine.getSearchResult())
+			{
+				// Engine search result is ready.
+				board.makeMove(searchResult->move, window);
+				return true;
+			}
+		}
 	}
 }
 
-std::optional<PlayResult> PlayHandler::showEndScreen(Window& window)
+bool PlayHandler::startEngineSearch(statesAndEvents::DifficultyLevel difficulty)
+{
+	switch (difficulty)
+	{
+		case statesAndEvents::DifficultyLevel::Hard:
+			return engine.startSearchTimeout(board.getFEN(), 40000);
+		case statesAndEvents::DifficultyLevel::Medium:
+			return engine.startSearchDepth(board.getFEN(), 4);
+			break;
+		case statesAndEvents::DifficultyLevel::Easy:
+			return engine.startSearchMiniMaxDepth(board.getFEN(), 2);
+			break;
+		case statesAndEvents::DifficultyLevel::Silly:
+			return false;
+			break;
+		default:
+			return false;
+	}
+}
+
+std::optional<PlayResult> PlayHandler::showEndScreen(hceEngine::PlayState state, Window& window)
 {
 	using namespace statesAndEvents;
 	while (true)

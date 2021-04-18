@@ -27,9 +27,11 @@ private:
 	void draw(Window& window);
 
 	bool userMakeMove(const hceEngine::LegalMovesCollection& legalMoves, Window& window);
-	bool engineMakeMove(Window& window);
+	bool engineMakeMove(Window& window, statesAndEvents::DifficultyLevel difficulty);
 
-	std::optional<PlayResult> showEndScreen(Window& window);
+	bool startEngineSearch(statesAndEvents::DifficultyLevel difficulty);
+
+	std::optional<PlayResult> showEndScreen(hceEngine::PlayState state, Window& window);
 
 	bool isUsersTurn(hceEngine::PlayState state);
 
