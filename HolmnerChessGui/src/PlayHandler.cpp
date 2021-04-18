@@ -150,9 +150,10 @@ bool PlayHandler::startEngineSearch(statesAndEvents::DifficultyLevel difficulty)
 			return engine.startSearchDepth(board.getFEN(), 4);
 			break;
 		case statesAndEvents::DifficultyLevel::Easy:
-			return engine.startSearchMiniMaxDepth(board.getFEN(), 2);
+			return engine.startSearchMiniMax(board.getFEN(), 2);
 			break;
 		case statesAndEvents::DifficultyLevel::Silly:
+			return engine.startSearchWorstMoveMiniMax(board.getFEN(), 3);
 			return false;
 			break;
 		default:

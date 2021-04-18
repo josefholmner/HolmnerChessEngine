@@ -37,6 +37,12 @@ SearchResult EngineAPI::getBestMoveMiniMax(const std::string& FEN, uint8_t depth
     return engine->getBestMoveMiniMax(FEN, depth);
 }
 
+SearchResult hceEngine::EngineAPI::getWorstMoveMiniMax(const std::string& FEN, uint8_t depth) const
+{
+    assert(engine != nullptr);
+    return engine->getWorstMoveMiniMax(FEN, depth);
+}
+
 LegalMovesCollection hceEngine::EngineAPI::getLegalMoves(const std::string& FEN) const
 {
     assert(engine != nullptr);

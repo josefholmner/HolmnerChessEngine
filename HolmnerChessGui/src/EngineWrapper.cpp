@@ -22,7 +22,7 @@ bool EngineWrapper::startSearchDepth(const std::string& FEN, uint8_t depth)
 	return true;
 }
 
-bool EngineWrapper::startSearchMiniMaxDepth(const std::string& FEN, uint8_t depth)
+bool EngineWrapper::startSearchMiniMax(const std::string& FEN, uint8_t depth)
 {
 	if (isProcessingRequest())
 	{
@@ -45,6 +45,19 @@ bool EngineWrapper::startSearchTimeout(const std::string& FEN, int32_t mills)
 	auto func = std::bind(
 		&EngineWrapper::getBestMoveTimeout, this, std::placeholders::_1, std::placeholders::_2);
 	future = std::async(std::launch::async, func, FEN, mills);
+	return true;
+}
+
+bool EngineWrapper::startSearchWorstMoveMiniMax(const std::string& FEN, uint8_t depth)
+{
+	if (isProcessingRequest())
+	{
+		return false;
+	}
+
+	auto func = std::bind(
+		&EngineWrapper::getWorstMoveMiniMax, this, std::placeholders::_1, std::placeholders::_2);
+	future = std::async(std::launch::async, func, FEN, depth);
 	return true;
 }
 
@@ -76,6 +89,11 @@ hceEngine::SearchResult EngineWrapper::getBestMoveTimeout(const std::string& FEN
 hceEngine::SearchResult EngineWrapper::getBestMoveMiniMax(const std::string& FEN, uint8_t depth)
 {
 	return engine.getBestMoveMiniMax(FEN, depth);
+}
+
+hceEngine::SearchResult EngineWrapper::getWorstMoveMiniMax(const std::string& FEN, uint8_t depth)
+{
+	return engine.getWorstMoveMiniMax(FEN, depth);
 }
 
 hceEngine::SearchResult EngineWrapper::getBestMoveDepth(const std::string& FEN, uint8_t depth)

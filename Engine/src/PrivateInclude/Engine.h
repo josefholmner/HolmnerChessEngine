@@ -27,6 +27,7 @@ public:
 		int32_t timeoutMilliSeconds) const;
 
 	hceEngine::SearchResult getBestMoveMiniMax(const std::string& FEN, Depth depth) const;
+	hceEngine::SearchResult getWorstMoveMiniMax(const std::string& FEN, Depth depth) const;
 
 private:
 	std::vector<Move> getCaptureAndPromotionMoves(BoardState& board) const;

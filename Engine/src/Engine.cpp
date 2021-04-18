@@ -1415,6 +1415,49 @@ hceEngine::SearchResult Engine::getBestMoveMiniMax(const std::string& FEN, Depth
 	return searchResult;
 }
 
+hceEngine::SearchResult Engine::getWorstMoveMiniMax(const std::string& FEN, Depth depth) const
+{
+	hceEngine::SearchResult searchResult;
+
+	if (depth <= 0)
+	{
+		EngineUtilities::logE("getWorstMoveMiniMax failed, depth must be at least 1.");
+		searchResult.move.type = hceEngine::MoveType::Invalid;
+		return searchResult;
+	}
+
+	BoardState board;
+	if (!board.initFromFEN(FEN))
+	{
+		EngineUtilities::logE("getWorstMoveMiniMax failed, invalid FEN.");
+		searchResult.move.type = hceEngine::MoveType::Invalid;
+		return searchResult;
+	}
+
+	searchHelpers::SearchInfo info;
+	Move worstMove;
+	Score worstScore = searchHelpers::plusInf;
+	for (const Move& m : getLegalMoves(board))
+	{
+		board.makeMove(m);
+		info.nodesVisited++;
+		const Score score = -negaMax(board, depth - 1, info);
+		if (score < worstScore)
+		{
+			worstScore = score;
+			worstMove = m;
+		}
+
+		board.unmakeMove(m);
+	}
+
+	searchResult.move = moveGenerationHelpers::moveToChessMove(worstMove, board, worstScore);
+	searchResult.engineInfo.depthsCompletelyCovered = depth;
+	searchResult.engineInfo.maxDepthVisited = depth; // No quiescence search.
+	searchResult.engineInfo.nodesVisited = info.nodesVisited;
+	return searchResult;
+}
+
 std::vector<Move> Engine::getCaptureAndPromotionMoves(BoardState& board) const
 {
 	using namespace moveGenerationHelpers;

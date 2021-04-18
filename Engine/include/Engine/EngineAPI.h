@@ -33,6 +33,11 @@ namespace hceEngine
         SearchResult getBestMoveMiniMax(const std::string& FEN, uint8_t depth) const;
 
         /**
+        * Uses the simplest minimax algorithm to find the worst move given a FEN.
+        */
+        SearchResult getWorstMoveMiniMax(const std::string& FEN, uint8_t depth) const;
+
+        /**
         * Given a FEN, returns a LegalMovesCollection containing all legal moves.
         * If no legal moves are found, the PlayState in the LegalMovesCollection will indicate
         * which side is the winning side, or if it is a draw.
