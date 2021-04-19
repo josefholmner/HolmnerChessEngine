@@ -3,6 +3,7 @@
 #include "Vec2.h"
 #include "Squares.h"
 #include "Piece.h"
+#include "CapturedPiece.h"
 #include "Text.h"
 #include "StatesAndEvents.h"
 #include "Engine/EngineAPIReturnDefinitions.h"
@@ -29,7 +30,7 @@ class Board
 public:
 	Board(const ResourceData& image);
 
-	void init(const Vec2<float>& normPos, const Vec2<float>& scale,
+	void init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 		statesAndEvents::PlayingSide side, const Window& window);
 
 	void draw(Window& window, const Vec2<int32_t>& mousePos);
@@ -46,7 +47,7 @@ public:
 	void setPlayInfoText(const std::string& str);
 
 private:
-	void setUpPieces(const Window& window, const Vec2<float>& scale);
+	void setUpPieces(const Window& window);
 
 	void placePieceAtSquare(Piece& piece, Square sq, const Window& window);
 
@@ -61,7 +62,10 @@ private:
 
 	std::string moveToStr(const hceEngine::ChessMove& move) const;
 
+	void appendCapturedPiece(const hceEngine::ChessMove& move, const Window& window);
+
 	statesAndEvents::PlayingSide userSide;
+	Vec2<float> scale;
 	std::unique_ptr<Drawable> boardDrawable;
 	std::array<Piece, squares::num> pieces;
 	Square dragStartSquare = squares::none;
@@ -69,4 +73,6 @@ private:
 	std::unique_ptr<Text> playInfoText;
 	std::unique_ptr<Text> moveListText;
 	std::vector<std::string> moveList;
+	std::vector<CapturedPiece> capturedBlackPieces;
+	std::vector<CapturedPiece> capturedWhitePieces;
 };

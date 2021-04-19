@@ -8,28 +8,33 @@
 
 #include "ThirdPartyWrappersFactory.h"
 
+#include <locale>
 #include <cassert>
+#include <algorithm>
 
 Board::Board(const ResourceData& image)
 	: boardDrawable{ThirdPartyWrappersFactory::createDrawable(image)}
 {
 }
 
-void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale,
+void Board::init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 	statesAndEvents::PlayingSide side, const Window& window)
 {
 	assert(boardDrawable != nullptr);
+	scale = inScale;
 	boardDrawable->setNormalizedPosition(normPos, window);
 	boardDrawable->setScale(scale);
 
 	userSide = side;
 	moveList.clear();
+	capturedBlackPieces.clear();
+	capturedWhitePieces.clear();
 	FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // Starting position.
 	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 24);
-	playInfoText->setNormalizedPosition(Vec2<float>(0.05f, 0.05f), window);
+	playInfoText->setNormalizedPosition(Vec2<float>(0.05f, 0.465f), window);
 	moveListText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 20);
-	moveListText->setNormalizedPosition(Vec2<float>(0.8f, 0.12f), window);
-	setUpPieces(window, scale);
+	moveListText->setNormalizedPosition(Vec2<float>(0.78f, 0.12f), window);
+	setUpPieces(window);
 }
 
 void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
@@ -71,6 +76,16 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 
 	moveListText->setText(moveListsStr);
 	window.draw(*moveListText);
+
+	for (auto& cp : capturedWhitePieces)
+	{
+		cp.draw(window, mousePos);
+	}
+
+	for (auto& cp : capturedBlackPieces)
+	{
+		cp.draw(window, mousePos);
+	}
 }
 
 void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
@@ -100,11 +115,14 @@ void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
 
 	// Upate move list (for drawing to the screen).
 	moveList.push_back(moveToStr(move));
-	static constexpr size_t moveListMaxLen = 20;
+	static constexpr size_t moveListMaxLen = 24;
 	while (moveList.size() > moveListMaxLen)
 	{
 		moveList.erase(moveList.begin());
 	}
+
+	// Update captured pieces (for drawing to the screen).
+	appendCapturedPiece(move, window);
 }
 
 void Board::registerMouseDown(const Vec2<int32_t>& mousePos, const Window& window)
@@ -157,7 +175,7 @@ void Board::setPlayInfoText(const std::string& str)
 	}
 }
 
-void Board::setUpPieces(const Window& window, const Vec2<float>& scale)
+void Board::setUpPieces(const Window& window)
 {
 	pieces[squares::a1].init(Piece::Type::WRook, scale);
 	pieces[squares::b1].init(Piece::Type::WKnight, scale);
@@ -343,6 +361,41 @@ std::string Board::moveToStr(const hceEngine::ChessMove& move) const
 	}
 
 	return moveStr;
+}
+
+void Board::appendCapturedPiece(const hceEngine::ChessMove& move, const Window& window)
+{
+	if (move.capturedPiece == "")
+	{
+		return;
+	}
+
+	static constexpr float cpScaleMultiplier = 0.6f;
+	static constexpr float startXPos = 0.26f;
+	static constexpr float startTopYPos = 0.02f;
+	static constexpr float startBottomYPos = 0.92f;
+	static constexpr float pieceOffset = 0.03f;
+	
+	auto sortAndPlace = [&](std::vector<CapturedPiece>& cps, bool placeAtTop)
+	{
+		std::sort(cps.begin(), cps.end());
+
+		const float yPos = placeAtTop ? startTopYPos : startBottomYPos;
+		for (int i = 0; i < cps.size(); i++)
+		{
+			cps[i].setNormalizedPosition(Vec2<float>(startXPos + i * pieceOffset, yPos), window);
+		}
+	};
+
+	const Vec2<float> capturePieceScale(scale.x() * cpScaleMultiplier, scale.y() * cpScaleMultiplier);
+	const bool isWhitePiece = !islower(move.capturedPiece[0]);
+
+	CapturedPiece cp;
+	cp.init(Piece::stringToType(move.capturedPiece), capturePieceScale);
+	auto& capturedPieces = isWhitePiece ? capturedWhitePieces : capturedBlackPieces;
+	capturedPieces.push_back(cp);
+	const bool placeAtTop = isWhitePiece == (userSide == statesAndEvents::PlayingSide::White);
+	sortAndPlace(capturedPieces, placeAtTop);
 }
 
 Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) const

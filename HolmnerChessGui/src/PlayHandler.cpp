@@ -41,7 +41,7 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 {
 	static const Vec2<float> boardPos(0.25f, 0.1f);
-	static const Vec2<float> boardScale(0.5f, 0.5f);
+	static const Vec2<float> boardScale(0.48f, 0.48f);
 	board.init(boardPos, boardScale, side, window);
 	setPlayInfoText();
 }
