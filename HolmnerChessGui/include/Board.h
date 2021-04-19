@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <array>
+#include <vector>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -58,10 +59,14 @@ private:
 	void makeEnPassantCaptureMove(const hceEngine::ChessMove& move, const Window& window);
 	void makeRegularMove(const hceEngine::ChessMove& move, const Window& window);
 
+	std::string moveToStr(const hceEngine::ChessMove& move) const;
+
 	statesAndEvents::PlayingSide userSide;
 	std::unique_ptr<Drawable> boardDrawable;
 	std::array<Piece, squares::num> pieces;
 	Square dragStartSquare = squares::none;
 	std::string FEN;
 	std::unique_ptr<Text> playInfoText;
+	std::unique_ptr<Text> moveListText;
+	std::vector<std::string> moveList;
 };

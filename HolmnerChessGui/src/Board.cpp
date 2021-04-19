@@ -23,8 +23,12 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale,
 	boardDrawable->setScale(scale);
 
 	userSide = side;
+	moveList.clear();
 	FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // Starting position.
 	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 24);
+	playInfoText->setNormalizedPosition(Vec2<float>(0.05f, 0.05f), window);
+	moveListText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 20);
+	moveListText->setNormalizedPosition(Vec2<float>(0.8f, 0.12f), window);
 	setUpPieces(window, scale);
 }
 
@@ -32,6 +36,7 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 {
 	assert(boardDrawable != nullptr);
 	assert(playInfoText != nullptr);
+	assert(moveListText != nullptr);
 
 	// Draw board.
 	window.draw(*boardDrawable);
@@ -54,8 +59,18 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 		draggedPiece->draw(window, mousePos);
 	}
 
-	// Draw text.
+	// Draw play info text.
 	window.draw(*playInfoText);
+
+	// Draw move list text.
+	std::string moveListsStr = "";
+	for (const auto& m : moveList)
+	{
+		moveListsStr += m + "\n";
+	}
+
+	moveListText->setText(moveListsStr);
+	window.draw(*moveListText);
 }
 
 void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
@@ -81,8 +96,15 @@ void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
 			return;
 	}
 
-	// Lastly, update FEN.
 	FEN = move.postMoveFEN;
+
+	// Upate move list (for drawing to the screen).
+	moveList.push_back(moveToStr(move));
+	static constexpr size_t moveListMaxLen = 20;
+	while (moveList.size() > moveListMaxLen)
+	{
+		moveList.erase(moveList.begin());
+	}
 }
 
 void Board::registerMouseDown(const Vec2<int32_t>& mousePos, const Window& window)
@@ -300,6 +322,27 @@ void Board::makeRegularMove(const hceEngine::ChessMove& move, const Window& wind
 	placePieceAtSquare(pieces[toSq], toSq, window);
 
 	pieces[fromSq].setType(Piece::Type::None);
+}
+
+std::string Board::moveToStr(const hceEngine::ChessMove& move) const
+{
+	std::string moveStr = move.movingPiece + ": ";
+	if (move.type == hceEngine::MoveType::Castling)
+	{
+		const Square file = squares::fromString(move.toSquare) % 8;
+		moveStr += file == 6 ? "0-0" : "0-0-0";
+	}
+	else
+	{
+		moveStr += move.fromSquare + move.toSquare;
+	}
+
+	if (move.capturedPiece != "")
+	{
+		moveStr += " x " + move.capturedPiece;
+	}
+
+	return moveStr;
 }
 
 Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) const
