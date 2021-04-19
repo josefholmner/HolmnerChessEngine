@@ -8,7 +8,7 @@
 
 class Drawable;
 class Window;
-struct ImageData;
+struct ResourceData;
 
 class Piece
 {

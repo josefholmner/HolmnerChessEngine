@@ -1,122 +1,128 @@
 #include "Resources.h"
 
-#include "Images/MenuBackgroundImg.cpp"
-#include "Images/MenuButtonHardImg.cpp"
-#include "Images/MenuButtonMediumImg.cpp"
-#include "Images/MenuButtonEasyImg.cpp"
-#include "Images/MenuButtonSillyImg.cpp"
-#include "Images/MenuButtonSideWhiteImg.cpp"
-#include "Images/MenuButtonSideBlackImg.cpp"
-#include "Images/BoardImg.cpp"
-#include "Images/WhiteKingImg.cpp"
-#include "Images/WhiteQueenImg.cpp"
-#include "Images/WhiteRookImg.cpp"
-#include "Images/WhiteBishopImg.cpp"
-#include "Images/WhiteKnightImg.cpp"
-#include "Images/WhitePawnImg.cpp"
-#include "Images/BlackKingImg.cpp"
-#include "Images/BlackQueenImg.cpp"
-#include "Images/BlackRookImg.cpp"
-#include "Images/BlackBishopImg.cpp"
-#include "Images/BlackKnightImg.cpp"
-#include "Images/BlackPawnImg.cpp"
+#include "Resources/MenuBackgroundImg.cpp"
+#include "Resources/MenuButtonHardImg.cpp"
+#include "Resources/MenuButtonMediumImg.cpp"
+#include "Resources/MenuButtonEasyImg.cpp"
+#include "Resources/MenuButtonSillyImg.cpp"
+#include "Resources/MenuButtonSideWhiteImg.cpp"
+#include "Resources/MenuButtonSideBlackImg.cpp"
+#include "Resources/BoardImg.cpp"
+#include "Resources/WhiteKingImg.cpp"
+#include "Resources/WhiteQueenImg.cpp"
+#include "Resources/WhiteRookImg.cpp"
+#include "Resources/WhiteBishopImg.cpp"
+#include "Resources/WhiteKnightImg.cpp"
+#include "Resources/WhitePawnImg.cpp"
+#include "Resources/BlackKingImg.cpp"
+#include "Resources/BlackQueenImg.cpp"
+#include "Resources/BlackRookImg.cpp"
+#include "Resources/BlackBishopImg.cpp"
+#include "Resources/BlackKnightImg.cpp"
+#include "Resources/BlackPawnImg.cpp"
+#include "Resources/DefaultFont.cpp"
 
-const ImageData Resources::getMenuBackgroundImg()
+const ResourceData Resources::getMenuBackgroundImg()
 {
-	return ImageData(menuBackgroundImg, sizeof(menuBackgroundImg));
+	return ResourceData(menuBackgroundImg, sizeof(menuBackgroundImg));
 }
 
-const ImageData Resources::getMenuButtonHardImg()
+const ResourceData Resources::getMenuButtonHardImg()
 {
-	return ImageData(menuButtonHardImg, sizeof(menuButtonHardImg));
+	return ResourceData(menuButtonHardImg, sizeof(menuButtonHardImg));
 }
 
-const ImageData Resources::getMenuButtonMediumImg()
+const ResourceData Resources::getMenuButtonMediumImg()
 {
-	return ImageData(menuButtonMediumImg, sizeof(menuButtonMediumImg));
+	return ResourceData(menuButtonMediumImg, sizeof(menuButtonMediumImg));
 }
 
-const ImageData Resources::getMenuButtonEasyImg()
+const ResourceData Resources::getMenuButtonEasyImg()
 {
-	return ImageData(menuButtonEasyImg, sizeof(menuButtonEasyImg));
+	return ResourceData(menuButtonEasyImg, sizeof(menuButtonEasyImg));
 }
 
-const ImageData Resources::getMenuButtonSillyImg()
+const ResourceData Resources::getMenuButtonSillyImg()
 {
-	return ImageData(menuButtonSillyImg, sizeof(menuButtonSillyImg));
+	return ResourceData(menuButtonSillyImg, sizeof(menuButtonSillyImg));
 }
 
-const ImageData Resources::getMenuButtonSideWhiteImg()
+const ResourceData Resources::getMenuButtonSideWhiteImg()
 {
-	return ImageData(menuButtonSideWhiteImg, sizeof(menuButtonSideWhiteImg));
+	return ResourceData(menuButtonSideWhiteImg, sizeof(menuButtonSideWhiteImg));
 }
 
-const ImageData Resources::getMenuButtonSideBlackImg()
+const ResourceData Resources::getMenuButtonSideBlackImg()
 {
-	return ImageData(menuButtonSideBlackImg, sizeof(menuButtonSideBlackImg));
+	return ResourceData(menuButtonSideBlackImg, sizeof(menuButtonSideBlackImg));
 }
 
-const ImageData Resources::getBoardImg()
+const ResourceData Resources::getBoardImg()
 {
-	return ImageData(boardImg, sizeof(boardImg));
+	return ResourceData(boardImg, sizeof(boardImg));
 }
 
-const ImageData Resources::getWhiteKingImg()
+const ResourceData Resources::getWhiteKingImg()
 {
-	return ImageData(whiteKingImg, sizeof(whiteKingImg));
+	return ResourceData(whiteKingImg, sizeof(whiteKingImg));
 }
 
-const ImageData Resources::getWhiteQueenImg()
+const ResourceData Resources::getWhiteQueenImg()
 {
-	return ImageData(whiteQueenImg, sizeof(whiteQueenImg));
+	return ResourceData(whiteQueenImg, sizeof(whiteQueenImg));
 }
 
-const ImageData Resources::getWhiteRookImg()
+const ResourceData Resources::getWhiteRookImg()
 {
-	return ImageData(whiteRookImg, sizeof(whiteRookImg));
+	return ResourceData(whiteRookImg, sizeof(whiteRookImg));
 }
 
-const ImageData Resources::getWhiteBishopImg()
+const ResourceData Resources::getWhiteBishopImg()
 {
-	return ImageData(whiteBishopImg, sizeof(whiteBishopImg));
+	return ResourceData(whiteBishopImg, sizeof(whiteBishopImg));
 }
 
-const ImageData Resources::getWhiteKnightImg()
+const ResourceData Resources::getWhiteKnightImg()
 {
-	return ImageData(whiteKnightImg, sizeof(whiteKnightImg));
+	return ResourceData(whiteKnightImg, sizeof(whiteKnightImg));
 }
 
-const ImageData Resources::getWhitePawnImg()
+const ResourceData Resources::getWhitePawnImg()
 {
-	return ImageData(whitePawnImg, sizeof(whitePawnImg));
+	return ResourceData(whitePawnImg, sizeof(whitePawnImg));
 }
 
-const ImageData Resources::getBlackKingImg()
+const ResourceData Resources::getBlackKingImg()
 {
-	return ImageData(blackKingImg, sizeof(blackKingImg));
+	return ResourceData(blackKingImg, sizeof(blackKingImg));
 }
 
-const ImageData Resources::getBlackQueenImg()
+const ResourceData Resources::getBlackQueenImg()
 {
-	return ImageData(blackQueenImg, sizeof(blackQueenImg));
+	return ResourceData(blackQueenImg, sizeof(blackQueenImg));
 }
 
-const ImageData Resources::getBlackRookImg()
+const ResourceData Resources::getBlackRookImg()
 {
-	return ImageData(blackRookImg, sizeof(blackRookImg));
+	return ResourceData(blackRookImg, sizeof(blackRookImg));
 }
 
-const ImageData Resources::getBlackBishopImg()
+const ResourceData Resources::getBlackBishopImg()
 {
-	return ImageData(blackBishopImg, sizeof(blackBishopImg));
+	return ResourceData(blackBishopImg, sizeof(blackBishopImg));
 }
 
-const ImageData Resources::getBlackKnightImg()
+const ResourceData Resources::getBlackKnightImg()
 {
-	return ImageData(blackKnightImg, sizeof(blackKnightImg));
+	return ResourceData(blackKnightImg, sizeof(blackKnightImg));
 }
 
-const ImageData Resources::getBlackPawnImg()
+const ResourceData Resources::getBlackPawnImg()
 {
-	return ImageData(blackPawnImg, sizeof(blackPawnImg));
+	return ResourceData(blackPawnImg, sizeof(blackPawnImg));
+}
+
+const ResourceData Resources::getDefaultFont()
+{
+	return ResourceData(defaultFont, sizeof(defaultFont));
 }

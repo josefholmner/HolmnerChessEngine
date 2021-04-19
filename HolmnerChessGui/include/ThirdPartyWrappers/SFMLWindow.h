@@ -14,10 +14,13 @@ public:
 	Vec2<uint32_t> getSize() const override;
 
 	void draw(const Drawable& drawable) override;
+	void draw(const Text& text) override;
+
 	void clear() override;
 	void display() override;
 
 	Vec2<float> pixelToNormalizedPosition(const Vec2<int32_t>& pixel) const override;
+	Vec2<float> normalizedPositionToCoordinate(const Vec2<float> normPos) const;
 
 	Vec2<int32_t> getMousePos() const override;
 

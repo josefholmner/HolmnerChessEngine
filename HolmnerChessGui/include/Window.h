@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+class Text;
+
 class Window
 {
 public:
@@ -19,6 +21,7 @@ public:
 	virtual Vec2<uint32_t> getSize() const = 0;
 	
 	virtual void draw(const Drawable& drawable) = 0;
+	virtual void draw(const Text& text) = 0;
 	virtual void clear() = 0;
 	virtual void display() = 0;
 

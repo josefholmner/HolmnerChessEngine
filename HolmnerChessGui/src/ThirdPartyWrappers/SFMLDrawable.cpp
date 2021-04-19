@@ -1,12 +1,12 @@
 #include "ThirdPartyWrappers/SFMLDrawable.h"
 
 #include "GuiUtilities.h"
-#include "ImageData.h"
+#include "ResourceData.h"
 #include "Window.h"
 
 #include "ThirdPartyWrappers/SFMLWindow.h"
 
-SFMLDrawable::SFMLDrawable(const ImageData& image)
+SFMLDrawable::SFMLDrawable(const ResourceData& image)
 {
 	if (!texture.loadFromMemory(image.data, image.length))
 	{
@@ -27,20 +27,8 @@ void SFMLDrawable::setNormalizedPosition(const Vec2<float>& normPos, const Windo
 		return;
 	}
 
-	const sf::RenderWindow& renderWindow = sfmlWindow->getRenderWindow();
-	const auto windowSize = window.getSize();
-
-	// The view size and position must be taken into account since the window is letterbox scaled.
-	const float viewLeft = renderWindow.getView().getViewport().left * windowSize.x();
-	const float viewTop = renderWindow.getView().getViewport().top * windowSize.y();
-	const float viewWidth = renderWindow.getView().getViewport().width * windowSize.x();
-	const float viewHeight = renderWindow.getView().getViewport().height * windowSize.y();
-
-	const Vec2<float> pixel(normPos.x() * viewWidth + viewLeft, normPos.y() * viewHeight + viewTop);
-	const auto coordinate = 
-		renderWindow.mapPixelToCoords(sf::Vector2i((int32_t)pixel.x(), (int32_t)pixel.y()));
-
-	sprite.setPosition((float)coordinate.x, (float)coordinate.y);
+	const auto coordinate = sfmlWindow->normalizedPositionToCoordinate(normPos);
+	sprite.setPosition(coordinate.x(), coordinate.y());
 }
 
 Vec2<float> SFMLDrawable::getNormalizedPosition(const Window& window)

@@ -3,6 +3,7 @@
 #include "Vec2.h"
 #include "Squares.h"
 #include "Piece.h"
+#include "Text.h"
 #include "StatesAndEvents.h"
 #include "Engine/EngineAPIReturnDefinitions.h"
 
@@ -14,7 +15,7 @@
 
 class Drawable;
 class Window;
-struct ImageData;
+struct ResourceData;
 
 struct UserMove
 {
@@ -25,7 +26,7 @@ struct UserMove
 class Board
 {
 public:
-	Board(const ImageData& image);
+	Board(const ResourceData& image);
 
 	void init(const Vec2<float>& normPos, const Vec2<float>& scale,
 		statesAndEvents::PlayingSide side, const Window& window);
@@ -40,6 +41,8 @@ public:
 	std::string getFEN() const { return FEN; }
 
 	statesAndEvents::PlayingSide getUserSide() const { return userSide; }
+
+	void setPlayInfoText(const std::string& str);
 
 private:
 	void setUpPieces(const Window& window, const Vec2<float>& scale);
@@ -60,4 +63,5 @@ private:
 	std::array<Piece, squares::num> pieces;
 	Square dragStartSquare = squares::none;
 	std::string FEN;
+	std::unique_ptr<Text> playInfoText;
 };

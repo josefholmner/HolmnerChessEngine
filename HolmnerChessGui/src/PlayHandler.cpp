@@ -10,9 +10,10 @@ PlayHandler::PlayHandler()
 {
 }
 
-std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::DifficultyLevel difficulty,
+std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::DifficultyLevel inDifficulty,
 	statesAndEvents::PlayingSide side)
 {
+	difficulty = inDifficulty;
 	init(window, side);
 
 	bool isPlaying = true;
@@ -30,7 +31,7 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 		}
 		else
 		{
-			isPlaying = engineMakeMove(window, difficulty);
+			isPlaying = engineMakeMove(window);
 		}
 	}
 
@@ -39,9 +40,10 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 
 void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 {
-	static const Vec2<float> boardPos(0.25f, 0.05f);
+	static const Vec2<float> boardPos(0.25f, 0.1f);
 	static const Vec2<float> boardScale(0.5f, 0.5f);
 	board.init(boardPos, boardScale, side, window);
+	setPlayInfoText();
 }
 
 void PlayHandler::draw(Window& window)
@@ -49,6 +51,11 @@ void PlayHandler::draw(Window& window)
 	window.clear();
 	board.draw(window, window.getMousePos());
 	window.display();
+}
+
+void PlayHandler::drawPlayStatus(Window& window)
+{
+
 }
 
 namespace
@@ -102,12 +109,12 @@ bool PlayHandler::userMakeMove(const hceEngine::LegalMovesCollection& legalMoves
 	}
 }
 
-bool PlayHandler::engineMakeMove(Window& window, statesAndEvents::DifficultyLevel difficulty)
+bool PlayHandler::engineMakeMove(Window& window)
 {
 	using namespace statesAndEvents;
 
 	// Start async engine search.
-	if (!startEngineSearch(difficulty))
+	if (!startEngineSearch())
 	{
 		GuiUtilities::logE("Unexpected error, unable to start engine search.");
 		return false;
@@ -142,7 +149,7 @@ bool PlayHandler::engineMakeMove(Window& window, statesAndEvents::DifficultyLeve
 	}
 }
 
-bool PlayHandler::startEngineSearch(statesAndEvents::DifficultyLevel difficulty)
+bool PlayHandler::startEngineSearch()
 {
 	switch (difficulty)
 	{
@@ -174,13 +181,36 @@ void PlayHandler::consolePrintEngineMoveInfo(const hceEngine::SearchResult& sear
 		const std::string depth = std::to_string(searchResult.engineInfo.depthsCompletelyCovered);
 		const std::string maxDepth = std::to_string(searchResult.engineInfo.maxDepthVisited);
 		const std::string nodes = std::to_string(searchResult.engineInfo.nodesVisited);
-		GuiUtilities::log("Engine: " + moveStr + ", depth: " + depth + ", max depth: " + maxDepth +
-		", nodes visited: " + nodes);
+		GuiUtilities::log("Engine: " + moveStr + ", depth covered: " + depth + ", max depth: " +
+			maxDepth + ", nodes visited: " + nodes);
+}
+
+void PlayHandler::setPlayInfoText()
+{
+	std::string info = "Difficulty: ";
+	switch (difficulty)
+	{
+		case statesAndEvents::DifficultyLevel::Hard:
+			info += "Hard";
+			break;
+		case statesAndEvents::DifficultyLevel::Medium:
+			info += "Medium";
+			break;
+		case statesAndEvents::DifficultyLevel::Easy:
+			info += "Easy";
+			break;
+		case statesAndEvents::DifficultyLevel::Silly:
+			info += "Silly";
+			break;
+	}
+
+	board.setPlayInfoText(info);
 }
 
 std::optional<PlayResult> PlayHandler::showEndScreen(hceEngine::PlayState state, Window& window)
 {
 	using namespace statesAndEvents;
+
 	while (true)
 	{
 		draw(window);

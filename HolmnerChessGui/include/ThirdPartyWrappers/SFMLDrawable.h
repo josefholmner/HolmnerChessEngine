@@ -6,12 +6,12 @@
 
 #include <cstdint>
 
-struct ImageData;
+struct ResourceData;
 
 class SFMLDrawable : public Drawable
 {
 public:
-	SFMLDrawable(const ImageData& image);
+	SFMLDrawable(const ResourceData& image);
 
 	void setNormalizedPosition(const Vec2<float>& normPos, const Window& window) override;
 	Vec2<float> getNormalizedPosition(const Window& window) override;

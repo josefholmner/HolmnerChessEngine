@@ -32,7 +32,7 @@ void MenuHandler::init(const Window& window)
 	background = ThirdPartyWrappersFactory::createDrawable(Resources::getMenuBackgroundImg());
 	background->setScale(Vec2<float>(1.f / 1.5f, 1.f / 1.5f));
 
-	auto createButton = [](const ImageData& data, const Vec2<float>& scale, const Vec2<float>& normPos,
+	auto createButton = [](const ResourceData& data, const Vec2<float>& scale, const Vec2<float>& normPos,
 		const Window& window)
 	{
 		auto button = ThirdPartyWrappersFactory::createClickable(data);

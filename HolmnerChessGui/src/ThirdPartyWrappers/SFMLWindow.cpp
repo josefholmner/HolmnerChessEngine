@@ -1,8 +1,10 @@
 #include "ThirdPartyWrappers/SFMLWindow.h"
 
 #include "GuiUtilities.h"
+#include "Text.h"
 
 #include "ThirdPartyWrappers/SFMLDrawable.h"
+#include "ThirdPartyWrappers/SFMLText.h"
 
 #include <cassert>
 
@@ -47,6 +49,18 @@ void SFMLWindow::draw(const Drawable& drawable)
 	window.draw(sfmlDrawable->getSprite());
 }
 
+void SFMLWindow::draw(const Text& text)
+{
+	const SFMLText* sfmlText = dynamic_cast<const SFMLText*>(&text);
+	if (sfmlText == nullptr)
+	{
+		GuiUtilities::logE("Non SFML Text passed to SFMLWindow::draw(). Dynamic cast failed.");
+		return;
+	}
+
+	window.draw(sfmlText->getText());
+}
+
 void SFMLWindow::clear()
 {
 	window.clear();
@@ -67,6 +81,23 @@ Vec2<float> SFMLWindow::pixelToNormalizedPosition(const Vec2<int32_t>& pixel) co
 
 	return Vec2<float>(((float)pixel.x() - viewLeft) / viewWidth,
 		((float)pixel.y() - viewTop) / viewHeight);
+}
+
+Vec2<float> SFMLWindow::normalizedPositionToCoordinate(const Vec2<float> normPos) const
+{
+	const auto windowSize = window.getSize();
+
+	// The view size and position must be taken into account since the window is letterbox scaled.
+	const float viewLeft = window.getView().getViewport().left * windowSize.x;
+	const float viewTop = window.getView().getViewport().top * windowSize.y;
+	const float viewWidth = window.getView().getViewport().width * windowSize.x;
+	const float viewHeight = window.getView().getViewport().height * windowSize.y;
+
+	const Vec2<float> pixel(normPos.x() * viewWidth + viewLeft, normPos.y() * viewHeight + viewTop);
+	const auto coordinate =
+		window.mapPixelToCoords(sf::Vector2i((int32_t)pixel.x(), (int32_t)pixel.y()));
+
+	return Vec2<float>(coordinate.x, coordinate.y);
 }
 
 Vec2<int32_t> SFMLWindow::getMousePos() const

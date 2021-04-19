@@ -18,21 +18,24 @@ class PlayHandler
 public:
 	PlayHandler();
 
-	std::optional<PlayResult> run(Window& window, statesAndEvents::DifficultyLevel difficulty,
+	std::optional<PlayResult> run(Window& window, statesAndEvents::DifficultyLevel inDifficulty,
 		statesAndEvents::PlayingSide side);
 
 private:
 	void init(const Window& window, statesAndEvents::PlayingSide side);
 
 	void draw(Window& window);
+	void drawPlayStatus(Window& window);
 
 	bool userMakeMove(const hceEngine::LegalMovesCollection& legalMoves, Window& window);
-	bool engineMakeMove(Window& window, statesAndEvents::DifficultyLevel difficulty);
+	bool engineMakeMove(Window& window);
 
-	bool startEngineSearch(statesAndEvents::DifficultyLevel difficulty);
+	bool startEngineSearch();
 
 	void consolePrintUserMoveInfo(const hceEngine::ChessMove& move) const;
 	void consolePrintEngineMoveInfo(const hceEngine::SearchResult& searchResult) const;
+
+	void setPlayInfoText();
 
 	std::optional<PlayResult> showEndScreen(hceEngine::PlayState state, Window& window);
 
@@ -40,4 +43,6 @@ private:
 
 	Board board;
 	EngineWrapper engine;
+	statesAndEvents::DifficultyLevel difficulty;
+
 };

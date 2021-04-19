@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 #include "Drawable.h"
-#include "ImageData.h"
+#include "ResourceData.h"
 #include "Window.h"
 #include "GuiUtilities.h"
 #include "Resources.h"

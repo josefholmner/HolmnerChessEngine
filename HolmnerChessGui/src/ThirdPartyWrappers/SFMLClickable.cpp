@@ -4,7 +4,7 @@
 
 #include "ThirdPartyWrappers/SFMLWindow.h"
 
-SFMLClickable::SFMLClickable(const ImageData& image) : drawable(image)
+SFMLClickable::SFMLClickable(const ResourceData& image) : drawable(image)
 {
 }
 

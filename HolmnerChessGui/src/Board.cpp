@@ -2,7 +2,7 @@
 
 #include "Drawable.h"
 #include "Window.h"
-#include "ImageData.h"
+#include "ResourceData.h"
 #include "Resources.h"
 #include "GuiUtilities.h"
 
@@ -10,7 +10,7 @@
 
 #include <cassert>
 
-Board::Board(const ImageData& image)
+Board::Board(const ResourceData& image)
 	: boardDrawable{ThirdPartyWrappersFactory::createDrawable(image)}
 {
 }
@@ -24,12 +24,14 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& scale,
 
 	userSide = side;
 	FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // Starting position.
+	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 24);
 	setUpPieces(window, scale);
 }
 
 void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 {
 	assert(boardDrawable != nullptr);
+	assert(playInfoText != nullptr);
 
 	// Draw board.
 	window.draw(*boardDrawable);
@@ -51,6 +53,9 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 	{
 		draggedPiece->draw(window, mousePos);
 	}
+
+	// Draw text.
+	window.draw(*playInfoText);
 }
 
 void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
@@ -120,6 +125,14 @@ std::optional<UserMove> Board::registerMouseRelease(const Vec2<int32_t>& mousePo
 	userMove.fromSquare = squares::toString(startSq);
 	userMove.toSquare = squares::toString(endSq);
 	return userMove;
+}
+
+void Board::setPlayInfoText(const std::string& str)
+{
+	if (playInfoText != nullptr)
+	{
+		playInfoText->setText(str);
+	}
 }
 
 void Board::setUpPieces(const Window& window, const Vec2<float>& scale)
