@@ -2,8 +2,13 @@
 
 #include "Resources.h"
 #include "Window.h"
+#include "Clickable.h"
 #include "GuiUtilities.h"
+#include "ThirdPartyWrappersFactory.h"
+#include "ResourceData.h"
 #include "Common/StopWatch.h"
+
+#include <cassert>
 
 PlayHandler::PlayHandler()
 	: board(Resources::getBoardImg())
@@ -42,13 +47,21 @@ void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 {
 	static const Vec2<float> boardPos(0.25f, 0.1f);
 	static const Vec2<float> boardScale(0.48f, 0.48f);
+	static const Vec2<float> boardEdgeScale(1.f / 1.5f, 1.f / 1.5f);
 	board.init(boardPos, boardScale, side, window);
+	
+	boardEdge = ThirdPartyWrappersFactory::createClickable(Resources::getBoardEdgeImg());
+	boardEdge->getDrawable().setScale(boardEdgeScale);
+
 	setPlayInfoText();
 }
 
 void PlayHandler::draw(Window& window)
 {
+	assert(boardEdge != nullptr);
+
 	window.clear();
+	window.draw(boardEdge->getDrawable());
 	board.draw(window, window.getMousePos());
 	window.display();
 }

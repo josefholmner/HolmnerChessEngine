@@ -30,8 +30,8 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 	capturedBlackPieces.clear();
 	capturedWhitePieces.clear();
 	FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // Starting position.
-	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 24);
-	playInfoText->setNormalizedPosition(Vec2<float>(0.05f, 0.465f), window);
+	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 22);
+	playInfoText->setNormalizedPosition(Vec2<float>(0.043f, 0.465f), window);
 	moveListText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 20);
 	moveListText->setNormalizedPosition(Vec2<float>(0.78f, 0.12f), window);
 	setUpPieces(window);
@@ -372,8 +372,8 @@ void Board::appendCapturedPiece(const hceEngine::ChessMove& move, const Window& 
 
 	static constexpr float cpScaleMultiplier = 0.6f;
 	static constexpr float startXPos = 0.26f;
-	static constexpr float startTopYPos = 0.02f;
-	static constexpr float startBottomYPos = 0.92f;
+	static constexpr float startTopYPos = 0.018f;
+	static constexpr float startBottomYPos = 0.923f;
 	static constexpr float pieceOffset = 0.03f;
 	
 	auto sortAndPlace = [&](std::vector<CapturedPiece>& cps, bool placeAtTop)

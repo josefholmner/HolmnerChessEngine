@@ -29,5 +29,7 @@ public:
 	static const ResourceData getBlackKnightImg();
 	static const ResourceData getBlackPawnImg();
 
+	static const ResourceData getBoardEdgeImg();
+
 	static const ResourceData getDefaultFont();
 };

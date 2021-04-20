@@ -5,8 +5,10 @@
 #include "EngineWrapper.h"
 
 #include <optional>
+#include <memory>
 
 class Window;
+class Clickable;
 
 struct PlayResult
 {
@@ -44,5 +46,5 @@ private:
 	Board board;
 	EngineWrapper engine;
 	statesAndEvents::DifficultyLevel difficulty;
-
+	std::unique_ptr<Clickable> boardEdge;
 };

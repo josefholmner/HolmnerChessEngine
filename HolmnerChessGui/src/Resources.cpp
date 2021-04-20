@@ -21,6 +21,7 @@
 #include "Resources/BlackKnightImg.cpp"
 #include "Resources/BlackPawnImg.cpp"
 #include "Resources/DefaultFont.cpp"
+#include "Resources/BoardEdgeImg.cpp"
 
 const ResourceData Resources::getMenuBackgroundImg()
 {
@@ -120,6 +121,11 @@ const ResourceData Resources::getBlackKnightImg()
 const ResourceData Resources::getBlackPawnImg()
 {
 	return ResourceData(blackPawnImg, sizeof(blackPawnImg));
+}
+
+const ResourceData Resources::getBoardEdgeImg()
+{
+	return ResourceData(boardEdgeImg, sizeof(boardEdgeImg));
 }
 
 const ResourceData Resources::getDefaultFont()
