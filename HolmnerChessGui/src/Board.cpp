@@ -34,10 +34,13 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 	playInfoText->setNormalizedPosition(Vec2<float>(0.043f, 0.465f), window);
 	moveListText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 20);
 	moveListText->setNormalizedPosition(Vec2<float>(0.78f, 0.12f), window);
+
+	initSideToPlayImg(window);
+
 	setUpPieces(window);
 }
 
-void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
+void Board::draw(Window& window, const Vec2<int32_t>& mousePos, statesAndEvents::PlayingSide turn)
 {
 	assert(boardDrawable != nullptr);
 	assert(playInfoText != nullptr);
@@ -86,6 +89,8 @@ void Board::draw(Window& window, const Vec2<int32_t>& mousePos)
 	{
 		cp.draw(window, mousePos);
 	}
+
+	drawSideToPlay(window, turn);
 }
 
 void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
@@ -213,6 +218,39 @@ void Board::setUpPieces(const Window& window)
 	for (Square s = squares::a1; s < squares::num; s++)
 	{
 		placePieceAtSquare(pieces[s], s, window);
+	}
+}
+
+void Board::initSideToPlayImg(const Window& window)
+{
+	whiteToPlayLit = ThirdPartyWrappersFactory::createDrawable(Resources::getWhiteToPlayLitImg());
+	whiteToPlayUnlit = ThirdPartyWrappersFactory::createDrawable(Resources::getWhiteToPlayUnlitImg());
+	blackToPlayLit = ThirdPartyWrappersFactory::createDrawable(Resources::getBlackToPlayLitImg());
+	blackToPlayUnlit = ThirdPartyWrappersFactory::createDrawable(Resources::getBlackToPlayUnlitImg());
+
+	static const Vec2<float> imgScale(1 / 1.5f, 1 / 1.5f);
+	whiteToPlayLit->setScale(imgScale);
+	whiteToPlayUnlit->setScale(imgScale);
+	blackToPlayLit->setScale(imgScale);
+	blackToPlayUnlit->setScale(imgScale);
+
+	static constexpr float posX = 0.0592f;
+	static constexpr float posYTop = 0.12f;
+	static constexpr float posYBottom = 0.7f;
+
+	if (userSide == statesAndEvents::PlayingSide::White)
+	{
+		whiteToPlayLit->setNormalizedPosition(Vec2<float>(posX, posYBottom), window);
+		whiteToPlayUnlit->setNormalizedPosition(Vec2<float>(posX, posYBottom), window);
+		blackToPlayLit->setNormalizedPosition(Vec2<float>(posX, posYTop), window);
+		blackToPlayUnlit->setNormalizedPosition(Vec2<float>(posX, posYTop), window);
+	}
+	else
+	{
+		whiteToPlayLit->setNormalizedPosition(Vec2<float>(posX, posYTop), window);
+		whiteToPlayUnlit->setNormalizedPosition(Vec2<float>(posX, posYTop), window);
+		blackToPlayLit->setNormalizedPosition(Vec2<float>(posX, posYBottom), window);
+		blackToPlayUnlit->setNormalizedPosition(Vec2<float>(posX, posYBottom), window);
 	}
 }
 
@@ -396,6 +434,30 @@ void Board::appendCapturedPiece(const hceEngine::ChessMove& move, const Window& 
 	capturedPieces.push_back(cp);
 	const bool placeAtTop = isWhitePiece == (userSide == statesAndEvents::PlayingSide::White);
 	sortAndPlace(capturedPieces, placeAtTop);
+}
+
+void Board::drawSideToPlay(Window& window, statesAndEvents::PlayingSide turn)
+{
+	assert(whiteToPlayLit != nullptr);
+	assert(whiteToPlayUnlit != nullptr);
+	assert(blackToPlayLit != nullptr);
+	assert(blackToPlayUnlit != nullptr);
+
+	if (turn == statesAndEvents::PlayingSide::White)
+	{
+		window.draw(*whiteToPlayLit);
+		window.draw(*blackToPlayUnlit);
+	}
+	else if (turn == statesAndEvents::PlayingSide::Black)
+	{
+		window.draw(*blackToPlayLit);
+		window.draw(*whiteToPlayUnlit);
+	}
+	else
+	{
+		window.draw(*whiteToPlayUnlit);
+		window.draw(*blackToPlayUnlit);
+	}
 }
 
 Vec2<float> Board::getSquareNormalizedPosition(Square sq, const Window& window) const

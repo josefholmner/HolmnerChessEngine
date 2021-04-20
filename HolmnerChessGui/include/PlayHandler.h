@@ -26,7 +26,7 @@ public:
 private:
 	void init(const Window& window, statesAndEvents::PlayingSide side);
 
-	void draw(Window& window);
+	void draw(Window& window, statesAndEvents::PlayingSide turn);
 	void drawPlayStatus(Window& window);
 
 	bool userMakeMove(const hceEngine::LegalMovesCollection& legalMoves, Window& window);

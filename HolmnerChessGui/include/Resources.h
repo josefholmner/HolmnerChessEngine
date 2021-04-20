@@ -30,6 +30,10 @@ public:
 	static const ResourceData getBlackPawnImg();
 
 	static const ResourceData getBoardEdgeImg();
+	static const ResourceData getWhiteToPlayLitImg();
+	static const ResourceData getWhiteToPlayUnlitImg();
+	static const ResourceData getBlackToPlayLitImg();
+	static const ResourceData getBlackToPlayUnlitImg();
 
 	static const ResourceData getDefaultFont();
 };

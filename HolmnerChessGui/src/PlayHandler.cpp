@@ -56,13 +56,13 @@ void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 	setPlayInfoText();
 }
 
-void PlayHandler::draw(Window& window)
+void PlayHandler::draw(Window& window, statesAndEvents::PlayingSide turn)
 {
 	assert(boardEdge != nullptr);
 
 	window.clear();
 	window.draw(boardEdge->getDrawable());
-	board.draw(window, window.getMousePos());
+	board.draw(window, window.getMousePos(), turn);
 	window.display();
 }
 
@@ -92,9 +92,10 @@ bool PlayHandler::userMakeMove(const hceEngine::LegalMovesCollection& legalMoves
 {
 	using namespace statesAndEvents;
 
+
 	while (true)
 	{
-		draw(window);
+		draw(window, board.getUserSide());
 
 		Event event = window.pollEvent();
 		if (event.type == EventType::Close)
@@ -133,13 +134,16 @@ bool PlayHandler::engineMakeMove(Window& window)
 		return false;
 	}
 
+	const PlayingSide engineSide = board.getUserSide() == PlayingSide::White ?
+		PlayingSide::Black : PlayingSide::White;
+
 	static constexpr int32_t minThinkingTime = 2000;
 	hceCommon::Stopwatch stopWatch;
 	stopWatch.start();
 
 	while (true)
 	{
-		draw(window);
+		draw(window, engineSide);
 
 		Event event = window.pollEvent();
 		if (event.type == EventType::Close)
@@ -226,7 +230,7 @@ std::optional<PlayResult> PlayHandler::showEndScreen(hceEngine::PlayState state,
 
 	while (true)
 	{
-		draw(window);
+		draw(window, PlayingSide::None);
 
 		Event event = window.pollEvent();
 		if (event.type == EventType::Close)

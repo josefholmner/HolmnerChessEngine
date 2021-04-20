@@ -33,7 +33,7 @@ public:
 	void init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 		statesAndEvents::PlayingSide side, const Window& window);
 
-	void draw(Window& window, const Vec2<int32_t>& mousePos);
+	void draw(Window& window, const Vec2<int32_t>& mousePos, statesAndEvents::PlayingSide turn);
 
 	void makeMove(const hceEngine::ChessMove& move, const Window& window);
 
@@ -48,6 +48,7 @@ public:
 
 private:
 	void setUpPieces(const Window& window);
+	void initSideToPlayImg(const Window& window);
 
 	void placePieceAtSquare(Piece& piece, Square sq, const Window& window);
 
@@ -64,9 +65,15 @@ private:
 
 	void appendCapturedPiece(const hceEngine::ChessMove& move, const Window& window);
 
+	void drawSideToPlay(Window& window, statesAndEvents::PlayingSide turn);
+
 	statesAndEvents::PlayingSide userSide;
 	Vec2<float> scale;
 	std::unique_ptr<Drawable> boardDrawable;
+	std::unique_ptr<Drawable> whiteToPlayLit;
+	std::unique_ptr<Drawable> whiteToPlayUnlit;
+	std::unique_ptr<Drawable> blackToPlayLit;
+	std::unique_ptr<Drawable> blackToPlayUnlit;
 	std::array<Piece, squares::num> pieces;
 	Square dragStartSquare = squares::none;
 	std::string FEN;

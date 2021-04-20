@@ -22,6 +22,10 @@
 #include "Resources/BlackPawnImg.cpp"
 #include "Resources/DefaultFont.cpp"
 #include "Resources/BoardEdgeImg.cpp"
+#include "Resources/WhiteToPlayLitImg.cpp"
+#include "Resources/WhiteToPlayUnlitImg.cpp"
+#include "Resources/BlackToPlayLitImg.cpp"
+#include "Resources/BlackToPlayUnlitImg.cpp"
 
 const ResourceData Resources::getMenuBackgroundImg()
 {
@@ -126,6 +130,26 @@ const ResourceData Resources::getBlackPawnImg()
 const ResourceData Resources::getBoardEdgeImg()
 {
 	return ResourceData(boardEdgeImg, sizeof(boardEdgeImg));
+}
+
+const ResourceData Resources::getWhiteToPlayLitImg()
+{
+	return ResourceData(whiteToPlayLitImg, sizeof(whiteToPlayLitImg));
+}
+
+const ResourceData Resources::getWhiteToPlayUnlitImg()
+{
+	return ResourceData(whiteToPlayUnlitImg, sizeof(whiteToPlayUnlitImg));
+}
+
+const ResourceData Resources::getBlackToPlayLitImg()
+{
+	return ResourceData(blackToPlayLitImg, sizeof(blackToPlayLitImg));
+}
+
+const ResourceData Resources::getBlackToPlayUnlitImg()
+{
+	return ResourceData(blackToPlayUnlitImg, sizeof(blackToPlayUnlitImg));
 }
 
 const ResourceData Resources::getDefaultFont()

@@ -23,7 +23,8 @@ namespace statesAndEvents
 	enum class PlayingSide
 	{
 		White,
-		Black
+		Black,
+		None
 	};
 
 	enum class EventType
