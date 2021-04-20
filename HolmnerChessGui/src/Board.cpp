@@ -30,8 +30,8 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 	capturedBlackPieces.clear();
 	capturedWhitePieces.clear();
 	FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // Starting position.
-	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 22);
-	playInfoText->setNormalizedPosition(Vec2<float>(0.043f, 0.465f), window);
+	playInfoText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 21);
+	playInfoText->setNormalizedPosition(Vec2<float>(0.049f, 0.465f), window);
 	moveListText = ThirdPartyWrappersFactory::createText("", Resources::getDefaultFont(), 20);
 	moveListText->setNormalizedPosition(Vec2<float>(0.78f, 0.12f), window);
 
@@ -236,7 +236,7 @@ void Board::initSideToPlayImg(const Window& window)
 
 	static constexpr float posX = 0.0592f;
 	static constexpr float posYTop = 0.12f;
-	static constexpr float posYBottom = 0.7f;
+	static constexpr float posYBottom = 0.705f;
 
 	if (userSide == statesAndEvents::PlayingSide::White)
 	{

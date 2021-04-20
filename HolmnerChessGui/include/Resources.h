@@ -35,5 +35,9 @@ public:
 	static const ResourceData getBlackToPlayLitImg();
 	static const ResourceData getBlackToPlayUnlitImg();
 
+	static const ResourceData getWhiteWinsImg();
+	static const ResourceData getBlackWinsImg();
+	static const ResourceData getDrawImg();
+
 	static const ResourceData getDefaultFont();
 };

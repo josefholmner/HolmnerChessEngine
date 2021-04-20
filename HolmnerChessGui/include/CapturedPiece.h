@@ -19,5 +19,5 @@ protected:
 	int32_t getOrderValue() const {	return orderValue; }
 
 private:
-	int32_t orderValue;
+	int32_t orderValue = 0;
 };

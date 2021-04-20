@@ -3,6 +3,7 @@
 #include "Resources.h"
 #include "Window.h"
 #include "Clickable.h"
+#include "Drawable.h"
 #include "GuiUtilities.h"
 #include "ThirdPartyWrappersFactory.h"
 #include "ResourceData.h"
@@ -11,7 +12,8 @@
 #include <cassert>
 
 PlayHandler::PlayHandler()
-	: board(Resources::getBoardImg())
+	: board(Resources::getBoardImg()),
+	difficulty{statesAndEvents::DifficultyLevel::Silly}
 {
 }
 
@@ -50,8 +52,17 @@ void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 	static const Vec2<float> boardEdgeScale(1.f / 1.5f, 1.f / 1.5f);
 	board.init(boardPos, boardScale, side, window);
 	
-	boardEdge = ThirdPartyWrappersFactory::createClickable(Resources::getBoardEdgeImg());
-	boardEdge->getDrawable().setScale(boardEdgeScale);
+	boardEdge = ThirdPartyWrappersFactory::createDrawable(Resources::getBoardEdgeImg());
+	boardEdge->setScale(boardEdgeScale);
+
+	whiteWinsImg = ThirdPartyWrappersFactory::createClickable(Resources::getWhiteWinsImg());
+	blackWinsImg = ThirdPartyWrappersFactory::createClickable(Resources::getBlackWinsImg());
+	drawImg = ThirdPartyWrappersFactory::createClickable(Resources::getDrawImg());
+	static const Vec2<float> endGameButtonPos(0.37f, 0.44f);
+	for (auto& b : { whiteWinsImg.get(), blackWinsImg.get(), drawImg.get() })
+	{
+		b->getDrawable().setNormalizedPosition(endGameButtonPos, window);
+	}
 
 	setPlayInfoText();
 }
@@ -61,14 +72,20 @@ void PlayHandler::draw(Window& window, statesAndEvents::PlayingSide turn)
 	assert(boardEdge != nullptr);
 
 	window.clear();
-	window.draw(boardEdge->getDrawable());
+	window.draw(*boardEdge);
 	board.draw(window, window.getMousePos(), turn);
 	window.display();
 }
 
-void PlayHandler::drawPlayStatus(Window& window)
+void PlayHandler::drawEndScreen(Window& window, const Drawable& button)
 {
+	assert(boardEdge != nullptr);
 
+	window.clear();
+	window.draw(*boardEdge);
+	board.draw(window, window.getMousePos(), statesAndEvents::PlayingSide::None);
+	window.draw(button);
+	window.display();
 }
 
 namespace
@@ -227,10 +244,34 @@ void PlayHandler::setPlayInfoText()
 std::optional<PlayResult> PlayHandler::showEndScreen(hceEngine::PlayState state, Window& window)
 {
 	using namespace statesAndEvents;
+	assert(whiteWinsImg != nullptr);
+	assert(blackWinsImg != nullptr);
+	assert(drawImg != nullptr);
+
+	auto getButton = [&](hceEngine::PlayState state) -> std::unique_ptr<Clickable>&
+	{
+		if (state == hceEngine::PlayState::WhiteWins)
+		{
+			GuiUtilities::log("White wins\n");
+			return whiteWinsImg;
+		}
+		else if (state == hceEngine::PlayState::BlackWins)
+		{
+			GuiUtilities::log("Black wins\n");
+			return blackWinsImg;
+		}
+		else
+		{
+			GuiUtilities::log("Draw\n");
+			return drawImg;
+		}
+	};
+
+	auto& button = getButton(state);
 
 	while (true)
 	{
-		draw(window, PlayingSide::None);
+		drawEndScreen(window, button->getDrawable());
 
 		Event event = window.pollEvent();
 		if (event.type == EventType::Close)
@@ -238,8 +279,18 @@ std::optional<PlayResult> PlayHandler::showEndScreen(hceEngine::PlayState state,
 			// Quit.
 			return {};
 		}
-		
-		// TODO: implement end-screen.
+		else if (event.type != EventType::MouseDown)
+		{
+			continue;
+		}
+
+		// Event.type == MouseDown.
+
+		if (button->wasClicked(Vec2<int32_t>(event.mouseX, event.mouseY), window))
+		{
+			PlayResult res{ statesAndEvents::GameState::Menu };
+			return res;
+		}
 	}
 }
 

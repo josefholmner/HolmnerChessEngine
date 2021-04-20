@@ -8,6 +8,7 @@
 #include <memory>
 
 class Window;
+class Drawable;
 class Clickable;
 
 struct PlayResult
@@ -27,7 +28,7 @@ private:
 	void init(const Window& window, statesAndEvents::PlayingSide side);
 
 	void draw(Window& window, statesAndEvents::PlayingSide turn);
-	void drawPlayStatus(Window& window);
+	void drawEndScreen(Window& window, const Drawable& button);
 
 	bool userMakeMove(const hceEngine::LegalMovesCollection& legalMoves, Window& window);
 	bool engineMakeMove(Window& window);
@@ -46,5 +47,8 @@ private:
 	Board board;
 	EngineWrapper engine;
 	statesAndEvents::DifficultyLevel difficulty;
-	std::unique_ptr<Clickable> boardEdge;
+	std::unique_ptr<Drawable> boardEdge;
+	std::unique_ptr<Clickable> whiteWinsImg;
+	std::unique_ptr<Clickable> blackWinsImg;
+	std::unique_ptr<Clickable> drawImg;
 };

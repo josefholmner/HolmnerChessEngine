@@ -26,6 +26,9 @@
 #include "Resources/WhiteToPlayUnlitImg.cpp"
 #include "Resources/BlackToPlayLitImg.cpp"
 #include "Resources/BlackToPlayUnlitImg.cpp"
+#include "Resources/WhiteWinsImg.cpp"
+#include "Resources/BlackWinsImg.cpp"
+#include "Resources/DrawImg.cpp"
 
 const ResourceData Resources::getMenuBackgroundImg()
 {
@@ -150,6 +153,21 @@ const ResourceData Resources::getBlackToPlayLitImg()
 const ResourceData Resources::getBlackToPlayUnlitImg()
 {
 	return ResourceData(blackToPlayUnlitImg, sizeof(blackToPlayUnlitImg));
+}
+
+const ResourceData Resources::getWhiteWinsImg()
+{
+	return ResourceData(whiteWinsImg, sizeof(whiteWinsImg));
+}
+
+const ResourceData Resources::getBlackWinsImg()
+{
+	return ResourceData(blackWinsImg, sizeof(blackWinsImg));
+}
+
+const ResourceData Resources::getDrawImg()
+{
+	return ResourceData(drawImg, sizeof(drawImg));
 }
 
 const ResourceData Resources::getDefaultFont()
