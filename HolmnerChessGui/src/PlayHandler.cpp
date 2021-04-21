@@ -223,8 +223,9 @@ void PlayHandler::consolePrintEngineMoveInfo(const hceEngine::SearchResult& sear
 		const std::string depth = std::to_string(searchResult.engineInfo.depthsCompletelyCovered);
 		const std::string maxDepth = std::to_string(searchResult.engineInfo.maxDepthVisited);
 		const std::string nodes = std::to_string(searchResult.engineInfo.nodesVisited);
+		const std::string eval = std::to_string(searchResult.move.positionEvaluation);
 		GuiUtilities::log("Engine: " + moveStr + ", depth covered: " + depth + ", max depth: " +
-			maxDepth + ", nodes visited: " + nodes);
+			maxDepth + ", nodes visited: " + nodes + ", evaluation: " + eval);
 }
 
 void PlayHandler::setPlayInfoText()
