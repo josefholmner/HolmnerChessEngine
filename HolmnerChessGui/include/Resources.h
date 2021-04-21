@@ -29,7 +29,8 @@ public:
 	static const ResourceData getBlackKnightImg();
 	static const ResourceData getBlackPawnImg();
 
-	static const ResourceData getBoardEdgeImg();
+	static const ResourceData getBoardEdgeWhiteImg();
+	static const ResourceData getBoardEdgeBlackImg();
 	static const ResourceData getWhiteToPlayLitImg();
 	static const ResourceData getWhiteToPlayUnlitImg();
 	static const ResourceData getBlackToPlayLitImg();

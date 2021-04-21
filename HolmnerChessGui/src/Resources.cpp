@@ -21,7 +21,8 @@
 #include "Resources/BlackKnightImg.cpp"
 #include "Resources/BlackPawnImg.cpp"
 #include "Resources/DefaultFont.cpp"
-#include "Resources/BoardEdgeImg.cpp"
+#include "Resources/BoardEdgeWhiteImg.cpp"
+#include "Resources/BoardEdgeBlackImg.cpp"
 #include "Resources/WhiteToPlayLitImg.cpp"
 #include "Resources/WhiteToPlayUnlitImg.cpp"
 #include "Resources/BlackToPlayLitImg.cpp"
@@ -130,9 +131,14 @@ const ResourceData Resources::getBlackPawnImg()
 	return ResourceData(blackPawnImg, sizeof(blackPawnImg));
 }
 
-const ResourceData Resources::getBoardEdgeImg()
+const ResourceData Resources::getBoardEdgeWhiteImg()
 {
-	return ResourceData(boardEdgeImg, sizeof(boardEdgeImg));
+	return ResourceData(boardEdgeWhiteImg, sizeof(boardEdgeWhiteImg));
+}
+
+const ResourceData Resources::getBoardEdgeBlackImg()
+{
+	return ResourceData(boardEdgeBlackImg, sizeof(boardEdgeBlackImg));
 }
 
 const ResourceData Resources::getWhiteToPlayLitImg()

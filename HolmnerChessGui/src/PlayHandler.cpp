@@ -47,12 +47,20 @@ std::optional<PlayResult> PlayHandler::run(Window& window, statesAndEvents::Diff
 
 void PlayHandler::init(const Window& window, statesAndEvents::PlayingSide side)
 {
-	static const Vec2<float> boardPos(0.25f, 0.1f);
-	static const Vec2<float> boardScale(0.48f, 0.48f);
+	static const Vec2<float> boardPos(0.255f, 0.105f);
+	static const Vec2<float> boardScale(0.475f, 0.475f);
 	static const Vec2<float> boardEdgeScale(1.f / 1.5f, 1.f / 1.5f);
 	board.init(boardPos, boardScale, side, window);
 	
-	boardEdge = ThirdPartyWrappersFactory::createDrawable(Resources::getBoardEdgeImg());
+	if (side == statesAndEvents::PlayingSide::White)
+	{
+		boardEdge = ThirdPartyWrappersFactory::createDrawable(Resources::getBoardEdgeWhiteImg());
+	}
+	else
+	{
+		boardEdge = ThirdPartyWrappersFactory::createDrawable(Resources::getBoardEdgeBlackImg());
+	}
+	
 	boardEdge->setScale(boardEdgeScale);
 
 	whiteWinsImg = ThirdPartyWrappersFactory::createClickable(Resources::getWhiteWinsImg());
