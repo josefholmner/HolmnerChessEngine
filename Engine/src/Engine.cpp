@@ -1077,6 +1077,11 @@ namespace moveGenerationHelpers
 		// Normalize the score so that 1.0 represents the value of a single pawn.
 		cm.positionEvaluation = 
 			static_cast<float>(staticEvaluation) / (float)BoardEvaluator::getPawnBaseValue();
+		if (board.getTurn() == pieces::Color::BLACK)
+		{
+			cm.positionEvaluation = -cm.positionEvaluation;
+		}
+
 		cm.fromSquare = squares::squareToStr(move.fromSquare);
 		cm.toSquare = squares::squareToStr(move.toSquare);
 		cm.movingPiece = pieces::pieceToStr(move.movingPiece);
