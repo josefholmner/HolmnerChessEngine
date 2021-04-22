@@ -1,9 +1,12 @@
 #include "PrivateInclude/BoardEvaluator.h"
 
 #include "PrivateInclude/EngineUtilities.h"
+#include "PrivateInclude/Move.h"
+#include "PrivateInclude/FastSqLookup.h"
 
 #include <cassert>
 #include <vector>
+#include <array>
 
 /*
 * Note on terminology: 

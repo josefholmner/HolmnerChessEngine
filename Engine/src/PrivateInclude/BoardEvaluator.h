@@ -2,12 +2,9 @@
 
 #include "PiecesAndSquares.h"
 #include "BoardState.h"
-#include "FastSqLookup.h"
-#include "Move.h"
-#include "SearchHelpers.h"
 
-#include <cstdint>
-#include <array>
+class Move;
+class FastSqLookup;
 
 /**
 * The BoardEvaluator enables fast evaluation of a BoardState. Note that the construction of this
