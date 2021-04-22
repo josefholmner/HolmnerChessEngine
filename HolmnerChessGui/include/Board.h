@@ -46,6 +46,8 @@ public:
 
 	void setPlayInfoText(const std::string& str);
 
+	int32_t getMoveCount() const { return moveCount; }
+
 private:
 	void setUpPieces(const Window& window);
 	void initSideToPlayImg(const Window& window);
@@ -69,6 +71,7 @@ private:
 
 	statesAndEvents::PlayingSide userSide;
 	Vec2<float> scale;
+	int32_t moveCount = 0;
 	std::unique_ptr<Drawable> boardDrawable;
 	std::unique_ptr<Drawable> whiteToPlayLit;
 	std::unique_ptr<Drawable> whiteToPlayUnlit;

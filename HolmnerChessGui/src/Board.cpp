@@ -25,6 +25,7 @@ void Board::init(const Vec2<float>& normPos, const Vec2<float>& inScale,
 	boardDrawable->setNormalizedPosition(normPos, window);
 	boardDrawable->setScale(scale);
 
+	moveCount = 0;
 	userSide = side;
 	moveList.clear();
 	capturedBlackPieces.clear();
@@ -116,6 +117,7 @@ void Board::makeMove(const hceEngine::ChessMove& move, const Window& window)
 			return;
 	}
 
+	moveCount++;
 	FEN = move.postMoveFEN;
 
 	// Upate move list (for drawing to the screen).

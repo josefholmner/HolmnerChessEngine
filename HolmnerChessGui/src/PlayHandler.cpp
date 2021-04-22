@@ -196,7 +196,23 @@ bool PlayHandler::startEngineSearch()
 	switch (difficulty)
 	{
 		case statesAndEvents::DifficultyLevel::Hard:
-			return engine.startSearchTimeout(board.getFEN(), 40000);
+			// Avoid unnecessary (and boring) long searches at first moves.
+			if (board.getMoveCount() <= 1)
+			{
+				return engine.startSearchDepthTimeout(board.getFEN(), 8, 20000);
+			}
+			else if (board.getMoveCount() <= 3)
+			{
+				return engine.startSearchDepthTimeout(board.getFEN(), 9, 20000);
+			}
+			else if (board.getMoveCount() <= 5)
+			{
+				return engine.startSearchDepthTimeout(board.getFEN(), 9, 30000);
+			}
+			else
+			{
+				return engine.startSearchTimeout(board.getFEN(), 40000);
+			}
 		case statesAndEvents::DifficultyLevel::Medium:
 			return engine.startSearchDepth(board.getFEN(), 4);
 			break;
