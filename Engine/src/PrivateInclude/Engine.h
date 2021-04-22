@@ -65,5 +65,4 @@ private:
 		Score staticEval, const searchHelpers::tp::MoveID& bestMove) const;
 
 	FastSqLookup fastSqLookup;
-	BoardEvaluator boardEvaluator;
 };
