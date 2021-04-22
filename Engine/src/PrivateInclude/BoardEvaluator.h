@@ -17,9 +17,7 @@
 class BoardEvaluator
 {
 public:
-	BoardEvaluator();
-
-	Score getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const;
+	static Score getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup);
 	
 	struct PreMoveInfo
 	{
@@ -41,48 +39,11 @@ public:
 	// -OPTION 2-
 	// eval = preMoveEval + getStaticEvaluationDelta()
 	//
-	Score getStaticEvaluationDelta(const BoardState& board, const Move& move,
-		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
-	bool canUseGetStaticEvaluationDelta(const Move& move) const;
+	static Score getStaticEvaluationDelta(const BoardState& board, const Move& move,
+		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup);
+	static bool canUseGetStaticEvaluationDelta(const Move& move);
 
 	static PreMoveInfo createPreMoveInfo(const BoardState& board);
 
 	static Score getPawnBaseValue();
-
-private:
-	void init();
-
-	Score getWhiteKingScore(const BoardState& board, int8_t numBlackMajorPieces) const;
-	Score getBlackKingScore(const BoardState& board, int8_t numWhiteMajorPieces) const;
-
-	Score getPieceMoveDeltaScore(const BoardState& board, const Move& move,
-		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
-	
-	Score getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
-		const FastSqLookup& lookup) const;
-	Score getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
-		const FastSqLookup& lookup) const;
-
-	Score getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
-		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
-	Score getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
-		const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const;
-
-	std::array<Score, squares::num> wQueenStaticScores;
-	std::array<Score, squares::num> bQueenStaticScores;
-
-	std::array<Score, squares::num> wRookStaticScores;
-	std::array<Score, squares::num> bRookStaticScores;
-
-	std::array<Score, squares::num> wBishopStaticScores;
-	std::array<Score, squares::num> bBishopStaticScores;
-
-	std::array<Score, squares::num> wKnightStaticScores;
-	std::array<Score, squares::num> bKnightStaticScores;
-
-	std::array<Score, squares::num> wPawnStaticScores;
-	std::array<Score, squares::num> bPawnStaticScores;
-
-	std::array<Score, squares::num> wKingEndgameStaticScores;
-	std::array<Score, squares::num> bKingEndgameStaticScores;
 };

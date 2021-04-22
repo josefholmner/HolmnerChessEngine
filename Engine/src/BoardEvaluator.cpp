@@ -5,87 +5,190 @@
 #include <cassert>
 #include <vector>
 
+/*
+* Note on terminology: 
+* 'vals' are always positive, thus must be negated for black.
+* 'score' takes color into account, so is already negative for black.
+*/
+
 namespace scoringConstants
 {
-	static constexpr Score rankScoreMin = 0;
-	static constexpr Score fileScoreMin = 0;
-
-	// How much more a square on a rank or file 1 rank or file closer to the board center is worth.
-	static constexpr Score rankScoreJump = 6;
-	static constexpr Score fileScoreJump = 6;
-
-	static constexpr Score pBaseVal = 100;
-	static constexpr Score nBaseVal = 320;
-	static constexpr Score bBaseVal = 330;
-	static constexpr Score rBaseVal = 500;
-	static constexpr Score qBaseVal = 900;
-	static constexpr Score kBaseVal = 10000;
-
-	static constexpr Score kingToTheSideVal = 60;
-	static constexpr Score pawnProtectingKing1RankAwayVal = 30;
+	static constexpr Score pawnProtectingKing1RankAwayVal = 40;
 	static constexpr Score pawnProtectingKing2RanksAwayVal = 20;
 
 	// The minimum number of opponent major pieces that has to be on the board for the king to
 	// be rewarded to be "hidden" to the side of the board behind pawns.
 	static constexpr Score minNumOpponentMajorPieceRewardKingSafety = 2;
 
-
 	static constexpr Score doublePawnsPunishmentVal = 25;
 	static constexpr Score pawnIslandPunishmentVal = 25;
 
-	static constexpr Score rookOpenFileVal = 30;
+	static constexpr Score rookOpenFileVal = 40;
+	static constexpr Score trappedRookPenaltyVal = 80;
+
+	static constexpr Score minorPieceProtectedByPawnVal = 10;
 
 	static constexpr Score bishopCoverValPerSquare = 3;
+
+	static constexpr std::array<Score, squares::num>bPawnStaticVals =
+	{
+		180, 180, 180, 200, 200, 180, 180, 180,
+		180, 180, 180, 200, 200, 180, 180, 180,
+		100, 120, 140, 160, 160, 140, 120, 100,
+		100, 110, 120, 140, 140, 120, 110, 100,
+		100, 110, 120, 140, 140, 120, 110, 100,
+		100, 110, 120, 120, 120, 120, 110, 100,
+		100, 110, 110, 110, 110, 110, 110, 100,
+		100, 100, 100, 100, 100, 100, 100, 100
+	};
+
+	static constexpr std::array<Score, squares::num> wPawnStaticVals =
+	{
+		100, 100, 100, 100, 100, 100, 100, 100,
+		100, 110, 110, 110, 110, 110, 110, 100,
+		100, 110, 120, 120, 120, 120, 110, 100,
+		100, 110, 120, 140, 140, 120, 110, 100,
+		100, 110, 120, 140, 140, 120, 110, 100,
+		100, 120, 140, 160, 160, 140, 120, 100,
+		180, 180, 180, 200, 200, 180, 180, 180,
+		180, 180, 180, 200, 200, 180, 180, 180
+	};
+
+	static constexpr std::array<Score, squares::num> bKnightStaticVals =
+	{
+		300, 300, 300, 300, 300, 300, 300, 300,
+		300, 310, 310, 310, 310, 310, 310, 300,
+		300, 310, 320, 320, 320, 320, 310, 300,
+		300, 310, 320, 340, 340, 320, 310, 300,
+		300, 310, 320, 340, 340, 320, 310, 300,
+		300, 310, 320, 320, 320, 320, 310, 300,
+		300, 310, 310, 310, 310, 310, 310, 300,
+		300, 270, 300, 300, 300, 300, 270, 300
+	};
+
+	static constexpr std::array<Score, squares::num> wKnightStaticVals =
+	{
+		300, 270, 300, 300, 300, 300, 270, 300,
+		300, 310, 310, 310, 310, 310, 310, 300,
+		300, 310, 320, 320, 320, 320, 310, 300,
+		300, 310, 320, 340, 340, 320, 310, 300,
+		300, 310, 320, 340, 340, 320, 310, 300,
+		300, 310, 320, 320, 320, 320, 310, 300,
+		300, 310, 310, 310, 310, 310, 310, 300,
+		300, 300, 300, 300, 300, 300, 300, 300
+	};
+
+	static constexpr std::array<Score, squares::num> bBishopStaticVals =
+	{
+		305, 305, 305, 305, 305, 305, 305, 305,
+		305, 315, 315, 315, 315, 315, 315, 305,
+		305, 325, 325, 325, 325, 325, 325, 305,
+		305, 325, 335, 345, 345, 335, 325, 305,
+		305, 325, 335, 345, 345, 335, 325, 305,
+		305, 325, 325, 325, 325, 325, 325, 305,
+		305, 315, 315, 315, 315, 315, 315, 305,
+		305, 305, 275, 305, 305, 275, 305, 305
+	};
+
+	static constexpr std::array<Score, squares::num> wBishopStaticVals =
+	{
+		305, 305, 275, 305, 300, 275, 305, 305,
+		305, 315, 315, 315, 315, 315, 315, 305,
+		305, 325, 325, 325, 325, 325, 325, 305,
+		305, 325, 335, 345, 345, 335, 325, 305,
+		305, 325, 335, 345, 345, 335, 325, 305,
+		305, 325, 325, 325, 325, 325, 325, 305,
+		305, 315, 315, 315, 315, 315, 315, 305,
+		305, 305, 305, 305, 305, 305, 305, 305
+	};
+
+	static constexpr std::array<Score, squares::num> rookStaticVals =
+	{
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500,
+		500, 507, 515, 522, 522, 515, 507, 500
+	};
+
+	static constexpr std::array<Score, squares::num> bQueenStaticVals =
+	{
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 875, 900, 900, 900, 900
+	};
+
+	static constexpr std::array<Score, squares::num> wQueenStaticVals =
+	{
+		900, 900, 900, 875, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900,
+		900, 900, 900, 900, 900, 900, 900, 900
+	};
+
+	static constexpr std::array<Score, squares::num> bKingEndgameStaticVals =
+	{
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10040, 10040, 10040, 10040, 10000, 10000,
+		10000, 10000, 10040, 10050, 10050, 10040, 10000, 10000,
+		10000, 10000, 10040, 10050, 10050, 10040, 10000, 10000,
+		10000, 10000, 10040, 10040, 10040, 10040, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000
+	};
+
+	static constexpr std::array<Score, squares::num> wKingEndgameStaticVals =
+	{
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10040, 10040, 10040, 10040, 10000, 10000,
+		10000, 10000, 10040, 10050, 10050, 10040, 10000, 10000,
+		10000, 10000, 10040, 10050, 10050, 10040, 10000, 10000,
+		10000, 10000, 10040, 10040, 10040, 10040, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000
+	};
+
+	static constexpr std::array<Score, squares::num> bKingEarlyGameStaticVals =
+	{
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10050, 10050, 10040, 10000, 10000, 10000, 10050, 10050
+	};
+
+	static constexpr std::array<Score, squares::num> wKingEarlyGameStaticVals =
+	{
+		10050, 10050, 10040, 10000, 10000, 10000, 10050, 10050,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+		10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000
+	};
 }
 
 namespace
 {
-	Score getRankScoreRewardCenter(Rank rank)
-	{
-		using namespace scoringConstants;
-		switch (rank)
-		{
-			case ranks::rank1:
-			case ranks::rank8:
-				return rankScoreMin;
-			case ranks::rank2:
-			case ranks::rank7:
-				return rankScoreMin + 1 * rankScoreJump;
-			case ranks::rank3:
-			case ranks::rank6:
-				return rankScoreMin + 2 * rankScoreJump;
-			case ranks::rank4:
-			case ranks::rank5:
-				return rankScoreMin + 3 * rankScoreJump;
-			default:
-				EngineUtilities::logE("BoardEvaluator: invalid rank passed to getRankScore().");
-				return 0;
-		}
-	}
-
-	Score getFileScore(File file)
-	{
-		using namespace scoringConstants;
-		switch (file)
-		{
-			case files::fileA:
-			case files::fileH:
-				return fileScoreMin;
-			case files::fileB:
-			case files::fileG:
-				return fileScoreMin + 1 * fileScoreJump;
-			case files::fileC:
-			case files::fileF:
-				return fileScoreMin + 2 * fileScoreJump;
-			case files::fileD:
-			case files::fileE:
-				return fileScoreMin + 3 * fileScoreJump;
-			default:
-				EngineUtilities::logE("BoardEvaluator: invalid file passed to getFileScore().");
-				return 0;
-		}
-	}
-
 	bool isPawn(Piece piece)
 	{
 		switch (piece)
@@ -137,6 +240,40 @@ namespace
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsA1()[sq], sq) -
 			getNumNonPawnSquaresInSweep(board, lookup.getDiagTowardsH1()[sq], sq);
 		return numSqs * scoringConstants::bishopCoverValPerSquare;
+	}
+
+	Score getWhiteMinorPiecePawnProtectedScore(const BoardState& board, const FastSqLookup& lookup,
+		Square sq)
+	{
+		using namespace scoringConstants;
+		return 0;
+		// Using black pawn capture pattern here which is not a bug.
+		for (Square sq : lookup.getBlackPawnCaptureSquares()[sq])
+		{
+			if (board.getPiece(sq) == pieces::wP)
+			{
+				return minorPieceProtectedByPawnVal;
+			}
+		}
+
+		return 0;
+	}
+
+	Score getBlackMinorPiecePawnProtectedScore(const BoardState& board, const FastSqLookup& lookup,
+		Square sq)
+	{
+		using namespace scoringConstants;
+		return 0;
+		// Using white pawn capture pattern here which is not a bug.
+		for (Square sq : lookup.getWhitePawnCaptureSquares()[sq])
+		{
+			if (board.getPiece(sq) == pieces::bP)
+			{
+				return -minorPieceProtectedByPawnVal;
+			}
+		}
+
+		return 0;
 	}
 
 	BoardEvaluator::PreMoveInfo createFromMovingSidePawn(const BoardState& board, Piece movingSidePawn)
@@ -194,15 +331,240 @@ namespace
 				return true;
 		}
 	}
+
+	Score getWhiteKingScore(const BoardState& board, int8_t numBlackMajorPieces)
+	{
+		using namespace scoringConstants;
+
+		if (numBlackMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
+		{
+			// The kBaseVal is baked into the array.
+			return wKingEndgameStaticVals[board.getWhiteKingSquare()];
+		}
+
+		// Non-endgame: reward king protection.
+		Score score = 0;
+		switch (board.getWhiteKingSquare())
+		{
+		case squares::a1:
+		case squares::b1:
+		{
+			if (board.getPiece(squares::a2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::a3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::b2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::b3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::c2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::c3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
+
+			// Trapped rook penalty.
+			if (board.getPiece(squares::a1) == pieces::wR)
+			{
+				score -= trappedRookPenaltyVal;
+			}
+		}
+		break;
+		case squares::g1:
+		case squares::h1:
+		{
+			if (board.getPiece(squares::f2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::f3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::g2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::g3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::h2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::h3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
+
+			// Trapped rook penalty.
+			if (board.getPiece(squares::h1) == pieces::wR)
+			{
+				score -= trappedRookPenaltyVal;
+			}
+		}
+		}
+
+		return score + wKingEarlyGameStaticVals[board.getWhiteKingSquare()];
+	}
+
+	Score getBlackKingScore(const BoardState& board, int8_t numWhiteMajorPieces)
+	{
+		using namespace scoringConstants;
+
+		if (numWhiteMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
+		{
+			// The kBaseVal is baked into the array.
+			return -bKingEndgameStaticVals[board.getBlackKingSquare()];
+		}
+
+		// Non-endgame: reward king protection.
+		Score score = 0;
+		switch (board.getBlackKingSquare())
+		{
+		case squares::a8:
+		case squares::b8:
+		{
+			if (board.getPiece(squares::a7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::a6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::b7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::b6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::c7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::c6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
+
+			// Trapped rook penalty.
+			if (board.getPiece(squares::a8) == pieces::bR)
+			{
+				score += trappedRookPenaltyVal;
+			}
+		}
+		break;
+		case squares::g8:
+		case squares::h8:
+		{
+			if (board.getPiece(squares::f7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::f6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::g7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::g6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
+
+			if (board.getPiece(squares::h7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
+			else if (board.getPiece(squares::h6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
+
+			// Trapped rook penalty.
+			if (board.getPiece(squares::h8) == pieces::bR)
+			{
+				score += trappedRookPenaltyVal;
+			}
+		}
+		}
+
+		return score - bKingEarlyGameStaticVals[board.getBlackKingSquare()];
+	}
+
+	Score getWhiteKnightMoveDeltaScore(const BoardState& board, const Move& move, const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		Score score = wKnightStaticVals[move.toSquare] - wKnightStaticVals[move.fromSquare];
+		score += getWhiteMinorPiecePawnProtectedScore(board, lookup, move.toSquare);
+		score -= getWhiteMinorPiecePawnProtectedScore(board, lookup, move.fromSquare);
+		return score;
+	}
+
+	Score getBlackKnightMoveDeltaScore(const BoardState& board, const Move& move, const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		Score score = -bKnightStaticVals[move.toSquare] + bKnightStaticVals[move.fromSquare];
+		score += getBlackMinorPiecePawnProtectedScore(board, lookup, move.toSquare);
+		score -= getBlackMinorPiecePawnProtectedScore(board, lookup, move.fromSquare);
+		return score;
+	}
+
+	Score getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
+		const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		Score score = wBishopStaticVals[move.toSquare] - wBishopStaticVals[move.fromSquare];
+		score += getWhiteBishopSquareCoverScore(board, lookup, move.toSquare);
+		score -= getWhiteBishopSquareCoverScore(board, lookup, move.fromSquare);
+		score += getWhiteMinorPiecePawnProtectedScore(board, lookup, move.toSquare);
+		score -= getWhiteMinorPiecePawnProtectedScore(board, lookup, move.fromSquare);
+		return score;
+	}
+
+	Score getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
+		const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		Score score = -bBishopStaticVals[move.toSquare] + bBishopStaticVals[move.fromSquare];
+		score += getBlackBishopSquareCoverScore(board, lookup, move.toSquare);
+		score -= getBlackBishopSquareCoverScore(board, lookup, move.fromSquare);
+		score += getBlackMinorPiecePawnProtectedScore(board, lookup, move.toSquare);
+		score -= getBlackMinorPiecePawnProtectedScore(board, lookup, move.fromSquare);
+		return score;
+	}
+
+	Score getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
+		const BoardEvaluator::PreMoveInfo& preMoveInfo, const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		Score score = rookStaticVals[move.toSquare] - rookStaticVals[move.fromSquare];
+
+		// Handle change in open file score.
+		const File newFile = files::toFile(move.toSquare);
+		const File oldFile = files::toFile(move.fromSquare);
+		if (!preMoveInfo.movingSidePawnsFileOccupation[newFile])
+		{
+			score += scoringConstants::rookOpenFileVal;
+		}
+
+		if (!preMoveInfo.movingSidePawnsFileOccupation[oldFile])
+		{
+			score -= scoringConstants::rookOpenFileVal;
+		}
+
+		return score;
+	}
+
+	Score getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
+		const BoardEvaluator::PreMoveInfo& preMoveInfo, const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		Score score = -rookStaticVals[move.toSquare] + rookStaticVals[move.fromSquare];
+
+		// Handle change in open file score.
+		const File newFile = files::toFile(move.toSquare);
+		const File oldFile = files::toFile(move.fromSquare);
+		if (!preMoveInfo.movingSidePawnsFileOccupation[newFile])
+		{
+			score -= scoringConstants::rookOpenFileVal;
+		}
+
+		if (!preMoveInfo.movingSidePawnsFileOccupation[oldFile])
+		{
+			score += scoringConstants::rookOpenFileVal;
+		}
+
+		return score;
+	}
+
+	Score getPieceMoveDeltaScore(const BoardState& board, const Move& move,
+		const BoardEvaluator::PreMoveInfo& preMoveInfo, const FastSqLookup& lookup)
+	{
+		using namespace scoringConstants;
+		assert(BoardEvaluator::canUseGetStaticEvaluationDelta(move));
+
+		switch (move.movingPiece)
+		{
+		case pieces::wN:
+			return getWhiteKnightMoveDeltaScore(board, move, lookup);
+		case pieces::bN:
+			return getBlackKnightMoveDeltaScore(board, move, lookup);
+		case pieces::wB:
+			return getWhiteBishopMoveDeltaScore(board, move, lookup);
+		case pieces::bB:
+			return getBlackBishopMoveDeltaScore(board, move, lookup);
+		case pieces::wR:
+			return getWhiteRookMoveDeltaScore(board, move, preMoveInfo, lookup);
+		case pieces::bR:
+			return getBlackRookMoveDeltaScore(board, move, preMoveInfo, lookup);
+		case pieces::wQ:
+			return wQueenStaticVals[move.toSquare] - wQueenStaticVals[move.fromSquare];
+		case pieces::bQ:
+			return -bQueenStaticVals[move.toSquare] + bQueenStaticVals[move.fromSquare];
+		default:
+			EngineUtilities::logE("Piece passed to getPieceMoveDeltaScore that cannot be used.");
+			return 0;
+		}
+	}
 }
 
-BoardEvaluator::BoardEvaluator()
+Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup)
 {
-	init();
-}
+	using namespace scoringConstants;
 
-Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqLookup& lookup) const
-{
 	Score score = 0;
 	int8_t numWhiteMajorPieces = 0;
 	int8_t numBlackMajorPieces = 0;
@@ -225,11 +587,11 @@ Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqL
 		{
 			case pieces::wP:
 			{
-				score += wPawnStaticScores[sq];
+				score += wPawnStaticVals[sq];
 				const File f = files::toFile(sq);
 				if (filesOccupiedBywP[f])
 				{
-					score -= scoringConstants::doublePawnsPunishmentVal;
+					score -= doublePawnsPunishmentVal;
 				}
 				else
 				{
@@ -239,28 +601,30 @@ Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqL
 				break;
 			case pieces::wN:
 				numWhiteMajorPieces++;
-				score += wKnightStaticScores[sq];
+				score += wKnightStaticVals[sq];
+				score += getWhiteMinorPiecePawnProtectedScore(board, lookup, sq);
 				break;
 			case pieces::wB:
 				numWhiteMajorPieces++;
-				score += wBishopStaticScores[sq];
+				score += wBishopStaticVals[sq];
 				score += getWhiteBishopSquareCoverScore(board, lookup, sq);
+				score += getWhiteMinorPiecePawnProtectedScore(board, lookup, sq);
 				break;
 			case pieces::wR:
 				numWhiteMajorPieces++;
 				wRooks[wRookCnt++] = sq;
-				score += wRookStaticScores[sq];
+				score += rookStaticVals[sq];
 				break;
 			case pieces::wQ:
 				numWhiteMajorPieces++;
-				score += wQueenStaticScores[sq];
+				score += wQueenStaticVals[sq];
 				break;
 			case pieces::wK:
 				// King scores are handled elsewhere.
 				break;
 			case pieces::bP:
 			{
-				score += bPawnStaticScores[sq];
+				score -= bPawnStaticVals[sq];
 				const File f = files::toFile(sq);
 				if (filesOccupiedBybP[f])
 				{
@@ -274,21 +638,23 @@ Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqL
 				break;
 			case pieces::bN:
 				numBlackMajorPieces++;
-				score += bKnightStaticScores[sq];
+				score -= bKnightStaticVals[sq];
+				score += getBlackMinorPiecePawnProtectedScore(board, lookup, sq);
 				break;
 			case pieces::bB:
 				numBlackMajorPieces++;
-				score += bBishopStaticScores[sq];
+				score -= bBishopStaticVals[sq];
 				score += getBlackBishopSquareCoverScore(board, lookup, sq);
+				score += getBlackMinorPiecePawnProtectedScore(board, lookup, sq);
 				break;
 			case pieces::bR:
 				bRooks[bRookCnt++] = sq;
 				numBlackMajorPieces++;
-				score += bRookStaticScores[sq];
+				score -= rookStaticVals[sq];
 				break;
 			case pieces::bQ:
 				numBlackMajorPieces++;
-				score += bQueenStaticScores[sq];
+				score -= bQueenStaticVals[sq];
 				break;
 			case pieces::bK:
 				// King scores are handled elsewhere.
@@ -327,15 +693,15 @@ Score BoardEvaluator::getStaticEvaluation(const BoardState& board, const FastSqL
 }
 
 Score BoardEvaluator::getStaticEvaluationDelta(const BoardState& board, const Move& move,
-	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
+	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup)
 {
-	assert(canUseGetStaticEvaluationDelta(move));
+assert(canUseGetStaticEvaluationDelta(move));
 
 	const Score delta = getPieceMoveDeltaScore(board, move, preMoveInfo, lookup);
 	return board.getTurn() == pieces::Color::WHITE ? delta : -delta;
 }
 
-bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move) const
+bool BoardEvaluator::canUseGetStaticEvaluationDelta(const Move& move)
 {
 	assert(EngineUtilities::isNonNonePiece(move.movingPiece));
 
@@ -355,235 +721,5 @@ BoardEvaluator::PreMoveInfo BoardEvaluator::createPreMoveInfo(const BoardState& 
 
 Score BoardEvaluator::getPawnBaseValue()
 {
-	return scoringConstants::pBaseVal;
-}
-
-void BoardEvaluator::init()
-{
-	using namespace scoringConstants;
-
-	// Set pawn bonus scores (base value added later).
-	bPawnStaticScores =
-	{
-		-0,  -0,  -0,  -0,  -0,  -0,  -0,  -0,
-	    -70, -70, -70, -70, -70, -70, -70, -70,
-		-20, -20, -40, -60, -60, -40, -20, -20,
-		-10, -15, -20, -40, -40, -20, -15, -10,
-		-0,  -10, -10, -40, -40, -10, -10, -0,
-		-0,  -10, -10, -20, -20, -10, -10, -0,
-		-0,  -10, -10, -0,  -0,  -10, -10, -0,
-		-0,  -0,  -0,  -0,  -0,  -0,  -0,  -0
-	};
-
-	wPawnStaticScores =
-	{
-		0,  0,  0,  0,  0,  0,  0,  0,
-		0,  10, 10, 0,  0,  10, 10, 0,
-		0,  10, 10, 20, 20, 10, 10, 0,
-		0,  10, 10, 40, 40, 10, 10,  0,
-		10, 15, 20, 40, 40, 20, 15, 10,
-		20, 20, 40, 60, 60, 40, 20, 20,
-		70, 70, 70, 70, 70, 70, 70, 70,
-		0,  0,  0,  0,  0,  0,  0,  0
-	};
-
-	for (Square sq = squares::a1; sq < squares::num; sq++)
-	{
-		const Score rankBonus = getRankScoreRewardCenter(ranks::toRank(sq));
-		const Score fileBonus = getFileScore(files::toFile(sq));
-
-		wKingEndgameStaticScores[sq] = kBaseVal + rankBonus + fileBonus;
-		bKingEndgameStaticScores[sq] = -kBaseVal -rankBonus - fileBonus;
-		wQueenStaticScores[sq] = qBaseVal;
-		bQueenStaticScores[sq] = -qBaseVal;
-		wRookStaticScores[sq] = rBaseVal + fileBonus;
-		bRookStaticScores[sq] = -rBaseVal - fileBonus;
-		wBishopStaticScores[sq] = bBaseVal + rankBonus + fileBonus;
-		bBishopStaticScores[sq] = -bBaseVal - rankBonus - fileBonus;
-		wKnightStaticScores[sq] = nBaseVal + rankBonus + fileBonus;
-		bKnightStaticScores[sq] = -nBaseVal - rankBonus - fileBonus;
-		wPawnStaticScores[sq] += pBaseVal;
-		bPawnStaticScores[sq] -= pBaseVal;
-	}
-}
-
-Score BoardEvaluator::getWhiteKingScore(const BoardState& board, int8_t numBlackMajorPieces) const
-{
-	using namespace scoringConstants;
-
-	if (numBlackMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
-	{
-		// The kBaseVal is baked into the array.
-		return wKingEndgameStaticScores[board.getWhiteKingSquare()];
-	}
-
-	// Non-endgame: reward king protection.
-	Score score = 0;
-	switch (board.getWhiteKingSquare())
-	{
-	case squares::a1:
-	case squares::b1:
-	{
-		score += kingToTheSideVal;
-		if (board.getPiece(squares::a2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::a3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
-			
-		if (board.getPiece(squares::b2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::b3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
-			
-		if (board.getPiece(squares::c2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::c3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
-	}
-	break;
-	case squares::g1:
-	case squares::h1:
-	{
-		score += kingToTheSideVal;
-		if (board.getPiece(squares::f2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::f3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
-
-		if (board.getPiece(squares::g2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::g3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
-
-		if (board.getPiece(squares::h2) == pieces::wP) { score += pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::h3) == pieces::wP) { score += pawnProtectingKing2RanksAwayVal; }
-	}
-	}
-
-	return score + kBaseVal;
-}
-
-Score BoardEvaluator::getBlackKingScore(const BoardState& board, int8_t numWhiteMajorPieces) const
-{
-	using namespace scoringConstants;
-
-	if (numWhiteMajorPieces < minNumOpponentMajorPieceRewardKingSafety)
-	{
-		// The kBaseVal is baked into the array.
-		return bKingEndgameStaticScores[board.getBlackKingSquare()];
-	}
-
-	// Non-endgame: reward king protection.
-	Score score = 0;
-	switch (board.getBlackKingSquare())
-	{
-	case squares::a8:
-	case squares::b8:
-	{
-		score -= kingToTheSideVal;
-		if (board.getPiece(squares::a7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::a6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
-
-		if (board.getPiece(squares::b7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::b6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
-
-		if (board.getPiece(squares::c7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::c6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
-	}
-	break;
-	case squares::g8:
-	case squares::h8:
-	{
-		score -= kingToTheSideVal;
-		if (board.getPiece(squares::f7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::f6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
-
-		if (board.getPiece(squares::g7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::g6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
-
-		if (board.getPiece(squares::h7) == pieces::bP) { score -= pawnProtectingKing1RankAwayVal; }
-		else if (board.getPiece(squares::h6) == pieces::bP) { score -= pawnProtectingKing2RanksAwayVal; }
-	}
-	}
-
-	return score - kBaseVal;
-}
-
-Score BoardEvaluator::getPieceMoveDeltaScore(const BoardState& board, const Move& move,
-	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
-{
-	assert(canUseGetStaticEvaluationDelta(move));
-
-	switch (move.movingPiece)
-	{
-		case pieces::wN:
-			return wKnightStaticScores[move.toSquare] - wKnightStaticScores[move.fromSquare];
-		case pieces::bN:
-			return bKnightStaticScores[move.toSquare] - bKnightStaticScores[move.fromSquare];
-		case pieces::wB:
-			return getWhiteBishopMoveDeltaScore(board, move, lookup);
-		case pieces::bB:
-			return getBlackBishopMoveDeltaScore(board, move, lookup);
-		case pieces::wR:
-			return getWhiteRookMoveDeltaScore(board, move, preMoveInfo, lookup);
-		case pieces::bR:
-			return getBlackRookMoveDeltaScore(board, move, preMoveInfo, lookup);
-		case pieces::wQ:
-			return wQueenStaticScores[move.toSquare] - wQueenStaticScores[move.fromSquare];
-		case pieces::bQ:
-			return bQueenStaticScores[move.toSquare] - bQueenStaticScores[move.fromSquare];
-		default:
-			EngineUtilities::logE("Piece passed to getPieceMoveDeltaScore that cannot be used.");
-			return 0;
-	}
-}
-
-Score BoardEvaluator::getWhiteBishopMoveDeltaScore(const BoardState& board, const Move& move,
-	const FastSqLookup& lookup) const
-{
-	Score score = wBishopStaticScores[move.toSquare] - wBishopStaticScores[move.fromSquare];
-	score += getWhiteBishopSquareCoverScore(board, lookup, move.toSquare);
-	score -= getWhiteBishopSquareCoverScore(board, lookup, move.fromSquare);
-	return score;
-}
-
-Score BoardEvaluator::getBlackBishopMoveDeltaScore(const BoardState& board, const Move& move,
-	const FastSqLookup& lookup) const
-{
-	Score score = bBishopStaticScores[move.toSquare] - bBishopStaticScores[move.fromSquare];
-	score += getBlackBishopSquareCoverScore(board, lookup, move.toSquare);
-	score -= getBlackBishopSquareCoverScore(board, lookup, move.fromSquare);
-	return score;
-}
-
-Score BoardEvaluator::getWhiteRookMoveDeltaScore(const BoardState& board, const Move& move,
-	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
-{
-	Score score = wRookStaticScores[move.toSquare] - wRookStaticScores[move.fromSquare];
-
-	// Handle change in open file score.
-	const File newFile = files::toFile(move.toSquare);
-	const File oldFile = files::toFile(move.fromSquare);
-	if (!preMoveInfo.movingSidePawnsFileOccupation[newFile])
-	{
-		score += scoringConstants::rookOpenFileVal;
-	}
-
-	if (!preMoveInfo.movingSidePawnsFileOccupation[oldFile])
-	{
-		score -= scoringConstants::rookOpenFileVal;
-	}
-
-	return score;
-}
-
-Score BoardEvaluator::getBlackRookMoveDeltaScore(const BoardState& board, const Move& move,
-	const PreMoveInfo& preMoveInfo, const FastSqLookup& lookup) const
-{
-	Score score = bRookStaticScores[move.toSquare] - bRookStaticScores[move.fromSquare];
-
-	// Handle change in open file score.
-	const File newFile = files::toFile(move.toSquare);
-	const File oldFile = files::toFile(move.fromSquare);
-	if (!preMoveInfo.movingSidePawnsFileOccupation[newFile])
-	{
-		score -= scoringConstants::rookOpenFileVal;
-	}
-
-	if (!preMoveInfo.movingSidePawnsFileOccupation[oldFile])
-	{
-		score += scoringConstants::rookOpenFileVal;
-	}
-
-	return score;
+	return 100;
 }
