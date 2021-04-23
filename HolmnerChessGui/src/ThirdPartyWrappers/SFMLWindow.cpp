@@ -111,7 +111,11 @@ statesAndEvents::Event SFMLWindow::pollEvent()
 	statesAndEvents::Event event;
 
 	sf::Event sfmlEvent;
-	window.pollEvent(sfmlEvent);
+	if (!window.pollEvent(sfmlEvent))
+	{
+		event.type = statesAndEvents::EventType::None;
+		return event;
+	}
 
 	switch (sfmlEvent.type)
 	{
