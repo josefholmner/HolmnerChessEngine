@@ -1,5 +1,16 @@
 # HolmnerChessEngine
 
+![img](images/img.jpg)
+
+## About
+A chess application comprised of an Engine and a Gui (and unint tests), all written in C++.
+
+Alpha-beta pruning is used with unbound quiescence search and a transposition table is used for faster evaluation and better move ordering. The raw "generate move, make move, unmake move" sequence speed is about 3 million nodes/s on a mid-range laptop.
+In practice, this roughly corresponds to depth 8 search with unbound quiescence search taking between 2-10 seconds (depending on the position) on a regular laptop.
+
+The Engine uses only the C++ standard library (C++17) and builds to a static library.
+The Gui is dependant on SFML and the Engine itself and builds to an executable.
+
 ## Build
 
 ### Windows
