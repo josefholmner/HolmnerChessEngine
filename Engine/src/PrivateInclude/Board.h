@@ -1,3 +1,5 @@
+#pragma once
+
 #include "PiecesAndSquares.h"
 
 #include <string>
@@ -9,7 +11,7 @@ struct BitBoards
   BitBoard pawns{ 0 };
   BitBoard rooks{ 0 };
   BitBoard knights{ 0 };
-  BitBoard bishops{ 0 }; 
+  BitBoard bishops{ 0 };
   BitBoard queens{ 0 };
   Square king{ 0 };
 };
@@ -28,45 +30,61 @@ public:
   void addPawn(Square sq, Side side)
   {
     BitBoards& pieces = getPieces(side);
-    pieces.all |= pieces.all << sq;
-    pieces.pawns |= pieces.pawns << sq;
+    pieces.all |= BIT << sq;
+    pieces.pawns |= BIT << sq;
   }
 
   void addRook(Square sq, Side side)
   {
     BitBoards& pieces = getPieces(side);
-    pieces.all |= pieces.all << sq;
-    pieces.rooks |= pieces.rooks << sq;
+    pieces.all |= BIT << sq;
+    pieces.rooks |= BIT << sq;
   }
 
   void addKnight(Square sq, Side side)
   {
     BitBoards& pieces = getPieces(side);
-    pieces.all |= pieces.all << sq;
-    pieces.knights |= pieces.knights << sq;
+    pieces.all |= BIT << sq;
+    pieces.knights |= BIT << sq;
   }
 
   void addBishop(Square sq, Side side)
   {
     BitBoards& pieces = getPieces(side);
-    pieces.all |= pieces.all << sq;
-    pieces.bishops |= pieces.bishops << sq;
+    pieces.all |= BIT << sq;
+    pieces.bishops |= BIT << sq;
   }
 
   void addQueen(Square sq, Side side)
   {
     BitBoards& pieces = getPieces(side);
-    pieces.all |= pieces.all << sq;
-    pieces.queens |= pieces.queens << sq;
+    pieces.all |= BIT << sq;
+    pieces.queens |= BIT << sq;
   }
 
   void addKing(Square sq, Side side)
   {
     BitBoards& pieces = getPieces(side);
-    pieces.all |= pieces.all << sq;
+    pieces.all |= BIT << sq;
     pieces.king = sq;
   }
 
+  void setTurn(Side side)
+  {
+    if (side == WHITE)
+    {
+      state &= WHITE;
+    }
+    else
+    {
+      state |= BLACK;
+    }
+  }
+
+  void addCastlingRight(Val cr)
+  {
+    state |= BIT << cr;
+  }
 
 private:
   BitBoards& getPieces(Side side)
@@ -75,6 +93,12 @@ private:
     return side == WHITE ? whitePieces : blackPieces;
   }
 
+  // For debugging purposes.
+  void printAllBoards();
+
   BitBoards whitePieces;
   BitBoards blackPieces;
+
+  // Bit 0: turn, Bit 1-4: Castling rights, 
+  GameState state;
 };

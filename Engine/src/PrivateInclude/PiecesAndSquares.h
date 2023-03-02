@@ -1,16 +1,26 @@
+#pragma once
+
 #include <cstdint>
 
-using Square = int8_t;
-using Piece = int8_t;
-using Side = int8_t;
-using Rank = int8_t;
-using File = int8_t;
-using BitBoard = int64_t;
+using Square = uint8_t;
+using Piece = uint8_t;
+using Rank = uint8_t;
+using File = uint8_t;
+using Side = uint64_t;
+using Val = uint64_t;
+using BitBoard = uint64_t;
+using GameState = uint64_t;
 
-static constexpr Side WHITE = 0;
+static constexpr Val BIT = 1;
+static constexpr Side WHITE = ~1;
 static constexpr Side BLACK = 1;
 static constexpr Rank NUM_RANKS = 8;
 static constexpr File NUM_FILES = 8;
+
+static constexpr Val STATE_CASTLING_WK = 1;
+static constexpr Val STATE_CASTLING_WQ = 2;
+static constexpr Val STATE_CASTLING_BK = 3;
+static constexpr Val STATE_CASTLING_BQ = 4;
 
 static constexpr Square A1 = 0;
 static constexpr Square B1 = 1;
