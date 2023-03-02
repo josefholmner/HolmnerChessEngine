@@ -3,6 +3,7 @@
 #include "Common/CommonUtilities.h"
 #include "PrivateInclude/EngineUtilities.h"
 
+#include <iostream>
 #include <vector>
 
 namespace Board_helpers
@@ -26,8 +27,8 @@ namespace Board_helpers
           return false;
         }
 
-        const char ch = splitFEN[r][f];
-        const Square sq = r * NUM_FILES - 1 + f;
+        const char ch = splitFEN[(size_t)NUM_RANKS - (size_t)r - 1][f];
+        const Square sq = r * NUM_FILES + f;
         switch (ch)
         {
         case 'p':
@@ -64,7 +65,7 @@ namespace Board_helpers
           board.addKing(sq, WHITE);
           break;
         case 'Q':
-          board.addKing(sq, WHITE);
+          board.addQueen(sq, WHITE);
           break;
         default:
           Square empties = static_cast<Square>(ch - '0');
@@ -79,6 +80,8 @@ namespace Board_helpers
         }
       }
     }
+
+    return true;
   }
 }
 
@@ -99,5 +102,25 @@ bool Board::init(const std::string& FEN)
     return false;
   }
 
+  // todo: read the rest of the FEN here.
   return false;
+}
+
+void Board::printAllBoards()
+{
+  EngineUtilities::printBitBoard(whitePieces.all, "All White");
+  EngineUtilities::printBitBoard(whitePieces.pawns, "White Pawns");
+  EngineUtilities::printBitBoard(whitePieces.rooks, "White Rooks");
+  EngineUtilities::printBitBoard(whitePieces.knights, "White Knights");
+  EngineUtilities::printBitBoard(whitePieces.bishops, "White Bishops");
+  EngineUtilities::printBitBoard(whitePieces.queens, "White Queens");
+  EngineUtilities::printSquareOnBoard(whitePieces.king, "White King");
+
+  EngineUtilities::printBitBoard(blackPieces.all, "All Black");
+  EngineUtilities::printBitBoard(blackPieces.pawns, "Black Pawns");
+  EngineUtilities::printBitBoard(blackPieces.rooks, "Blacks Rooks");
+  EngineUtilities::printBitBoard(blackPieces.knights, "Blacks Knights");
+  EngineUtilities::printBitBoard(blackPieces.bishops, "Blacks Bishops");
+  EngineUtilities::printBitBoard(blackPieces.queens, "Blacks Queens");
+  EngineUtilities::printSquareOnBoard(blackPieces.king, "Black King");
 }
