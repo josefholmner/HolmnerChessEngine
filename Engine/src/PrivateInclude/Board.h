@@ -69,21 +69,34 @@ public:
     pieces.king = sq;
   }
 
-  void setTurn(Side side)
+  void setSideToPlay(Side side)
   {
-    if (side == WHITE)
-    {
-      state &= WHITE;
-    }
-    else
-    {
-      state |= BLACK;
-    }
+    sideToPlay = side;
   }
 
   void addCastlingRight(Val cr)
   {
-    state |= BIT << cr;
+    castlingRights |= cr;
+  }
+
+  void removeCastlingRight(Val cr)
+  {
+    castlingRights &= ~cr;
+  }
+
+  void setHalfMoves(SmallVal inHalfMoves)
+  {
+    halfMoves = inHalfMoves;
+  }
+
+  void incrHalfMoves()
+  {
+    halfMoves++;
+  }
+
+  void decrHalfMoves()
+  {
+    halfMoves--;
   }
 
 private:
@@ -99,6 +112,10 @@ private:
   BitBoards whitePieces;
   BitBoards blackPieces;
 
-  // Bit 0: turn, Bit 1-4: Castling rights, 
-  GameState state;
+  Side sideToPlay{ WHITE };
+  Val castlingRights{ CAN_CASTLE_WKWQBKBQ };
+  Square enPassantTarget{ NO_SQUARE };
+  SmallVal halfMoves{ 0 };
+
+  // @todo cache allign this class once multithreading is added.
 };

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 namespace Board_helpers
 {
@@ -13,7 +14,7 @@ namespace Board_helpers
     const std::vector<std::string> splitFEN = CommonUtilities::splitString(FENPieces, '/');
     if (splitFEN.size() != NUM_RANKS)
     {
-      EngineUtilities::logE("setupPieces failed: wrong number of ranks in FEN.");
+      EngineUtilities::logE("setupPieces failed: wrong number of ranks in FEN: " + FENPieces);
       return false;
     }
 
@@ -23,7 +24,7 @@ namespace Board_helpers
       {
         if (splitFEN[r].length() <= f)
         {
-          EngineUtilities::logE("setupPieces failed: wrong number of files in FEN.");
+          EngineUtilities::logE("setupPieces failed: wrong number of files in FEN: " + FENPieces);
           return false;
         }
 
@@ -71,7 +72,7 @@ namespace Board_helpers
           Square empties = static_cast<Square>(ch - '0');
           if (empties > NUM_FILES - f || empties < 1)
           {
-            EngineUtilities::logE("setupPieces failed: invalid number of empty squares in FEN.");
+            EngineUtilities::logE("setupPieces failed: invalid number of empty squares in FEN: " + FENPieces);
             return false;
           }
 
@@ -83,6 +84,92 @@ namespace Board_helpers
 
     return true;
   }
+
+  bool setSide(const std::string& FENSide, Board& board)
+  {
+    if (FENSide.size() != 1)
+    {
+      EngineUtilities::logE("setSideToPlay failed: invalid FEN string: " + FENSide);
+      return false;
+    }
+
+    if (FENSide[0] == 'w')
+      board.setSideToPlay(WHITE);
+    else if (FENSide[0] == 'b')
+      board.setSideToPlay(BLACK);
+    else
+    {
+      EngineUtilities::logE("setSideToPlay failed: invalid FEN string: " + FENSide);
+      return false;
+    }
+
+    return true;
+  }
+
+  bool setCastlingRights(const std::string& FENCastling, Board& board)
+  {
+    if (FENCastling.size() == 0)
+    {
+      EngineUtilities::logE("setCastlingRights failed: invalid castling right string: " + FENCastling);
+      return false;
+    }
+
+    board.removeCastlingRight(CAN_CASTLE_WKWQBKBQ);
+
+    const std::unordered_map<char, Val> castlingMap{
+      {'K', CAN_CASTLE_WK}, {'Q', CAN_CASTLE_WQ}, {'k', CAN_CASTLE_BK}, {'q', CAN_CASTLE_WQ} };
+    for (char c : FENCastling)
+    {
+      auto res = castlingMap.find(c);
+      if (res != castlingMap.end())
+      {
+        board.addCastlingRight(res->second);
+      }
+      else
+      {
+        EngineUtilities::logE("setCastlingRights failed: invalid castling right string" + FENCastling);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool setEnPassantTargetSquare(const std::string& FENEnPassant, Board& board)
+  {
+    if (FENEnPassant == "-")
+    {
+      return NO_SQUARE;
+    }
+
+    if (FENEnPassant.size() != 2)
+    {
+      EngineUtilities::logE("Invalid square in FEN: " + FENEnPassant);
+      return false;
+    }
+
+    Rank rank = static_cast<Rank>(FENEnPassant[1] - '1');
+    File file = static_cast<File>(FENEnPassant[0] - 'a');
+
+    if (rank < 0 || rank > NUM_RANKS || file < 0 || file > NUM_FILES)
+    {
+      EngineUtilities::logE("Invalid square in FEN: " + FENEnPassant);
+      return false;
+    }
+
+    return file + NUM_FILES * rank;
+  }
+
+  bool setHalfMoveCount(const std::string& FENHalfMoves, Board& board)
+  {
+    if (FENHalfMoves.size() == 0)
+    {
+      EngineUtilities::logE("Invalid halfmove in FEN: " + FENHalfMoves);
+      return false;
+    }
+
+    board.setHalfMoves(std::stoi(FENHalfMoves));
+  }
 }
 
 bool Board::init(const std::string& FEN)
@@ -93,7 +180,7 @@ bool Board::init(const std::string& FEN)
   // All FENs should be exactly 6 segments long.
   if (splitFEN.size() != 6)
   {
-    EngineUtilities::logE("initFromFEN failed: Invalid FEN.");
+    EngineUtilities::logE("initFromFEN failed: Invalid FEN " + FEN);
     return false;
   }
 
@@ -102,8 +189,27 @@ bool Board::init(const std::string& FEN)
     return false;
   }
 
-  // todo: read the rest of the FEN here.
-  return false;
+  if (!setSide(splitFEN[1], *this))
+  {
+    return false;
+  }
+
+  if (!setCastlingRights(splitFEN[2], *this))
+  {
+    return false;
+  }
+
+  if (!setEnPassantTargetSquare(splitFEN[3], *this))
+  {
+    return false;
+  }
+
+  if (!setHalfMoveCount(splitFEN[4], *this))
+  {
+    return false;
+  }
+  
+  return true;
 }
 
 void Board::printAllBoards()

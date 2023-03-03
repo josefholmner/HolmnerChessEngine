@@ -6,10 +6,10 @@ using Square = uint8_t;
 using Piece = uint8_t;
 using Rank = uint8_t;
 using File = uint8_t;
+using SmallVal = uint8_t;
 using Side = uint64_t;
 using Val = uint64_t;
 using BitBoard = uint64_t;
-using GameState = uint64_t;
 
 static constexpr Val BIT = 1;
 static constexpr Side WHITE = ~1;
@@ -17,10 +17,12 @@ static constexpr Side BLACK = 1;
 static constexpr Rank NUM_RANKS = 8;
 static constexpr File NUM_FILES = 8;
 
-static constexpr Val STATE_CASTLING_WK = 1;
-static constexpr Val STATE_CASTLING_WQ = 2;
-static constexpr Val STATE_CASTLING_BK = 3;
-static constexpr Val STATE_CASTLING_BQ = 4;
+static constexpr Val CAN_CASTLE_WK = 1;
+static constexpr Val CAN_CASTLE_WQ = 1 << 1;
+static constexpr Val CAN_CASTLE_BK = 1 << 2;
+static constexpr Val CAN_CASTLE_BQ = 1 << 3;
+static constexpr Val CAN_CASTLE_WKWQBKBQ = 
+  CAN_CASTLE_WK | CAN_CASTLE_WQ | CAN_CASTLE_BK | CAN_CASTLE_BQ;
 
 static constexpr Square A1 = 0;
 static constexpr Square B1 = 1;
@@ -93,3 +95,5 @@ static constexpr Square E8 = 60;
 static constexpr Square F8 = 61;
 static constexpr Square G8 = 62;
 static constexpr Square H8 = 63;
+
+static constexpr Square NO_SQUARE = 64;
