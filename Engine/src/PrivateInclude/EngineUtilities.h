@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PiecesAndSquares.h"
+#include "PrivateInclude/PiecesSquaresAndMoves.h"
 
 #include <string>
 

@@ -11,6 +11,9 @@ using Side = uint64_t;
 using Val = uint64_t;
 using BitBoard = uint64_t;
 
+// @todo write down bits meaning.
+using Move = uint64_t;
+
 static constexpr Val BIT = 1;
 static constexpr Side WHITE = ~1;
 static constexpr Side BLACK = 1;
@@ -23,6 +26,8 @@ static constexpr Val CAN_CASTLE_BK = 1 << 2;
 static constexpr Val CAN_CASTLE_BQ = 1 << 3;
 static constexpr Val CAN_CASTLE_WKWQBKBQ = 
   CAN_CASTLE_WK | CAN_CASTLE_WQ | CAN_CASTLE_BK | CAN_CASTLE_BQ;
+
+static constexpr SmallVal MAX_NUM_MOVES = 128;
 
 static constexpr Square A1 = 0;
 static constexpr Square B1 = 1;

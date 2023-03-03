@@ -1,7 +1,7 @@
 #include "PrivateInclude/EngineUtilities.h"
 
-#include "Common\Logger.h"
-#include "PrivateInclude\EngineUtilities.h"
+#include "Common/Logger.h"
+#include "PrivateInclude/EngineUtilities.h"
 
 #include <iostream>
 

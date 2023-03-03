@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PiecesAndSquares.h"
+#include "PrivateInclude/PiecesSquaresAndMoves.h"
 
 #include <string>
 #include <cassert>
@@ -14,12 +14,20 @@ struct BitBoards
   BitBoard bishops{ 0 };
   BitBoard queens{ 0 };
   Square king{ 0 };
+
+  bool operator==(const BitBoards& other) const
+  {
+    return all == other.all && pawns == other.pawns && rooks == other.rooks && knights == other.knights
+      && bishops == other.bishops && queens == other.queens && king == other.king;
+  }
 };
 
 class Board
 {
 public:
   bool init(const std::string& FEN);
+
+  bool isValid() const;
 
   const BitBoards& getPieces(Side side) const
   {
@@ -98,6 +106,11 @@ public:
   {
     halfMoves--;
   }
+
+  void makeMove(Move move);
+  void unMakeMove(Move move);
+
+  bool operator==(const Board& other) const;
 
 private:
   BitBoards& getPieces(Side side)

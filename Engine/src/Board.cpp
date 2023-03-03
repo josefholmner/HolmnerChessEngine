@@ -169,6 +169,7 @@ namespace Board_helpers
     }
 
     board.setHalfMoves(std::stoi(FENHalfMoves));
+    return true;
   }
 }
 
@@ -210,6 +211,29 @@ bool Board::init(const std::string& FEN)
   }
   
   return true;
+}
+
+bool Board::isValid() const
+{
+  // @todo impl.
+  return true;
+}
+
+void Board::makeMove(Move move)
+{
+  // todo: impl.
+}
+
+void Board::unMakeMove(Move move)
+{
+  // todo: impl.
+}
+
+bool Board::operator==(const Board& other) const
+{
+  return whitePieces == other.whitePieces && blackPieces == other.blackPieces &&
+    sideToPlay == other.sideToPlay && castlingRights == other.castlingRights &&
+    enPassantTarget == other.enPassantTarget && halfMoves == other.halfMoves;
 }
 
 void Board::printAllBoards()
