@@ -82,6 +82,11 @@ public:
     sideToPlay = side;
   }
 
+  Side getSideToPlay() const
+  {
+    return sideToPlay;
+  }
+
   void addCastlingRight(Val cr)
   {
     castlingRights |= cr;

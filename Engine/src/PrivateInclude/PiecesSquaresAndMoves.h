@@ -2,23 +2,25 @@
 
 #include <cstdint>
 
-using Square = uint8_t;
-using Piece = uint8_t;
-using Rank = uint8_t;
-using File = uint8_t;
-using SmallVal = uint8_t;
-using Side = uint64_t;
-using Val = uint64_t;
-using BitBoard = uint64_t;
+using Square = int8_t;
+using Piece = int8_t;
+using Rank = int8_t;
+using File = int8_t;
+using SmallVal = int8_t;
+using Side = int64_t;
+using Val = int64_t;
+using BitBoard = int64_t;
 
 // @todo write down bits meaning.
-using Move = uint64_t;
+using Move = int64_t;
 
 static constexpr Val BIT = 1;
 static constexpr Side WHITE = ~1;
 static constexpr Side BLACK = 1;
 static constexpr Rank NUM_RANKS = 8;
 static constexpr File NUM_FILES = 8;
+static constexpr SmallVal NUM_SQUARES = 64;
+static constexpr Val MAX_NUM_MOVES = 128;
 
 static constexpr Val CAN_CASTLE_WK = 1;
 static constexpr Val CAN_CASTLE_WQ = 1 << 1;
@@ -27,7 +29,23 @@ static constexpr Val CAN_CASTLE_BQ = 1 << 3;
 static constexpr Val CAN_CASTLE_WKWQBKBQ = 
   CAN_CASTLE_WK | CAN_CASTLE_WQ | CAN_CASTLE_BK | CAN_CASTLE_BQ;
 
-static constexpr SmallVal MAX_NUM_MOVES = 128;
+static constexpr File FileA = 0;
+static constexpr File FileB = 1;
+static constexpr File FileC = 2;
+static constexpr File FileD = 3;
+static constexpr File FileE = 4;
+static constexpr File FileF = 5;
+static constexpr File FileG = 6;
+static constexpr File FileH = 7;
+
+static constexpr Rank Rank1 = 0;
+static constexpr File Rank2 = 1;
+static constexpr File Rank3 = 2;
+static constexpr File Rank4 = 3;
+static constexpr File Rank5 = 4;
+static constexpr File Rank6 = 5;
+static constexpr File Rank7 = 6;
+static constexpr File Rank8 = 7;
 
 static constexpr Square A1 = 0;
 static constexpr Square B1 = 1;
